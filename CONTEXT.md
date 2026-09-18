@@ -1,6 +1,6 @@
 # ZARD
 
-ZARD is a Ruby self-documentation notation for people and AI agents. It uses InlineRBS and RBS::Extended for type contracts, while keeping API documentation separate from type contracts.
+ZARD is a Ruby self-documentation notation for people and AI agents. It uses plain RBS contracts, Rigor extensions, and separate API documentation so that prose does not require repeated type text.
 
 ## Language
 
@@ -17,11 +17,11 @@ Rigor's extra type information attached to RBS declarations.
 _Avoid_: a second type system
 
 **Contract**:
-A type-facing statement about Ruby code.
+A type-facing statement about Ruby code. Plain RBS contracts use `@rbs` or `#:`; extended contracts use `@extrbs`.
 _Avoid_: API description
 
 **`@extrbs`**:
-A typed comment channel for InlineRBS and RBS::Extended.
+A typed comment channel for contract information that plain RBS cannot express. It may carry plain RBS, but `@rbs` and `#:` are preferred for plain RBS.
 _Avoid_: API documentation tag
 
 **API documentation**:
@@ -43,6 +43,10 @@ _Avoid_: documentation claim
 **Rigor lens**:
 A structured summary of code, contracts, Rigor facts, and diagnostics.
 _Avoid_: a second analyzer
+
+**Grammar revision**:
+A named revision of the `@extrbs` type grammar that a tool reads or writes.
+_Avoid_: package version
 
 **Provenance**:
 The source, location, syntax, and origin of a contract, documentation item, or fact.

@@ -1,14 +1,19 @@
-# Use an em dash for named ZARD documentation tags
+# Use an em dash for named or typed ZARD documentation tags
 
-ZARD uses an em dash `—` when a named documentation tag or an optional type must be separated from its description. A typeless, nameless tag such as `@return` uses the existing `@return description` form. InlineRBS keeps `--` as its own contract-note syntax inside `@extrbs`; a YARD-like tag without the required `—` is not a ZARD type hint.
+ZARD uses an em dash `—` when a named documentation tag or an optional type must be separated from its description. A tag with neither a name nor a type writes its description directly. InlineRBS keeps `--` as its own contract-note syntax inside `@extrbs`; a YARD-like tag without the required `—` is not a ZARD type hint.
 
 ## Consequences
 
 - `@param value — Input text.` is ZARD documentation.
 - `@param value [String] — Input text.` is ZARD documentation with a claim.
 - `@return Normalized text.` is ZARD documentation without a type claim.
+- `@return — Normalized text.` is accepted, but `zard-doc lint` recommends removing the redundant em dash.
 - `@return [String] — Normalized text.` is ZARD documentation with a claim.
 - `@return [String] Normalized text.` is YARD-like raw text, not a type hint.
+- `@yieldreturn yielded value.` follows the same rule as `@return`.
+- `@option options :format — Output format.` is ZARD documentation.
+- `@option options :format [Symbol] — Output format.` is ZARD documentation with a claim.
+- Tags with no name and no type, such as `@note`, `@see`, `@deprecated`, and `@example`, write their description directly.
 - `@param value [String] Input text.` is preserved as raw text, not as a type hint.
 - Named tags such as `@param`, `@option`, `@yieldparam`, and `@raise` require `—` before their description.
 - `zard-doc lint` warns about YARD-like tags and can promote the warning to an error.

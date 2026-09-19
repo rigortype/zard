@@ -53,7 +53,7 @@ The source, location, syntax, and origin of a contract, documentation item, or f
 _Avoid_: inferred origin
 
 **ZARD documentation marker**:
-The em dash `—` that separates a named documentation tag or an optional type from its description. A typeless, nameless tag such as `@return` does not need this marker.
+The em dash `—` that separates a named documentation tag or an optional type from its description. A tag with neither a name nor a type writes its description directly, without this marker.
 _Avoid_: `--` in documentation tags
 
 **YARD-like comment**:

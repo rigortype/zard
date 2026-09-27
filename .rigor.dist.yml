@@ -1,0 +1,6 @@
+target_ruby: "3.3"
+
+paths:
+  - lib
+
+severity_profile: strict

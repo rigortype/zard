@@ -2,4 +2,6 @@
 /coverage/
 /Gemfile.lock
 /pkg/
+/.rigor/
+/.rigor.yml
 /vendor/bundle/

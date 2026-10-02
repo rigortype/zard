@@ -43,6 +43,8 @@ Lint source files with `zard-doc lint`. Warnings are reported without failing by
 
 Render Markdown to standard output with `zard-doc render lib/example.rb`.
 
+ZARD documentation requires UTF-8 source text. Non-UTF-8 Ruby source may still carry `@rbs`, `#:`, and `@extrbs` contracts.
+
 ## Installation
 
 Until the first RubyGems release, add the repository to your Gemfile:

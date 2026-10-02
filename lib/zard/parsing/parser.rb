@@ -24,7 +24,8 @@ module Zard
           @source,
           @path,
           result.comments,
-          diagnostics
+          diagnostics,
+          result.encoding
         ).call(result.value)
 
         Model::V1::Document.new(
@@ -54,11 +55,12 @@ module Zard
     end
 
     class DeclarationCollector < Prism::Visitor
-      def initialize(source, path, comments, diagnostics)
+      def initialize(source, path, comments, diagnostics, encoding)
         @source = source
         @path = path
-        @comments = comments.select { |comment| standalone?(comment) }
+        @comments = comments.select { |comment| standalone?(comment) && !magic_comment?(comment) }
         @diagnostics = diagnostics
+        @encoding = encoding
         @declarations = []
         @namespace = []
         @singleton_depth = 0
@@ -86,7 +88,7 @@ module Zard
 
       def visit_def_node(node)
         comments = comment_block_for(node.location.start_line)
-        parsed = CommentBlockParser.new(@path, comments, @diagnostics).call
+        parsed = CommentBlockParser.new(@path, comments, @diagnostics, @encoding).call
 
         @declarations << Model::V1::Declaration.new(
           kind: singleton_method?(node) ? :singleton_method : :instance_method,
@@ -145,6 +147,12 @@ module Zard
         prefix.match?(/\A[\t ]*\z/)
       end
 
+      def magic_comment?(comment)
+        return false if comment.location.start_line > 2
+
+        comment.location.slice.match?(/\A#\s*(?:en)?coding\s*[:=]|\A#\s*frozen_string_literal\s*:/i)
+      end
+
       def comment_block_for(declaration_line)
         expected_line = declaration_line - 1
         block = []
@@ -190,10 +198,11 @@ module Zard
     end
 
     class CommentBlockParser
-      def initialize(path, comments, diagnostics)
+      def initialize(path, comments, diagnostics, encoding)
         @path = path
         @comments = comments
         @diagnostics = diagnostics
+        @encoding = encoding
       end
 
       def call
@@ -212,6 +221,18 @@ module Zard
               "Write @extrbs as '# @extrbs' with one space.",
               comment.location
             )
+          end
+
+          if non_utf8_documentation?(body, raw)
+            add_diagnostic(
+              "documentation.non-utf8",
+              :error,
+              "ZARD documentation requires UTF-8 source text.",
+              comment.location
+            )
+            documentation << raw_tag(body, raw, comment.location)
+            seen_non_extrbs_annotation = true
+            next
           end
 
           if (payload = contract_payload(body, "@extrbs"))
@@ -276,6 +297,15 @@ module Zard
       def contract_payload(body, tag)
         match = body.match(/\A#{Regexp.escape(tag)}(?:\s+(.*)|\z)/)
         match && match[1].to_s
+      end
+
+      def non_utf8_documentation?(body, raw)
+        return false if @encoding == Encoding::UTF_8
+        return false if body.empty?
+        return false if contract_payload(body, "@extrbs") || contract_payload(body, "@rbs")
+        return false if raw.start_with?("#:")
+
+        true
       end
 
       def contract(channel, payload, raw, location)

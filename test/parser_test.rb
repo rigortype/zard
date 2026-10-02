@@ -147,4 +147,21 @@ class ParserTest < Minitest::Test
     assert_equal "Thread-safe after initialization.", documentation.fetch(0).description
     assert_equal "reader.read", documentation.fetch(3).description
   end
+
+  def test_rejects_documentation_in_a_non_utf8_source
+    source = "# encoding: Windows-31J\n# @return 名前\ndef call = nil\n".encode("Windows-31J")
+    document = Zard.parse(source, path: "example.rb")
+
+    assert_equal [:raw], document.declarations.fetch(0).documentation.map(&:name)
+    assert_equal ["documentation.non-utf8"], document.diagnostics.map(&:code)
+    assert_equal :error, document.diagnostics.fetch(0).severity
+  end
+
+  def test_accepts_contracts_in_a_non_utf8_source
+    source = "# encoding: Windows-31J\n# @rbs return: String\ndef call = nil\n".encode("Windows-31J")
+    document = Zard.parse(source, path: "example.rb")
+
+    assert_empty document.diagnostics
+    assert_equal [:rbs], document.declarations.fetch(0).contracts.map(&:channel)
+  end
 end

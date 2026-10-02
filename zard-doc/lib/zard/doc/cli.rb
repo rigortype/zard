@@ -40,7 +40,10 @@ module Zard
         lint_option_parser.parse!(@argv)
         return usage_error("Pass at least one Ruby source file.") if @argv.empty?
 
-        lint(@argv)
+        paths = source_paths(@argv)
+        return usage_error("No Ruby source files were found.") if paths.empty?
+
+        lint(paths)
       end
 
       def lint_option_parser
@@ -56,7 +59,16 @@ module Zard
         OptionParser.new.parse!(@argv)
         return usage_error("Pass at least one Ruby source file.") if @argv.empty?
 
-        render(@argv)
+        paths = source_paths(@argv)
+        return usage_error("No Ruby source files were found.") if paths.empty?
+
+        render(paths)
+      end
+
+      def source_paths(inputs)
+        inputs.flat_map do |input|
+          File.directory?(input) ? Dir.glob(File.join(input, "**", "*.rb")).sort : input
+        end.uniq.sort
       end
 
       def lint(paths)
@@ -113,8 +125,8 @@ module Zard
       def usage
         <<~USAGE.chomp
           Usage:
-            zard-doc lint [--fail-on error|warning] FILE...
-            zard-doc render FILE...
+            zard-doc lint [--fail-on error|warning] PATH...
+            zard-doc render PATH...
         USAGE
       end
     end

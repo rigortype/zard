@@ -12,12 +12,14 @@ Descriptions may continue across plain comment lines until the next annotation o
 Run the linter against Ruby source files with:
 
 ```console
-zard-doc lint lib/example.rb
+zard-doc lint lib
 zard-doc lint --fail-on warning lib/example.rb
 ```
 
 Render Markdown to standard output with:
 
 ```console
-zard-doc render lib/example.rb
+zard-doc render lib
 ```
+
+Directories are searched recursively for Ruby source files. Files are processed in stable sorted order and duplicate paths are ignored.

@@ -3,6 +3,7 @@
 require "test_helper"
 require "stringio"
 require "tempfile"
+require "tmpdir"
 require "zard/doc/cli"
 
 class ZardDocCLITest < Minitest::Test
@@ -62,6 +63,39 @@ class ZardDocCLITest < Minitest::Test
       assert_equal 1, status
       assert_empty stdout
       assert_includes stderr, "error ruby.syntax"
+    end
+  end
+
+  def test_lint_discovers_ruby_files_in_directories
+    Dir.mktmpdir("zard-doc") do |directory|
+      nested = File.join(directory, "nested")
+      Dir.mkdir(nested)
+      File.write(File.join(directory, "clean.rb"), "def clean = nil\n")
+      File.write(File.join(nested, "warning.rb"), "# @return — Value.\ndef call = 1\n")
+      File.write(File.join(nested, "ignored.txt"), "# @return — Value.\n")
+
+      status, stdout, stderr = run_cli("lint", "--fail-on", "warning", directory)
+
+      assert_equal 1, status
+      assert_includes stdout, "warning.rb:1:1: warning documentation.redundant-marker"
+      refute_includes stdout, "ignored.txt"
+      assert_empty stderr
+    end
+  end
+
+  def test_render_deduplicates_and_sorts_discovered_files
+    Dir.mktmpdir("zard-doc") do |directory|
+      first = File.join(directory, "a.rb")
+      second = File.join(directory, "b.rb")
+      File.write(first, "# @return A.\ndef a = 1\n")
+      File.write(second, "# @return B.\ndef b = 2\n")
+
+      status, stdout, stderr = run_cli("render", second, directory)
+
+      assert_equal 0, status
+      assert_operator stdout.index("## `a()`"), :<, stdout.index("## `b()`")
+      assert_equal 1, stdout.scan("## `b()`").length
+      assert_empty stderr
     end
   end
 

@@ -39,9 +39,9 @@ markdown = Zard::Doc.render(document)
 
 The initial renderer supports method prose, `@param`, `@return`, `@yieldparam`, `@yieldreturn`, `@option`, `@raise`, `@note`, `@see`, `@deprecated`, and `@example`. Contracts remain available in the model and are not copied into API prose.
 
-Lint source files with `zard-doc lint`. Warnings are reported without failing by default; use `--fail-on warning` to make them fail in CI.
+Lint source files or directories with `zard-doc lint`. Warnings are reported without failing by default; use `--fail-on warning` to make them fail in CI.
 
-Render Markdown to standard output with `zard-doc render lib/example.rb`.
+Render Markdown to standard output with `zard-doc render lib`.
 
 ZARD documentation requires UTF-8 source text. Non-UTF-8 Ruby source may still carry `@rbs`, `#:`, and `@extrbs` contracts.
 

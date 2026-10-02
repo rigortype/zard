@@ -7,6 +7,8 @@ document = Zard.parse(source, path: "lib/example.rb")
 markdown = Zard::Doc.render(document)
 ```
 
+Descriptions may continue across plain comment lines until the next annotation or contract.
+
 Run the linter against Ruby source files with:
 
 ```console

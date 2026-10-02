@@ -47,6 +47,8 @@ ZARD documentation requires UTF-8 source text. Non-UTF-8 Ruby source may still c
 
 InlineRBS trailing prose after `--` is stored as a contract note. It is not copied into API documentation.
 
+Documentation descriptions continue across plain comment lines until the next annotation or contract. No continuation marker is required.
+
 ## Installation
 
 Until the first RubyGems release, add the repository to your Gemfile:

@@ -41,14 +41,15 @@ class ParserTest < Minitest::Test
     source = "# @rbs return: String\n#  @extrbs return: non-empty-string\ndef call = \"value\"\n"
     document = Zard.parse(source, path: "example.rb")
 
-    assert_equal %w[extrbs.noncanonical-spacing extrbs.not-first], document.diagnostics.map(&:code)
+    assert_equal ["extrbs.noncanonical-spacing"], document.diagnostics.map(&:code)
+    assert_equal [:raw], document.declarations.fetch(0).documentation.map(&:name)
   end
 
   def test_reports_extrbs_without_the_required_space
     document = Zard.parse("\#@extrbs return: non-empty-string\ndef call = \"value\"\n", path: "example.rb")
 
     assert_equal ["extrbs.noncanonical-spacing"], document.diagnostics.map(&:code)
-    assert_equal [:extrbs], document.declarations.fetch(0).contracts.map(&:channel)
+    assert_empty document.declarations.fetch(0).contracts
   end
 
   def test_keeps_consecutive_extrbs_annotations_first
@@ -178,5 +179,59 @@ class ParserTest < Minitest::Test
     declaration = Zard.parse("# @rbs return: String\ndef call = \"value\"\n", path: "example.rb").declarations.fetch(0)
 
     assert_nil declaration.contracts.fetch(0).note
+  end
+
+  def test_continues_every_documentation_tag_until_the_next_annotation
+    source = "# @param path — Path to read.  \n# Must be readable.\n#\n# Kept open while reading.\n# @example\n#   @value = reader.read\n#     puts @value\n# @return Result.\ndef read(path) = nil\n"
+    document = Zard.parse(source, path: "example.rb")
+    parameter, example, returned = document.declarations.fetch(0).documentation
+
+    assert_empty document.diagnostics
+    assert_equal "Path to read.  \nMust be readable.\n\nKept open while reading.", parameter.description
+    assert_equal "  @value = reader.read\n    puts @value", example.description
+    assert_equal "Result.", returned.description
+    assert_equal 1, parameter.span.start_line
+    assert_equal 4, parameter.span.end_line
+  end
+
+  def test_keeps_yard_like_continuation_raw
+    source = "# @param value [String] YARD-like description.\n# Continued description.\ndef call(value) = value\n"
+    document = Zard.parse(source, path: "example.rb")
+    tag = document.declarations.fetch(0).documentation.fetch(0)
+
+    assert_equal :raw, tag.name
+    assert_equal "@param value [String] YARD-like description.\nContinued description.", tag.description
+    assert_equal ["documentation.yard-like"], document.diagnostics.map(&:code)
+  end
+
+  def test_contract_ends_continuation_without_reconnecting_it
+    source = "# @return Cached value.\n# @rbs return: String\n# Recomputed when stale.\ndef call = \"value\"\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
+
+    assert_equal %i[return text], declaration.documentation.map(&:name)
+    assert_equal ["Cached value.", "Recomputed when stale."], declaration.documentation.map(&:description)
+  end
+
+  def test_warns_about_an_empty_description
+    document = Zard.parse("# @param value —\ndef call(value) = value\n", path: "example.rb")
+
+    assert_equal "", document.declarations.fetch(0).documentation.fetch(0).description
+    assert_equal ["documentation.empty-description"], document.diagnostics.map(&:code)
+  end
+
+  def test_preserves_crlf_raw_text_and_normalizes_description_newlines
+    source = "# @note First.\r\n# Second.\r\ndef call = nil\r\n"
+    tag = Zard.parse(source, path: "example.rb").declarations.fetch(0).documentation.fetch(0)
+
+    assert_equal "First.\nSecond.", tag.description
+    assert_equal "# @note First.\r\n# Second.\r", tag.raw
+  end
+
+  def test_keeps_noncanonical_documentation_tags_raw
+    source = "#  @param value — Description.\n# Continued raw text.\ndef call(value) = value\n"
+    document = Zard.parse(source, path: "example.rb")
+
+    assert_equal [:raw], document.declarations.fetch(0).documentation.map(&:name)
+    assert_equal ["documentation.noncanonical-spacing"], document.diagnostics.map(&:code)
   end
 end

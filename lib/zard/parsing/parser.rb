@@ -88,7 +88,7 @@ module Zard
 
       def visit_def_node(node)
         comments = comment_block_for(node.location.start_line)
-        parsed = CommentBlockParser.new(@path, comments, @diagnostics, @encoding).call
+        parsed = CommentBlockParser.new(@source, @path, comments, @diagnostics, @encoding).call
 
         @declarations << Model::V1::Declaration.new(
           kind: singleton_method?(node) ? :singleton_method : :instance_method,
@@ -198,7 +198,8 @@ module Zard
     end
 
     class CommentBlockParser
-      def initialize(path, comments, diagnostics, encoding)
+      def initialize(source, path, comments, diagnostics, encoding)
+        @source = source
         @path = path
         @comments = comments
         @diagnostics = diagnostics
@@ -209,18 +210,27 @@ module Zard
         documentation = []
         contracts = []
         seen_non_extrbs_annotation = false
+        pending = nil
 
         @comments.each do |comment|
           raw = comment.location.slice
-          body = raw.sub(/\A#\s*/, "")
+          body = comment_body(raw)
 
-          if body.match?(/\A@extrbs(?:\s|\z)/) && !raw.start_with?("# @extrbs")
-            add_diagnostic(
-              "extrbs.noncanonical-spacing",
-              :warning,
-              "Write @extrbs as '# @extrbs' with one space.",
-              comment.location
-            )
+          if annotation_boundary?(body, raw)
+            flush_pending(documentation, pending)
+            pending = nil
+          elsif pending
+            append_continuation(pending, body, comment)
+            next
+          end
+
+          if (tag = noncanonical_known_tag(body, raw))
+            code = (tag == "@extrbs") ? "extrbs.noncanonical-spacing" : "documentation.noncanonical-spacing"
+            message = (tag == "@extrbs") ? "Write @extrbs as '# @extrbs' with one space." : "Write ZARD annotations immediately after '# '."
+            add_diagnostic(code, :warning, message, comment.location)
+            pending = pending_documentation(raw_tag(body, raw, comment.location), comment)
+            seen_non_extrbs_annotation = true
+            next
           end
 
           if non_utf8_documentation?(body, raw)
@@ -230,7 +240,7 @@ module Zard
               "ZARD documentation requires UTF-8 source text.",
               comment.location
             )
-            documentation << raw_tag(body, raw, comment.location)
+            pending = pending_documentation(raw_tag(body, raw, comment.location), comment)
             seen_non_extrbs_annotation = true
             next
           end
@@ -252,47 +262,127 @@ module Zard
             contracts << contract(:rbs, raw.delete_prefix("#:").strip, raw, comment.location)
             seen_non_extrbs_annotation = true
           elsif body.match?(/\A@param(?:\s|\z)/)
-            documentation << parse_named_tag(body, raw, comment.location, :param, "@param")
+            pending = pending_documentation(parse_named_tag(body, raw, comment.location, :param, "@param"), comment)
             seen_non_extrbs_annotation = true
           elsif body.match?(/\A@yieldparam(?:\s|\z)/)
-            documentation << parse_named_tag(body, raw, comment.location, :yieldparam, "@yieldparam")
+            pending = pending_documentation(parse_named_tag(body, raw, comment.location, :yieldparam, "@yieldparam"), comment)
             seen_non_extrbs_annotation = true
           elsif body.match?(/\A@option(?:\s|\z)/)
-            documentation << parse_option(body, raw, comment.location)
+            pending = pending_documentation(parse_option(body, raw, comment.location), comment)
             seen_non_extrbs_annotation = true
           elsif body.match?(/\A@raise(?:\s|\z)/)
-            documentation << parse_named_tag(body, raw, comment.location, :raise, "@raise")
+            pending = pending_documentation(parse_named_tag(body, raw, comment.location, :raise, "@raise"), comment)
             seen_non_extrbs_annotation = true
           elsif body.match?(/\A@return(?:\s|\z)/)
-            documentation << parse_nameless_tag(body, raw, comment.location, :return, "@return")
+            pending = pending_documentation(parse_nameless_tag(body, raw, comment.location, :return, "@return"), comment)
             seen_non_extrbs_annotation = true
           elsif body.match?(/\A@yieldreturn(?:\s|\z)/)
-            documentation << parse_nameless_tag(body, raw, comment.location, :yieldreturn, "@yieldreturn")
+            pending = pending_documentation(parse_nameless_tag(body, raw, comment.location, :yieldreturn, "@yieldreturn"), comment)
             seen_non_extrbs_annotation = true
           elsif body.match?(/\A@note(?:\s|\z)/)
-            documentation << parse_description_tag(body, raw, comment.location, :note, "@note")
+            pending = pending_documentation(parse_description_tag(body, raw, comment.location, :note, "@note"), comment)
             seen_non_extrbs_annotation = true
           elsif body.match?(/\A@see(?:\s|\z)/)
-            documentation << parse_description_tag(body, raw, comment.location, :see, "@see")
+            pending = pending_documentation(parse_description_tag(body, raw, comment.location, :see, "@see"), comment)
             seen_non_extrbs_annotation = true
           elsif body.match?(/\A@deprecated(?:\s|\z)/)
-            documentation << parse_description_tag(body, raw, comment.location, :deprecated, "@deprecated")
+            pending = pending_documentation(parse_description_tag(body, raw, comment.location, :deprecated, "@deprecated"), comment)
             seen_non_extrbs_annotation = true
           elsif body.match?(/\A@example(?:\s|\z)/)
-            documentation << parse_description_tag(body, raw, comment.location, :example, "@example")
+            pending = pending_documentation(parse_description_tag(body, raw, comment.location, :example, "@example"), comment)
             seen_non_extrbs_annotation = true
           elsif body.start_with?("@")
-            documentation << raw_tag(body, raw, comment.location)
+            pending = pending_documentation(raw_tag(body, raw, comment.location), comment)
             seen_non_extrbs_annotation = true
           elsif !body.empty?
             documentation << documentation_tag(:text, nil, nil, body, raw, comment.location)
           end
         end
 
+        flush_pending(documentation, pending)
+
         {documentation: documentation, contracts: contracts}
       end
 
       private
+
+      def comment_body(raw)
+        raw.sub(/\A# ?/, "").delete_suffix("\r")
+      end
+
+      def annotation_boundary?(body, raw)
+        raw.start_with?("#:", "# @") || !noncanonical_known_tag(body, raw).nil?
+      end
+
+      def noncanonical_known_tag(body, raw)
+        return if raw.start_with?("# @")
+
+        candidate = body.lstrip[/\A@[^\s]*/]
+        return unless %w[@extrbs @rbs @param @yieldparam @option @raise @return @yieldreturn @note @see @deprecated @example].include?(candidate)
+
+        candidate
+      end
+
+      def pending_documentation(tag, comment)
+        lines = tag.description.strip.empty? ? [] : [tag.description]
+        {tag: tag, comments: [comment], lines: lines}
+      end
+
+      def append_continuation(pending, body, comment)
+        pending.fetch(:lines) << (body.strip.empty? ? "" : body)
+        pending.fetch(:comments) << comment
+      end
+
+      def flush_pending(documentation, pending)
+        return unless pending
+
+        lines = pending.fetch(:lines)
+        lines.shift while lines.first == ""
+        lines.pop while lines.last == ""
+        tag = pending.fetch(:tag)
+        comments = pending.fetch(:comments)
+        description = lines.join("\n")
+        location = comments.first.location
+
+        if tag.name != :raw && description.empty?
+          add_diagnostic(
+            "documentation.empty-description",
+            :warning,
+            "Add a description to this ZARD documentation tag.",
+            location
+          )
+        end
+
+        documentation << Model::V1::DocumentationTag.new(
+          name: tag.name,
+          owner: tag.owner,
+          subject: tag.subject,
+          claim: tag.claim,
+          description: description,
+          span: combined_span(comments),
+          raw: combined_raw(comments)
+        )
+      end
+
+      def combined_span(comments)
+        first = comments.first.location
+        last = comments.last.location
+        Model::V1::SourceSpan.new(
+          path: @path,
+          start_line: first.start_line,
+          start_column: first.start_column,
+          end_line: last.end_line,
+          end_column: last.end_column,
+          start_offset: first.start_offset,
+          end_offset: last.end_offset
+        )
+      end
+
+      def combined_raw(comments)
+        first = comments.first.location.start_offset
+        last = comments.last.location.end_offset
+        @source.byteslice(first, last - first)
+      end
 
       def contract_payload(body, tag)
         match = body.match(/\A#{Regexp.escape(tag)}(?:\s+(.*)|\z)/)
@@ -320,10 +410,10 @@ module Zard
       end
 
       def parse_named_tag(body, raw, location, name, prefix)
-        rest = body.delete_prefix(prefix).strip
-        head, marker, description = rest.partition(" — ")
+        rest = body.delete_prefix(prefix).sub(/\A[\t ]/, "")
+        head, description = split_named_description(rest)
 
-        if marker.empty?
+        unless head
           yard_like(raw, location)
           return raw_tag(body, raw, location)
         end
@@ -338,12 +428,17 @@ module Zard
       end
 
       def parse_option(body, raw, location)
-        rest = body.delete_prefix("@option").strip
-        head, marker, description = rest.partition(" — ")
+        rest = body.delete_prefix("@option").sub(/\A[\t ]/, "")
+        head, description = split_named_description(rest)
+        unless head
+          yard_like(raw, location)
+          return raw_tag(body, raw, location)
+        end
+
         owner, option_head = head.split(/\s+/, 2)
         subject, claim, valid = parse_named_head(option_head.to_s)
 
-        if marker.empty? || !owner || !valid
+        if !owner || !valid
           yard_like(raw, location)
           return raw_tag(body, raw, location)
         end
@@ -352,34 +447,44 @@ module Zard
       end
 
       def parse_nameless_tag(body, raw, location, name, prefix)
-        rest = body.delete_prefix(prefix).strip
+        rest = body.delete_prefix(prefix).sub(/\A[\t ]/, "")
 
-        if rest.start_with?("—")
+        if rest == "—" || rest.start_with?("— ")
           add_diagnostic(
             "documentation.redundant-marker",
             :warning,
             "Remove the redundant em dash from #{prefix} without a type claim.",
             location
           )
-          return documentation_tag(name, nil, nil, rest.delete_prefix("—").strip, raw, location)
+          description = rest.delete_prefix("—").sub(/\A /, "")
+          return documentation_tag(name, nil, nil, description, raw, location)
         end
 
         if rest.start_with?("[")
           claim, remainder = bracketed_claim(rest)
-          unless claim && remainder.start_with?(" — ")
+          valid_claim = claim && (remainder == " —" || remainder.start_with?(" — "))
+          if !valid_claim
             yard_like(raw, location)
             return raw_tag(body, raw, location)
           end
 
-          return documentation_tag(name, nil, claim, remainder.delete_prefix(" — "), raw, location)
+          description = remainder.delete_prefix(" —").sub(/\A /, "")
+          return documentation_tag(name, nil, claim, description, raw, location)
         end
 
         documentation_tag(name, nil, nil, rest, raw, location)
       end
 
       def parse_description_tag(body, raw, location, name, prefix)
-        description = body.delete_prefix(prefix).strip
+        description = body.delete_prefix(prefix).sub(/\A[\t ]/, "")
         documentation_tag(name, nil, nil, description, raw, location)
+      end
+
+      def split_named_description(rest)
+        match = rest.match(/\A(.+?) —(?: (.*))?\z/)
+        return [nil, nil] unless match
+
+        [match[1], match[2].to_s]
       end
 
       def parse_named_head(head)

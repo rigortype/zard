@@ -81,4 +81,26 @@ class ZardDocTest < Minitest::Test
 
     assert_equal "## `call()`\n\n### Returns\n\nThe stored value.\n", Zard::Doc.render(document)
   end
+
+  def test_renders_multiline_descriptions_inside_list_items
+    source = "# @param path — Path to read.\n# Must be readable.\n#\n# Kept open while reading.\n# @see Reader#read\n# Additional details.\ndef read(path) = nil\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `read(path)`
+
+      ### Parameters
+
+      - `path` — Path to read.
+        Must be readable.
+
+        Kept open while reading.
+
+      ### See also
+
+      - Reader#read
+        Additional details.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
 end

@@ -39,7 +39,7 @@ module Zard
 
         parameters = documentation.select { |tag| tag.name == :param }
         unless parameters.empty?
-          items = parameters.map { |tag| "- `#{tag.subject}` — #{tag.description}" }
+          items = parameters.map { |tag| list_item("`#{tag.subject}` — ", tag.description) }
           parts << "### Parameters\n\n#{items.join("\n")}"
         end
 
@@ -47,19 +47,19 @@ module Zard
         parts << "### Returns\n\n#{returns.map(&:description).join("\n\n")}" unless returns.empty?
 
         documentation.select { |tag| tag.name == :option }.group_by(&:owner).each do |owner, options|
-          items = options.map { |tag| "- `#{tag.subject}` — #{tag.description}" }
+          items = options.map { |tag| list_item("`#{tag.subject}` — ", tag.description) }
           parts << "### Options for `#{owner}`\n\n#{items.join("\n")}"
         end
 
         raises = documentation.select { |tag| tag.name == :raise }
         unless raises.empty?
-          items = raises.map { |tag| "- `#{tag.subject}` — #{tag.description}" }
+          items = raises.map { |tag| list_item("`#{tag.subject}` — ", tag.description) }
           parts << "### Raises\n\n#{items.join("\n")}"
         end
 
         yield_parameters = documentation.select { |tag| tag.name == :yieldparam }
         unless yield_parameters.empty?
-          items = yield_parameters.map { |tag| "- `#{tag.subject}` — #{tag.description}" }
+          items = yield_parameters.map { |tag| list_item("`#{tag.subject}` — ", tag.description) }
           parts << "### Yield parameters\n\n#{items.join("\n")}"
         end
 
@@ -68,7 +68,7 @@ module Zard
 
         see_also = documentation.select { |tag| tag.name == :see }
         unless see_also.empty?
-          items = see_also.map { |tag| "- #{tag.description}" }
+          items = see_also.map { |tag| list_item("", tag.description) }
           parts << "### See also\n\n#{items.join("\n")}"
         end
         parts.join("\n\n")
@@ -79,6 +79,13 @@ module Zard
 
         separator = (declaration.kind == :singleton_method) ? "." : "#"
         "#{declaration.namespace}#{separator}#{declaration.name}"
+      end
+
+      def list_item(prefix, description)
+        first, *continuation = description.split("\n", -1)
+        lines = ["- #{prefix}#{first}"]
+        continuation.each { |line| lines << (line.empty? ? "" : "  #{line}") }
+        lines.join("\n")
       end
     end
   end

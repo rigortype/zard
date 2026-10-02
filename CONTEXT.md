@@ -56,6 +56,10 @@ _Avoid_: inferred origin
 The em dash `—` that separates a named documentation tag or an optional type from its description. A tag with neither a name nor a type writes its description directly, without this marker.
 _Avoid_: `--` in documentation tags
 
+**Documentation continuation line**:
+A plain comment line that extends the preceding canonical ZARD documentation tag until another annotation or contract begins.
+_Avoid_: explicit continuation marker
+
 **YARD-like comment**:
 A familiar documentation tag without the ZARD em dash. It may be preserved as raw text, but it is not a ZARD documentation claim.
 _Avoid_: ZARD documentation

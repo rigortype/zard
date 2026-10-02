@@ -73,23 +73,34 @@ module Zard
 
       def lint(paths)
         failed = false
+        input_error = false
 
         paths.each do |path|
-          document = Zard.parse(File.read(path), path: path)
+          source = read_source(path)
+          unless source
+            input_error = true
+            next
+          end
+
+          document = Zard.parse(source, path: path)
           document.diagnostics.each do |diagnostic|
             @stdout.puts format_diagnostic(diagnostic)
             failed ||= failing?(diagnostic)
           end
-        rescue SystemCallError => error
-          @stderr.puts "#{path}: #{error.message}"
-          return 2
         end
+
+        return 2 if input_error
 
         failed ? 1 : 0
       end
 
       def render(paths)
-        documents = paths.map { |path| Zard.parse(File.read(path), path: path) }
+        documents = paths.filter_map do |path|
+          source = read_source(path)
+          Zard.parse(source, path: path) if source
+        end
+        return 2 if documents.length != paths.length
+
         diagnostics = documents.flat_map(&:diagnostics)
         diagnostics.each { |diagnostic| @stderr.puts format_diagnostic(diagnostic) }
         return 1 if diagnostics.any? { |diagnostic| diagnostic.severity == :error }
@@ -97,9 +108,13 @@ module Zard
         markdown = documents.map { |document| Zard::Doc.render(document) }.reject(&:empty?).join("\n")
         @stdout.print markdown
         0
+      end
+
+      def read_source(path)
+        File.read(path)
       rescue SystemCallError => error
-        @stderr.puts error.message
-        2
+        @stderr.puts "#{path}: #{error.message}"
+        nil
       end
 
       def failing?(diagnostic)

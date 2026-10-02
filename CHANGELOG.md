@@ -20,5 +20,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Preserve InlineRBS trailing prose separately from contract payloads.
 - Support multiline descriptions with exact source provenance and Markdown list continuation.
 - Discover Ruby source files recursively from `zard-doc` CLI directory inputs.
+- Report all unreadable CLI inputs without emitting partial Markdown.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

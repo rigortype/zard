@@ -99,6 +99,26 @@ class ZardDocCLITest < Minitest::Test
     end
   end
 
+  def test_lint_reports_all_readable_files_before_returning_an_input_error
+    with_source("# @return — Value.\ndef call = 1\n") do |path|
+      status, stdout, stderr = run_cli("lint", "missing.rb", path)
+
+      assert_equal 2, status
+      assert_includes stdout, "warning documentation.redundant-marker"
+      assert_includes stderr, "missing.rb:"
+    end
+  end
+
+  def test_render_does_not_emit_partial_markdown_after_an_input_error
+    with_source("# @return Value.\ndef call = 1\n") do |path|
+      status, stdout, stderr = run_cli("render", "missing.rb", path)
+
+      assert_equal 2, status
+      assert_empty stdout
+      assert_includes stderr, "missing.rb:"
+    end
+  end
+
   private
 
   def run_cli(*arguments)

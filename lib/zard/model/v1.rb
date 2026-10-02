@@ -43,10 +43,11 @@ module Zard
       end
 
       class DocumentationTag
-        attr_reader :name, :subject, :claim, :description, :span, :raw
+        attr_reader :name, :owner, :subject, :claim, :description, :span, :raw
 
-        def initialize(name:, subject:, claim:, description:, span:, raw:)
+        def initialize(name:, owner:, subject:, claim:, description:, span:, raw:)
           @name = name
+          @owner = owner
           @subject = subject
           @claim = claim
           @description = description

@@ -29,4 +29,23 @@ class ZardDocTest < Minitest::Test
 
     assert_equal expected, Zard::Doc.render(document)
   end
+
+  def test_renders_options_and_raised_exceptions
+    source = "# @option options :format — Output format.\n# @option options :limit [Integer] — Maximum count.\n# @raise IOError — If the input cannot be read.\ndef read(**options) = nil\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `read(**options)`
+
+      ### Options for `options`
+
+      - `:format` — Output format.
+      - `:limit` — Maximum count.
+
+      ### Raises
+
+      - `IOError` — If the input cannot be read.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
 end

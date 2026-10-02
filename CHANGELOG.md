@@ -12,5 +12,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Add the versioned ZARD document model and Ruby source parser.
 - Add the separate `zard-doc` gem with Markdown rendering for method parameters and returns.
 - Add parsing and Markdown rendering for `@yieldparam` and `@yieldreturn` block documentation.
+- Add structured option ownership plus parsing and Markdown rendering for `@option` and `@raise`.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

@@ -236,6 +236,12 @@ module Zard
           elsif body.match?(/\A@yieldparam(?:\s|\z)/)
             documentation << parse_named_tag(body, raw, comment.location, :yieldparam, "@yieldparam")
             seen_non_extrbs_annotation = true
+          elsif body.match?(/\A@option(?:\s|\z)/)
+            documentation << parse_option(body, raw, comment.location)
+            seen_non_extrbs_annotation = true
+          elsif body.match?(/\A@raise(?:\s|\z)/)
+            documentation << parse_named_tag(body, raw, comment.location, :raise, "@raise")
+            seen_non_extrbs_annotation = true
           elsif body.match?(/\A@return(?:\s|\z)/)
             documentation << parse_nameless_tag(body, raw, comment.location, :return, "@return")
             seen_non_extrbs_annotation = true
@@ -285,6 +291,20 @@ module Zard
         end
 
         documentation_tag(name, subject, claim, description, raw, location)
+      end
+
+      def parse_option(body, raw, location)
+        rest = body.delete_prefix("@option").strip
+        head, marker, description = rest.partition(" — ")
+        owner, option_head = head.split(/\s+/, 2)
+        subject, claim, valid = parse_named_head(option_head.to_s)
+
+        if marker.empty? || !owner || !valid
+          yard_like(raw, location)
+          return raw_tag(body, raw, location)
+        end
+
+        documentation_tag(:option, subject, claim, description, raw, location, owner: owner)
       end
 
       def parse_nameless_tag(body, raw, location, name, prefix)
@@ -352,9 +372,10 @@ module Zard
         documentation_tag(:raw, nil, nil, body, raw, location)
       end
 
-      def documentation_tag(name, subject, claim, description, raw, location)
+      def documentation_tag(name, subject, claim, description, raw, location, owner: nil)
         Model::V1::DocumentationTag.new(
           name: name,
+          owner: owner,
           subject: subject,
           claim: claim,
           description: description,

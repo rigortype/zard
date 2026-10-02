@@ -115,4 +115,24 @@ class ParserTest < Minitest::Test
     assert_equal [:raw], document.declarations.fetch(0).documentation.map(&:name)
     assert_equal ["documentation.yard-like"], document.diagnostics.map(&:code)
   end
+
+  def test_parses_options_and_raised_exceptions
+    source = "# @option options :format — Output format.\n# @option options :limit [Integer] — Maximum count.\n# @raise IOError — If the input cannot be read.\ndef read(**options) = nil\n"
+    document = Zard.parse(source, path: "example.rb")
+    documentation = document.declarations.fetch(0).documentation
+
+    assert_empty document.diagnostics
+    assert_equal %i[option option raise], documentation.map(&:name)
+    assert_equal ["options", "options", nil], documentation.map(&:owner)
+    assert_equal [":format", ":limit", "IOError"], documentation.map(&:subject)
+    assert_equal [nil, "Integer", nil], documentation.map(&:claim)
+  end
+
+  def test_preserves_yard_like_option_as_raw_text
+    source = "# @option options [Symbol] :format Output format.\ndef read(**options) = nil\n"
+    document = Zard.parse(source, path: "example.rb")
+
+    assert_equal [:raw], document.declarations.fetch(0).documentation.map(&:name)
+    assert_equal ["documentation.yard-like"], document.diagnostics.map(&:code)
+  end
 end

@@ -37,6 +37,17 @@ module Zard
         returns = documentation.select { |tag| tag.name == :return }
         parts << "### Returns\n\n#{returns.map(&:description).join("\n\n")}" unless returns.empty?
 
+        documentation.select { |tag| tag.name == :option }.group_by(&:owner).each do |owner, options|
+          items = options.map { |tag| "- `#{tag.subject}` — #{tag.description}" }
+          parts << "### Options for `#{owner}`\n\n#{items.join("\n")}"
+        end
+
+        raises = documentation.select { |tag| tag.name == :raise }
+        unless raises.empty?
+          items = raises.map { |tag| "- `#{tag.subject}` — #{tag.description}" }
+          parts << "### Raises\n\n#{items.join("\n")}"
+        end
+
         yield_parameters = documentation.select { |tag| tag.name == :yieldparam }
         unless yield_parameters.empty?
           items = yield_parameters.map { |tag| "- `#{tag.subject}` — #{tag.description}" }

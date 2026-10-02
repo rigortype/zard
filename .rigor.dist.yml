@@ -2,5 +2,6 @@ target_ruby: "3.3"
 
 paths:
   - lib
+  - zard-doc/lib
 
 severity_profile: strict

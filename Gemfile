@@ -4,6 +4,8 @@ source "https://rubygems.org"
 
 gemspec
 
+gem "zard-doc", path: "zard-doc"
+
 gem "irb"
 gem "minitest", "~> 5.0"
 gem "rake", "~> 13.0"

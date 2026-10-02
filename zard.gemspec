@@ -22,4 +22,6 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir["{lib,sig}/**/*", "CHANGELOG.md", "LICENSE", "README.md"].select { |path| File.file?(path) }.sort
   spec.require_paths = ["lib"]
+
+  spec.add_dependency "prism", "~> 1.9"
 end

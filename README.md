@@ -2,7 +2,7 @@
 
 ZARD is an AI-friendly Ruby self-documentation notation built around RBS and Rigor extensions. It keeps human-facing API documentation separate from checked type contracts.
 
-The package is under active design. The current repository contains the core gem skeleton and the accepted design records; parsing and rendering are not implemented yet.
+The package is under active design. The first vertical slice parses Ruby source into a versioned ZARD model and renders its API documentation as Markdown.
 
 ## Syntax direction
 
@@ -21,12 +21,31 @@ end
 
 See [CONTEXT.md](CONTEXT.md) and [docs/adr](docs/adr) for the current language and architecture decisions.
 
+## Usage
+
+The core gem parses Ruby source without interpreting `@extrbs` type payloads:
+
+```ruby
+document = Zard.parse(source, path: "lib/example.rb")
+```
+
+The separate `zard-doc` gem renders the API documentation in that model:
+
+```ruby
+require "zard/doc"
+
+markdown = Zard::Doc.render(document)
+```
+
+The initial renderer supports method prose, `@param`, and `@return`. Contracts remain available in the model and are not copied into API prose.
+
 ## Installation
 
 Until the first RubyGems release, add the repository to your Gemfile:
 
 ```ruby
 gem "zard", github: "rigortype/zard"
+gem "zard-doc", github: "rigortype/zard"
 ```
 
 ## Development
@@ -43,4 +62,3 @@ The default task runs tests, Standard, RBS validation, and a gem build.
 ## License
 
 ZARD is available under the Mozilla Public License 2.0. See [LICENSE](LICENSE).
-

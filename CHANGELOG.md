@@ -14,5 +14,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Add parsing and Markdown rendering for `@yieldparam` and `@yieldreturn` block documentation.
 - Add structured option ownership plus parsing and Markdown rendering for `@option` and `@raise`.
 - Add parsing and Markdown rendering for description-only documentation tags.
+- Add the `zard-doc lint` command with configurable warning failure behavior.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

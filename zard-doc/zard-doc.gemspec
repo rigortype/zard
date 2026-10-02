@@ -20,8 +20,10 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = spec.homepage
 
   spec.files = Dir.chdir(__dir__) do
-    Dir["lib/**/*", "LICENSE", "README.md"].select { |path| File.file?(path) }.sort
+    Dir["{exe,lib}/**/*", "LICENSE", "README.md"].select { |path| File.file?(path) }.sort
   end
+  spec.bindir = "exe"
+  spec.executables = ["zard-doc"]
   spec.require_paths = ["lib"]
 
   spec.add_dependency "zard", "~> 0.1.0"

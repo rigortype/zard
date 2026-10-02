@@ -42,6 +42,7 @@ The initial renderer supports method prose, `@param`, `@return`, `@yieldparam`, 
 Lint source files or directories with `zard-doc lint`. Warnings are reported without failing by default; use `--fail-on warning` to make them fail in CI.
 
 Render Markdown to standard output with `zard-doc render lib`.
+Use `-` as the input path to lint or render Ruby source from standard input.
 
 ZARD documentation requires UTF-8 source text. Non-UTF-8 Ruby source may still carry `@rbs`, `#:`, and `@extrbs` contracts.
 

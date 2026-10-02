@@ -21,5 +21,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Support multiline descriptions with exact source provenance and Markdown list continuation.
 - Discover Ruby source files recursively from `zard-doc` CLI directory inputs.
 - Report all unreadable CLI inputs without emitting partial Markdown.
+- Read `zard-doc` CLI source from standard input when the input path is `-`.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

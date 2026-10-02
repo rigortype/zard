@@ -8,12 +8,13 @@ module Zard
     class CLI
       SEVERITY_RANK = {error: 2, warning: 1, info: 0}.freeze
 
-      def self.run(argv, stdout: $stdout, stderr: $stderr)
-        new(argv, stdout, stderr).run
+      def self.run(argv, stdin: $stdin, stdout: $stdout, stderr: $stderr)
+        new(argv, stdin, stdout, stderr).run
       end
 
-      def initialize(argv, stdout, stderr)
+      def initialize(argv, stdin, stdout, stderr)
         @argv = argv.dup
+        @stdin = stdin
         @stdout = stdout
         @stderr = stderr
         @fail_on = :error
@@ -111,6 +112,8 @@ module Zard
       end
 
       def read_source(path)
+        return @stdin.read if path == "-"
+
         File.read(path)
       rescue SystemCallError => error
         @stderr.puts "#{path}: #{error.message}"

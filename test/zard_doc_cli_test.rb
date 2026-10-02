@@ -119,12 +119,29 @@ class ZardDocCLITest < Minitest::Test
     end
   end
 
+  def test_lint_reads_standard_input_from_a_dash
+    status, stdout, stderr = run_cli("lint", "--fail-on", "warning", "-", stdin: "# @return — Value.\ndef call = 1\n")
+
+    assert_equal 1, status
+    assert_includes stdout, "-:1:1: warning documentation.redundant-marker"
+    assert_empty stderr
+  end
+
+  def test_render_reads_standard_input_from_a_dash
+    status, stdout, stderr = run_cli("render", "-", stdin: "# @return Value.\ndef call = 1\n")
+
+    assert_equal 0, status
+    assert_includes stdout, "## `call()`"
+    assert_empty stderr
+  end
+
   private
 
-  def run_cli(*arguments)
+  def run_cli(*arguments, stdin: "")
+    input = StringIO.new(stdin)
     stdout = StringIO.new
     stderr = StringIO.new
-    status = Zard::Doc::CLI.run(arguments, stdout: stdout, stderr: stderr)
+    status = Zard::Doc::CLI.run(arguments, stdin: input, stdout: stdout, stderr: stderr)
     [status, stdout.string, stderr.string]
   end
 

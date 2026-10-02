@@ -24,3 +24,4 @@ zard-doc render lib
 
 Directories are searched recursively for Ruby source files. Files are processed in stable sorted order and duplicate paths are ignored.
 Unreadable inputs are reported together; rendering never emits partial Markdown when any input cannot be read.
+Use `-` as a path to read Ruby source from standard input.

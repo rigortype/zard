@@ -74,4 +74,11 @@ class ZardDocTest < Minitest::Test
 
     assert_equal expected, Zard::Doc.render(document)
   end
+
+  def test_does_not_render_contract_notes_as_api_documentation
+    source = "# @extrbs return: non-empty-string -- Guaranteed by validation.\n# @return The stored value.\ndef call = \"value\"\n"
+    document = Zard.parse(source, path: "example.rb")
+
+    assert_equal "## `call()`\n\n### Returns\n\nThe stored value.\n", Zard::Doc.render(document)
+  end
 end

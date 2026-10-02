@@ -164,4 +164,19 @@ class ParserTest < Minitest::Test
     assert_empty document.diagnostics
     assert_equal [:rbs], document.declarations.fetch(0).contracts.map(&:channel)
   end
+
+  def test_separates_contract_notes_from_type_payloads
+    source = "# @extrbs return: non-empty-string -- Guaranteed by validation.\n# @rbs return: String -- Public return type.\n# @return The stored value.\ndef call = \"value\"\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
+
+    assert_equal ["return: non-empty-string", "return: String"], declaration.contracts.map(&:payload)
+    assert_equal ["Guaranteed by validation.", "Public return type."], declaration.contracts.map(&:note)
+    assert_equal ["The stored value."], declaration.documentation.map(&:description)
+  end
+
+  def test_leaves_contract_note_nil_without_a_separator
+    declaration = Zard.parse("# @rbs return: String\ndef call = \"value\"\n", path: "example.rb").declarations.fetch(0)
+
+    assert_nil declaration.contracts.fetch(0).note
+  end
 end

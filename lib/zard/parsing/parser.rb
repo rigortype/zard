@@ -309,9 +309,11 @@ module Zard
       end
 
       def contract(channel, payload, raw, location)
+        contract_payload, marker, note = payload.partition(" -- ")
         Model::V1::Contract.new(
           channel: channel,
-          payload: payload,
+          payload: contract_payload,
+          note: marker.empty? ? nil : note,
           span: span(location),
           raw: raw
         )

@@ -31,11 +31,12 @@ module Zard
       end
 
       class Contract
-        attr_reader :channel, :payload, :span, :raw
+        attr_reader :channel, :payload, :note, :span, :raw
 
-        def initialize(channel:, payload:, span:, raw:)
+        def initialize(channel:, payload:, note:, span:, raw:)
           @channel = channel
           @payload = payload
+          @note = note
           @span = span
           @raw = raw
           freeze

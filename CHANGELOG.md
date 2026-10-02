@@ -17,5 +17,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Add the `zard-doc lint` command with configurable warning failure behavior.
 - Add the `zard-doc render` command for generating Markdown from Ruby source files.
 - Diagnose ZARD documentation in non-UTF-8 source while preserving contract channels.
+- Preserve InlineRBS trailing prose separately from contract payloads.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

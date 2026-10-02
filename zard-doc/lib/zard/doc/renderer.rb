@@ -28,6 +28,15 @@ module Zard
         text = documentation.select { |tag| tag.name == :text }.map(&:description)
         parts << text.join("\n") unless text.empty?
 
+        deprecated = documentation.select { |tag| tag.name == :deprecated }
+        parts << "### Deprecated\n\n#{deprecated.map(&:description).join("\n\n")}" unless deprecated.empty?
+
+        notes = documentation.select { |tag| tag.name == :note }
+        parts << "### Notes\n\n#{notes.map(&:description).join("\n\n")}" unless notes.empty?
+
+        examples = documentation.select { |tag| tag.name == :example }
+        parts << "### Examples\n\n#{examples.map(&:description).join("\n\n")}" unless examples.empty?
+
         parameters = documentation.select { |tag| tag.name == :param }
         unless parameters.empty?
           items = parameters.map { |tag| "- `#{tag.subject}` — #{tag.description}" }
@@ -56,6 +65,12 @@ module Zard
 
         yield_returns = documentation.select { |tag| tag.name == :yieldreturn }
         parts << "### Yields\n\n#{yield_returns.map(&:description).join("\n\n")}" unless yield_returns.empty?
+
+        see_also = documentation.select { |tag| tag.name == :see }
+        unless see_also.empty?
+          items = see_also.map { |tag| "- #{tag.description}" }
+          parts << "### See also\n\n#{items.join("\n")}"
+        end
         parts.join("\n\n")
       end
 

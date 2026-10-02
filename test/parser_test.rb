@@ -135,4 +135,16 @@ class ParserTest < Minitest::Test
     assert_equal [:raw], document.declarations.fetch(0).documentation.map(&:name)
     assert_equal ["documentation.yard-like"], document.diagnostics.map(&:code)
   end
+
+  def test_parses_description_only_tags_without_type_claims
+    source = "# @note Thread-safe after initialization.\n# @see https://example.test/reference\n# @deprecated Use #fetch instead.\n# @example reader.read\ndef read = nil\n"
+    document = Zard.parse(source, path: "example.rb")
+    documentation = document.declarations.fetch(0).documentation
+
+    assert_empty document.diagnostics
+    assert_equal %i[note see deprecated example], documentation.map(&:name)
+    assert documentation.all? { |tag| tag.owner.nil? && tag.subject.nil? && tag.claim.nil? }
+    assert_equal "Thread-safe after initialization.", documentation.fetch(0).description
+    assert_equal "reader.read", documentation.fetch(3).description
+  end
 end

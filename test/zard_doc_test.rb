@@ -48,4 +48,30 @@ class ZardDocTest < Minitest::Test
 
     assert_equal expected, Zard::Doc.render(document)
   end
+
+  def test_renders_description_only_tags
+    source = "# @note Thread-safe after initialization.\n# @see https://example.test/reference\n# @deprecated Use #fetch instead.\n# @example reader.read\ndef read = nil\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `read()`
+
+      ### Deprecated
+
+      Use #fetch instead.
+
+      ### Notes
+
+      Thread-safe after initialization.
+
+      ### Examples
+
+      reader.read
+
+      ### See also
+
+      - https://example.test/reference
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
 end

@@ -248,6 +248,18 @@ module Zard
           elsif body.match?(/\A@yieldreturn(?:\s|\z)/)
             documentation << parse_nameless_tag(body, raw, comment.location, :yieldreturn, "@yieldreturn")
             seen_non_extrbs_annotation = true
+          elsif body.match?(/\A@note(?:\s|\z)/)
+            documentation << parse_description_tag(body, raw, comment.location, :note, "@note")
+            seen_non_extrbs_annotation = true
+          elsif body.match?(/\A@see(?:\s|\z)/)
+            documentation << parse_description_tag(body, raw, comment.location, :see, "@see")
+            seen_non_extrbs_annotation = true
+          elsif body.match?(/\A@deprecated(?:\s|\z)/)
+            documentation << parse_description_tag(body, raw, comment.location, :deprecated, "@deprecated")
+            seen_non_extrbs_annotation = true
+          elsif body.match?(/\A@example(?:\s|\z)/)
+            documentation << parse_description_tag(body, raw, comment.location, :example, "@example")
+            seen_non_extrbs_annotation = true
           elsif body.start_with?("@")
             documentation << raw_tag(body, raw, comment.location)
             seen_non_extrbs_annotation = true
@@ -331,6 +343,11 @@ module Zard
         end
 
         documentation_tag(name, nil, nil, rest, raw, location)
+      end
+
+      def parse_description_tag(body, raw, location, name, prefix)
+        description = body.delete_prefix(prefix).strip
+        documentation_tag(name, nil, nil, description, raw, location)
       end
 
       def parse_named_head(head)

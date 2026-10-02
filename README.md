@@ -37,7 +37,7 @@ require "zard/doc"
 markdown = Zard::Doc.render(document)
 ```
 
-The initial renderer supports method prose, `@param`, `@return`, `@yieldparam`, `@yieldreturn`, `@option`, and `@raise`. Contracts remain available in the model and are not copied into API prose.
+The initial renderer supports method prose, `@param`, `@return`, `@yieldparam`, `@yieldreturn`, `@option`, `@raise`, `@note`, `@see`, `@deprecated`, and `@example`. Contracts remain available in the model and are not copied into API prose.
 
 ## Installation
 

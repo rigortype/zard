@@ -11,4 +11,22 @@ class ZardDocTest < Minitest::Test
 
     assert_equal File.read(markdown_path), Zard::Doc.render(document)
   end
+
+  def test_renders_yield_parameters_and_return_value
+    source = "# @yieldparam value — Each value.\n# @yieldreturn The consumed length.\ndef each_value = yield(\"value\")\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `each_value()`
+
+      ### Yield parameters
+
+      - `value` — Each value.
+
+      ### Yields
+
+      The consumed length.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
 end

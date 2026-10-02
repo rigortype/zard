@@ -231,10 +231,16 @@ module Zard
             contracts << contract(:rbs, raw.delete_prefix("#:").strip, raw, comment.location)
             seen_non_extrbs_annotation = true
           elsif body.match?(/\A@param(?:\s|\z)/)
-            documentation << parse_param(body, raw, comment.location)
+            documentation << parse_named_tag(body, raw, comment.location, :param, "@param")
+            seen_non_extrbs_annotation = true
+          elsif body.match?(/\A@yieldparam(?:\s|\z)/)
+            documentation << parse_named_tag(body, raw, comment.location, :yieldparam, "@yieldparam")
             seen_non_extrbs_annotation = true
           elsif body.match?(/\A@return(?:\s|\z)/)
-            documentation << parse_return(body, raw, comment.location)
+            documentation << parse_nameless_tag(body, raw, comment.location, :return, "@return")
+            seen_non_extrbs_annotation = true
+          elsif body.match?(/\A@yieldreturn(?:\s|\z)/)
+            documentation << parse_nameless_tag(body, raw, comment.location, :yieldreturn, "@yieldreturn")
             seen_non_extrbs_annotation = true
           elsif body.start_with?("@")
             documentation << raw_tag(body, raw, comment.location)
@@ -263,8 +269,8 @@ module Zard
         )
       end
 
-      def parse_param(body, raw, location)
-        rest = body.delete_prefix("@param").strip
+      def parse_named_tag(body, raw, location, name, prefix)
+        rest = body.delete_prefix(prefix).strip
         head, marker, description = rest.partition(" — ")
 
         if marker.empty?
@@ -278,20 +284,20 @@ module Zard
           return raw_tag(body, raw, location)
         end
 
-        documentation_tag(:param, subject, claim, description, raw, location)
+        documentation_tag(name, subject, claim, description, raw, location)
       end
 
-      def parse_return(body, raw, location)
-        rest = body.delete_prefix("@return").strip
+      def parse_nameless_tag(body, raw, location, name, prefix)
+        rest = body.delete_prefix(prefix).strip
 
         if rest.start_with?("—")
           add_diagnostic(
             "documentation.redundant-marker",
             :warning,
-            "Remove the redundant em dash from @return without a type claim.",
+            "Remove the redundant em dash from #{prefix} without a type claim.",
             location
           )
-          return documentation_tag(:return, nil, nil, rest.delete_prefix("—").strip, raw, location)
+          return documentation_tag(name, nil, nil, rest.delete_prefix("—").strip, raw, location)
         end
 
         if rest.start_with?("[")
@@ -301,10 +307,10 @@ module Zard
             return raw_tag(body, raw, location)
           end
 
-          return documentation_tag(:return, nil, claim, remainder.delete_prefix(" — "), raw, location)
+          return documentation_tag(name, nil, claim, remainder.delete_prefix(" — "), raw, location)
         end
 
-        documentation_tag(:return, nil, nil, rest, raw, location)
+        documentation_tag(name, nil, nil, rest, raw, location)
       end
 
       def parse_named_head(head)

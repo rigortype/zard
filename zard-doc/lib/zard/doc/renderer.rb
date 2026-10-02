@@ -36,6 +36,15 @@ module Zard
 
         returns = documentation.select { |tag| tag.name == :return }
         parts << "### Returns\n\n#{returns.map(&:description).join("\n\n")}" unless returns.empty?
+
+        yield_parameters = documentation.select { |tag| tag.name == :yieldparam }
+        unless yield_parameters.empty?
+          items = yield_parameters.map { |tag| "- `#{tag.subject}` — #{tag.description}" }
+          parts << "### Yield parameters\n\n#{items.join("\n")}"
+        end
+
+        yield_returns = documentation.select { |tag| tag.name == :yieldreturn }
+        parts << "### Yields\n\n#{yield_returns.map(&:description).join("\n\n")}" unless yield_returns.empty?
         parts.join("\n\n")
       end
 

@@ -11,5 +11,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Add the initial Ruby gem package, test, lint, signature, and CI skeleton.
 - Add the versioned ZARD document model and Ruby source parser.
 - Add the separate `zard-doc` gem with Markdown rendering for method parameters and returns.
+- Add parsing and Markdown rendering for `@yieldparam` and `@yieldreturn` block documentation.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

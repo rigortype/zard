@@ -96,4 +96,23 @@ class ParserTest < Minitest::Test
     assert_equal ["Array[String]", "Array[String]"], declaration.documentation.map(&:claim)
     assert_equal ["Values.", "Copies."], declaration.documentation.map(&:description)
   end
+
+  def test_parses_yield_documentation_with_the_param_and_return_rules
+    source = "# @yieldparam value [String] — Each value.\n# @yieldreturn [Integer] — The consumed length.\ndef each_value = yield(\"value\")\n"
+    document = Zard.parse(source, path: "example.rb")
+    documentation = document.declarations.fetch(0).documentation
+
+    assert_empty document.diagnostics
+    assert_equal %i[yieldparam yieldreturn], documentation.map(&:name)
+    assert_equal ["String", "Integer"], documentation.map(&:claim)
+    assert_equal ["value", nil], documentation.map(&:subject)
+  end
+
+  def test_preserves_yard_like_yieldparam_as_raw_text
+    source = "# @yieldparam value [String] Each value.\ndef each_value = yield(\"value\")\n"
+    document = Zard.parse(source, path: "example.rb")
+
+    assert_equal [:raw], document.declarations.fetch(0).documentation.map(&:name)
+    assert_equal ["documentation.yard-like"], document.diagnostics.map(&:code)
+  end
 end

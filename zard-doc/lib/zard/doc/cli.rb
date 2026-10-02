@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "optparse"
-require "zard"
+require "zard/doc"
 
 module Zard
   module Doc
@@ -22,26 +22,41 @@ module Zard
       def run
         return help if @argv.first == "--help" || @argv.first == "-h"
 
-        command = @argv.shift
-        return usage_error("Expected the lint command.") unless command == "lint"
-
-        option_parser.parse!(@argv)
-        return usage_error("Pass at least one Ruby source file.") if @argv.empty?
-
-        lint(@argv)
+        case @argv.shift
+        when "lint"
+          lint_command
+        when "render"
+          render_command
+        else
+          usage_error("Expected the lint or render command.")
+        end
       rescue OptionParser::ParseError => error
         usage_error(error.message)
       end
 
       private
 
-      def option_parser
+      def lint_command
+        lint_option_parser.parse!(@argv)
+        return usage_error("Pass at least one Ruby source file.") if @argv.empty?
+
+        lint(@argv)
+      end
+
+      def lint_option_parser
         OptionParser.new do |parser|
           parser.banner = usage
           parser.on("--fail-on LEVEL", %w[error warning], "Minimum severity that exits unsuccessfully") do |level|
             @fail_on = level.to_sym
           end
         end
+      end
+
+      def render_command
+        OptionParser.new.parse!(@argv)
+        return usage_error("Pass at least one Ruby source file.") if @argv.empty?
+
+        render(@argv)
       end
 
       def lint(paths)
@@ -59,6 +74,20 @@ module Zard
         end
 
         failed ? 1 : 0
+      end
+
+      def render(paths)
+        documents = paths.map { |path| Zard.parse(File.read(path), path: path) }
+        diagnostics = documents.flat_map(&:diagnostics)
+        diagnostics.each { |diagnostic| @stderr.puts format_diagnostic(diagnostic) }
+        return 1 if diagnostics.any? { |diagnostic| diagnostic.severity == :error }
+
+        markdown = documents.map { |document| Zard::Doc.render(document) }.reject(&:empty?).join("\n")
+        @stdout.print markdown
+        0
+      rescue SystemCallError => error
+        @stderr.puts error.message
+        2
       end
 
       def failing?(diagnostic)
@@ -82,7 +111,11 @@ module Zard
       end
 
       def usage
-        "Usage: zard-doc lint [--fail-on error|warning] FILE..."
+        <<~USAGE.chomp
+          Usage:
+            zard-doc lint [--fail-on error|warning] FILE...
+            zard-doc render FILE...
+        USAGE
       end
     end
   end

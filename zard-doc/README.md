@@ -13,3 +13,9 @@ Run the linter against Ruby source files with:
 zard-doc lint lib/example.rb
 zard-doc lint --fail-on warning lib/example.rb
 ```
+
+Render Markdown to standard output with:
+
+```console
+zard-doc render lib/example.rb
+```

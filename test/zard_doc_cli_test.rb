@@ -44,6 +44,27 @@ class ZardDocCLITest < Minitest::Test
     assert_includes stderr, "missing.rb:"
   end
 
+  def test_render_writes_markdown
+    with_source("# @return Value.\ndef call = 1\n") do |path|
+      status, stdout, stderr = run_cli("render", path)
+
+      assert_equal 0, status
+      assert_includes stdout, "## `call()`"
+      assert_includes stdout, "### Returns\n\nValue."
+      assert_empty stderr
+    end
+  end
+
+  def test_render_reports_syntax_errors_without_markdown
+    with_source("# @return Value.\ndef call(\n") do |path|
+      status, stdout, stderr = run_cli("render", path)
+
+      assert_equal 1, status
+      assert_empty stdout
+      assert_includes stderr, "error ruby.syntax"
+    end
+  end
+
   private
 
   def run_cli(*arguments)

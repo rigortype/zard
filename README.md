@@ -41,6 +41,8 @@ The initial renderer supports method prose, `@param`, `@return`, `@yieldparam`, 
 
 Lint source files with `zard-doc lint`. Warnings are reported without failing by default; use `--fail-on warning` to make them fail in CI.
 
+Render Markdown to standard output with `zard-doc render lib/example.rb`.
+
 ## Installation
 
 Until the first RubyGems release, add the repository to your Gemfile:

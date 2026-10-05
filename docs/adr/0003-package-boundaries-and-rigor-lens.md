@@ -12,4 +12,4 @@ The project uses a monorepo with separate gems for the ZARD core, API documentat
 - Rigor generates `sig/`; the project does not hand-maintain duplicate contracts there.
 - API documentation can be generated without Rigor, but resolved type facts are then unavailable.
 - The Rigor adapter must not expose Rigor internal analyzer classes as the package boundary.
-- The first vertical slice carries class, module, and method declarations from Ruby source through the ZARD model to Markdown documentation.
+- The first vertical slice carries class, module, constant, and method declarations from Ruby source through the ZARD model to Markdown documentation.

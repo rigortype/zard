@@ -95,6 +95,27 @@ class ParserTest < Minitest::Test
     ], declarations.map { |declaration| [declaration.kind, declaration.name, declaration.namespace] }
   end
 
+  def test_collects_simple_qualified_and_absolute_constant_declarations
+    source = "module Demo\n  # Default limit.\n  LIMIT = 3\nend\nDemo::VERSION = \"1.0\"\nmodule Outer\n  ::ROOT = true\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind == :constant }
+
+    assert_equal [
+      ["LIMIT", "Demo"],
+      ["VERSION", "Demo"],
+      ["ROOT", nil]
+    ], declarations.map { |declaration| [declaration.name, declaration.namespace] }
+    assert_equal "Default limit.", declarations.fetch(0).documentation.fetch(0).description
+    assert_equal [], declarations.fetch(0).parameters
+  end
+
+  def test_does_not_collect_constant_reassignments_as_declarations
+    source = "VALUE ||= 1\nVALUE &&= 2\nVALUE += 3\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_empty declarations
+  end
+
   def test_resets_the_namespace_for_an_absolute_constant_path
     source = "module Outer\n  class ::Reader\n    def read = nil\n  end\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.kind == :instance_method }

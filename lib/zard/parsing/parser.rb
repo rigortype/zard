@@ -72,13 +72,23 @@ module Zard
       end
 
       def visit_module_node(node)
-        collect_namespace_declaration(:module, node)
+        collect_path_declaration(:module, node.constant_path.location.slice, node)
         within_namespace(node.constant_path.location.slice) { node.body&.accept(self) }
       end
 
       def visit_class_node(node)
-        collect_namespace_declaration(:class, node)
+        collect_path_declaration(:class, node.constant_path.location.slice, node)
         within_namespace(node.constant_path.location.slice) { node.body&.accept(self) }
+      end
+
+      def visit_constant_write_node(node)
+        collect_path_declaration(:constant, node.name.to_s, node)
+        super
+      end
+
+      def visit_constant_path_write_node(node)
+        collect_path_declaration(:constant, node.target.location.slice, node)
+        super
       end
 
       def visit_singleton_class_node(node)
@@ -102,8 +112,8 @@ module Zard
 
       private
 
-      def collect_namespace_declaration(kind, node)
-        parts = namespace_parts(node.constant_path.location.slice)
+      def collect_path_declaration(kind, path, node)
+        parts = namespace_parts(path)
         collect_declaration(
           kind: kind,
           name: parts.last,

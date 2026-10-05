@@ -80,6 +80,8 @@ module Zard
           "## Class `#{qualified_name(declaration)}`"
         when :module
           "## Module `#{qualified_name(declaration)}`"
+        when :constant
+          "## Constant `#{qualified_name(declaration)}`"
         else
           "## `#{display_name(declaration)}(#{declaration.parameters.join(", ")})`"
         end

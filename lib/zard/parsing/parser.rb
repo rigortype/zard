@@ -72,10 +72,12 @@ module Zard
       end
 
       def visit_module_node(node)
+        collect_namespace_declaration(:module, node)
         within_namespace(node.constant_path.location.slice) { node.body&.accept(self) }
       end
 
       def visit_class_node(node)
+        collect_namespace_declaration(:class, node)
         within_namespace(node.constant_path.location.slice) { node.body&.accept(self) }
       end
 
@@ -87,18 +89,12 @@ module Zard
       end
 
       def visit_def_node(node)
-        comments = comment_block_for(node.location.start_line)
-        parsed = CommentBlockParser.new(@source, @path, comments, @diagnostics, @encoding).call
-
-        @declarations << Model::V1::Declaration.new(
+        collect_declaration(
           kind: singleton_method?(node) ? :singleton_method : :instance_method,
           name: node.name.to_s,
           namespace: @namespace.empty? ? nil : @namespace.join("::"),
           parameters: parameter_names(node.parameters).freeze,
-          span: span(node.location),
-          comment_span: comment_span(comments),
-          documentation: parsed.fetch(:documentation).freeze,
-          contracts: parsed.fetch(:contracts).freeze
+          node: node
         )
 
         node.body&.accept(self)
@@ -106,14 +102,44 @@ module Zard
 
       private
 
+      def collect_namespace_declaration(kind, node)
+        parts = namespace_parts(node.constant_path.location.slice)
+        collect_declaration(
+          kind: kind,
+          name: parts.last,
+          namespace: (parts.length > 1) ? parts[0...-1].join("::") : nil,
+          parameters: [].freeze,
+          node: node
+        )
+      end
+
+      def collect_declaration(kind:, name:, namespace:, parameters:, node:)
+        comments = comment_block_for(node.location.start_line)
+        parsed = CommentBlockParser.new(@source, @path, comments, @diagnostics, @encoding).call
+
+        @declarations << Model::V1::Declaration.new(
+          kind: kind,
+          name: name,
+          namespace: namespace,
+          parameters: parameters,
+          span: span(node.location),
+          comment_span: comment_span(comments),
+          documentation: parsed.fetch(:documentation).freeze,
+          contracts: parsed.fetch(:contracts).freeze
+        )
+      end
+
       def within_namespace(name)
         previous_namespace = @namespace
-        @namespace = name.start_with?("::") ? [] : @namespace.dup
-        parts = name.sub(/\A::/, "").split("::")
-        @namespace.concat(parts)
+        @namespace = namespace_parts(name)
         yield
       ensure
         @namespace = previous_namespace
+      end
+
+      def namespace_parts(name)
+        prefix = name.start_with?("::") ? [] : @namespace
+        prefix + name.sub(/\A::/, "").split("::")
       end
 
       def singleton_method?(node)

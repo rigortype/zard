@@ -24,7 +24,7 @@ module Zard
         documentation = declaration.documentation.reject { |tag| tag.name == :raw }
         return if documentation.empty?
 
-        parts = ["## `#{display_name(declaration)}(#{declaration.parameters.join(", ")})`"]
+        parts = [heading(declaration)]
         text = documentation.select { |tag| tag.name == :text }.map(&:description)
         parts << text.join("\n") unless text.empty?
 
@@ -72,6 +72,21 @@ module Zard
           parts << "### See also\n\n#{items.join("\n")}"
         end
         parts.join("\n\n")
+      end
+
+      def heading(declaration)
+        case declaration.kind
+        when :class
+          "## Class `#{qualified_name(declaration)}`"
+        when :module
+          "## Module `#{qualified_name(declaration)}`"
+        else
+          "## `#{display_name(declaration)}(#{declaration.parameters.join(", ")})`"
+        end
+      end
+
+      def qualified_name(declaration)
+        [declaration.namespace, declaration.name].compact.join("::")
       end
 
       def display_name(declaration)

@@ -12,6 +12,28 @@ class ZardDocTest < Minitest::Test
     assert_equal File.read(markdown_path), Zard::Doc.render(document)
   end
 
+  def test_renders_documented_modules_classes_and_methods
+    source = "# Public API.\nmodule Demo\n  # Reads stored values.\n  class Reader\n    # @return Stored value.\n    def read = nil\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Module `Demo`
+
+      Public API.
+
+      ## Class `Demo::Reader`
+
+      Reads stored values.
+
+      ## `Demo::Reader#read()`
+
+      ### Returns
+
+      Stored value.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_yield_parameters_and_return_value
     source = "# @yieldparam value — Each value.\n# @yieldreturn The consumed length.\ndef each_value = yield(\"value\")\n"
     document = Zard.parse(source, path: "example.rb")

@@ -28,6 +28,10 @@ _Avoid_: API documentation tag
 Human-facing information about a public Ruby declaration.
 _Avoid_: type contract
 
+**Declaration**:
+A Ruby class, module, or method represented in the versioned ZARD model.
+_Avoid_: documentation item
+
 **Documentation claim**:
 An optional type written in an API documentation tag. Rigor may check it, but it does not replace a contract or an inferred fact.
 _Avoid_: authoritative type

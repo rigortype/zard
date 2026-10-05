@@ -62,16 +62,42 @@ class ParserTest < Minitest::Test
 
   def test_collects_namespace_singleton_kind_and_parameter_shapes
     source = "module Demo\n  class Reader\n    # @return Value.\n    def self.read(path, mode: :text, **options, &block) = path\n  end\nend\n"
-    declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
+    declarations = Zard.parse(source, path: "example.rb").declarations
+    declaration = declarations.find { |item| item.kind == :singleton_method }
 
     assert_equal "Demo::Reader", declaration.namespace
     assert_equal :singleton_method, declaration.kind
     assert_equal ["path", "mode:", "**options", "&block"], declaration.parameters
   end
 
+  def test_collects_documented_modules_and_classes_before_their_members
+    source = "# Public API.\nmodule Demo\n  # Reads stored values.\n  class Reader\n    # @return Stored value.\n    def read = nil\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    mod, klass, method = document.declarations
+
+    assert_empty document.diagnostics
+    assert_equal [:module, :class, :instance_method], document.declarations.map(&:kind)
+    assert_equal ["Demo", "Reader", "read"], document.declarations.map(&:name)
+    assert_equal [nil, "Demo", "Demo::Reader"], document.declarations.map(&:namespace)
+    assert_equal [[], [], []], document.declarations.map(&:parameters)
+    assert_equal ["Public API.", "Reads stored values.", "Stored value."], [mod, klass, method].map { |item| item.documentation.fetch(0).description }
+  end
+
+  def test_collects_qualified_and_absolute_class_declarations
+    source = "class Demo::Reader\nend\nmodule Outer\n  class ::Root\n    def read = nil\n  end\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [
+      [:class, "Reader", "Demo"],
+      [:module, "Outer", nil],
+      [:class, "Root", nil],
+      [:instance_method, "read", "Root"]
+    ], declarations.map { |declaration| [declaration.kind, declaration.name, declaration.namespace] }
+  end
+
   def test_resets_the_namespace_for_an_absolute_constant_path
     source = "module Outer\n  class ::Reader\n    def read = nil\n  end\nend\n"
-    declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
+    declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.kind == :instance_method }
 
     assert_equal "Reader", declaration.namespace
   end

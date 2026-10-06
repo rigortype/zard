@@ -55,6 +55,12 @@ module Zard
     end
 
     class DeclarationCollector < Prism::Visitor
+      ATTRIBUTE_KINDS = {
+        attr_reader: :attribute_reader,
+        attr_writer: :attribute_writer,
+        attr_accessor: :attribute_accessor
+      }.freeze
+
       def initialize(source, path, comments, diagnostics, encoding)
         @source = source
         @path = path
@@ -110,7 +116,39 @@ module Zard
         node.body&.accept(self)
       end
 
+      def visit_call_node(node)
+        collect_attribute_declarations(node)
+        super
+      end
+
       private
+
+      def collect_attribute_declarations(node)
+        attribute_kind = ATTRIBUTE_KINDS[node.name]
+        return unless attribute_kind && node.receiver.nil? && !@namespace.empty?
+
+        names = node.arguments&.arguments&.filter_map { |argument| attribute_name(argument) } || []
+        return if names.empty?
+
+        comments, parsed = parse_comments(node)
+        scope = @singleton_depth.positive? ? :singleton : :instance
+        kind = :"#{scope}_#{attribute_kind}"
+        names.each do |name|
+          append_declaration(
+            kind: kind,
+            name: name,
+            namespace: @namespace.join("::"),
+            parameters: [].freeze,
+            node: node,
+            comments: comments,
+            parsed: parsed
+          )
+        end
+      end
+
+      def attribute_name(argument)
+        argument.unescaped if argument.is_a?(Prism::SymbolNode) || argument.is_a?(Prism::StringNode)
+      end
 
       def collect_path_declaration(kind, path, node)
         parts = namespace_parts(path)
@@ -124,9 +162,19 @@ module Zard
       end
 
       def collect_declaration(kind:, name:, namespace:, parameters:, node:)
-        comments = comment_block_for(node.location.start_line)
-        parsed = CommentBlockParser.new(@source, @path, comments, @diagnostics, @encoding).call
+        comments, parsed = parse_comments(node)
+        append_declaration(
+          kind: kind,
+          name: name,
+          namespace: namespace,
+          parameters: parameters,
+          node: node,
+          comments: comments,
+          parsed: parsed
+        )
+      end
 
+      def append_declaration(kind:, name:, namespace:, parameters:, node:, comments:, parsed:)
         @declarations << Model::V1::Declaration.new(
           kind: kind,
           name: name,
@@ -137,6 +185,12 @@ module Zard
           documentation: parsed.fetch(:documentation).freeze,
           contracts: parsed.fetch(:contracts).freeze
         )
+      end
+
+      def parse_comments(node)
+        comments = comment_block_for(node.location.start_line)
+        parsed = CommentBlockParser.new(@source, @path, comments, @diagnostics, @encoding).call
+        [comments, parsed]
       end
 
       def within_namespace(name)

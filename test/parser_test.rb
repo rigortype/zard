@@ -116,6 +116,43 @@ class ParserTest < Minitest::Test
     assert_empty declarations
   end
 
+  def test_collects_instance_attributes_with_shared_documentation
+    source = "class Reader\n  # Names exposed by the reader.\n  attr_reader :name, \"alias_name\"\n  attr_writer :token\n  attr_accessor(:enabled)\nend\n"
+    attributes = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.include?("attribute") }
+
+    assert_equal %i[instance_attribute_reader instance_attribute_reader instance_attribute_writer instance_attribute_accessor], attributes.map(&:kind)
+    assert_equal ["name", "alias_name", "token", "enabled"], attributes.map(&:name)
+    assert_equal ["Reader"] * 4, attributes.map(&:namespace)
+    assert_equal "Names exposed by the reader.", attributes.fetch(0).documentation.fetch(0).description
+    assert_equal attributes.fetch(0).comment_span.start_offset, attributes.fetch(1).comment_span.start_offset
+    assert_equal attributes.fetch(0).comment_span.end_offset, attributes.fetch(1).comment_span.end_offset
+  end
+
+  def test_reports_a_shared_attribute_comment_diagnostic_once
+    source = "class Reader\n  #  @note Shared description.\n  attr_reader :name, :age\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+
+    assert_equal ["documentation.noncanonical-spacing"], document.diagnostics.map(&:code)
+  end
+
+  def test_collects_singleton_attributes_inside_a_singleton_class
+    source = "class Reader\n  class << self\n    # Current format version.\n    attr_accessor :version\n  end\nend\n"
+    attribute = Zard.parse(source, path: "example.rb").declarations
+      .find { |declaration| declaration.kind == :singleton_attribute_accessor }
+
+    assert_equal "version", attribute.name
+    assert_equal "Reader", attribute.namespace
+  end
+
+  def test_ignores_dynamic_received_and_top_level_attribute_calls
+    source = "attr_reader :top_level\nclass Reader\n  attr_reader(*NAMES)\n  helper.attr_reader :received\nend\n"
+    attributes = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.include?("attribute") }
+
+    assert_empty attributes
+  end
+
   def test_resets_the_namespace_for_an_absolute_constant_path
     source = "module Outer\n  class ::Reader\n    def read = nil\n  end\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.kind == :instance_method }

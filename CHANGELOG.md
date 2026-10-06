@@ -24,5 +24,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Read `zard-doc` CLI source from standard input when the input path is `-`.
 - Preserve class and module declarations in the ZARD model and render their documentation.
 - Preserve simple constant declarations in the ZARD model and render their documentation.
+- Preserve instance and singleton attribute declarations in the ZARD model and render their documentation.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

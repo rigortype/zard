@@ -37,7 +37,7 @@ require "zard/doc"
 markdown = Zard::Doc.render(document)
 ```
 
-The initial renderer supports class, module, constant, and method prose plus `@param`, `@return`, `@yieldparam`, `@yieldreturn`, `@option`, `@raise`, `@note`, `@see`, `@deprecated`, and `@example`. Contracts remain available in the model and are not copied into API prose.
+The initial renderer supports class, module, constant, attribute, and method prose plus `@param`, `@return`, `@yieldparam`, `@yieldreturn`, `@option`, `@raise`, `@note`, `@see`, `@deprecated`, and `@example`. Contracts remain available in the model and are not copied into API prose.
 
 Lint source files or directories with `zard-doc lint`. Warnings are reported without failing by default; use `--fail-on warning` to make them fail in CI.
 

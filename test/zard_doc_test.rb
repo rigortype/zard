@@ -46,6 +46,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_instance_and_singleton_attributes
+    source = "class Reader\n  # Stored name.\n  attr_reader :name\n  class << self\n    # Current format version.\n    attr_accessor :version\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Attribute reader `Reader#name`
+
+      Stored name.
+
+      ## Attribute accessor `Reader.version`
+
+      Current format version.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_yield_parameters_and_return_value
     source = "# @yieldparam value — Each value.\n# @yieldreturn The consumed length.\ndef each_value = yield(\"value\")\n"
     document = Zard.parse(source, path: "example.rb")

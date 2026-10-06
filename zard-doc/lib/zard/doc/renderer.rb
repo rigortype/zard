@@ -82,6 +82,12 @@ module Zard
           "## Module `#{qualified_name(declaration)}`"
         when :constant
           "## Constant `#{qualified_name(declaration)}`"
+        when :instance_attribute_reader, :singleton_attribute_reader
+          "## Attribute reader `#{display_name(declaration)}`"
+        when :instance_attribute_writer, :singleton_attribute_writer
+          "## Attribute writer `#{display_name(declaration)}`"
+        when :instance_attribute_accessor, :singleton_attribute_accessor
+          "## Attribute accessor `#{display_name(declaration)}`"
         else
           "## `#{display_name(declaration)}(#{declaration.parameters.join(", ")})`"
         end
@@ -94,7 +100,7 @@ module Zard
       def display_name(declaration)
         return declaration.name unless declaration.namespace
 
-        separator = (declaration.kind == :singleton_method) ? "." : "#"
+        separator = declaration.kind.to_s.start_with?("singleton_") ? "." : "#"
         "#{declaration.namespace}#{separator}#{declaration.name}"
       end
 

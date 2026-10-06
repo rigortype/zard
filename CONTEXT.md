@@ -29,7 +29,7 @@ Human-facing information about a public Ruby declaration.
 _Avoid_: type contract
 
 **Declaration**:
-A Ruby class, module, constant, or method represented in the versioned ZARD model.
+A Ruby class, module, constant, attribute, or method represented in the versioned ZARD model.
 _Avoid_: documentation item
 
 **Documentation claim**:

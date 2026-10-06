@@ -59,12 +59,13 @@ module Zard
       end
 
       class Declaration
-        attr_reader :kind, :name, :namespace, :parameters, :span, :comment_span, :documentation, :contracts
+        attr_reader :kind, :name, :namespace, :visibility, :parameters, :span, :comment_span, :documentation, :contracts
 
-        def initialize(kind:, name:, namespace:, parameters:, span:, comment_span:, documentation:, contracts:)
+        def initialize(kind:, name:, namespace:, visibility:, parameters:, span:, comment_span:, documentation:, contracts:)
           @kind = kind
           @name = name
           @namespace = namespace
+          @visibility = visibility
           @parameters = parameters
           @span = span
           @comment_span = comment_span

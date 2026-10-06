@@ -50,6 +50,8 @@ InlineRBS trailing prose after `--` is stored as a contract note. It is not copi
 
 Documentation descriptions continue across plain comment lines until the next annotation or contract. No continuation marker is required.
 
+Declarations record `public`, `protected`, or `private` visibility. Markdown output includes public declarations only. Bare visibility calls and inline forms such as `private def` and `private attr_reader` are supported.
+
 ## Installation
 
 Until the first RubyGems release, add the repository to your Gemfile:

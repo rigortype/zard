@@ -62,6 +62,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_only_public_declarations
+    source = "class Reader\n  # Visible API.\n  def visible = nil\n  private\n  # Internal helper.\n  def hidden = nil\n  # Internal state.\n  attr_reader :token\n  public\n  # Public state.\n  attr_reader :name\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Reader#visible()`
+
+      Visible API.
+
+      ## Attribute reader `Reader#name`
+
+      Public state.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_yield_parameters_and_return_value
     source = "# @yieldparam value — Each value.\n# @yieldreturn The consumed length.\ndef each_value = yield(\"value\")\n"
     document = Zard.parse(source, path: "example.rb")

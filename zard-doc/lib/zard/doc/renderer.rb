@@ -21,6 +21,8 @@ module Zard
       private
 
       def render_declaration(declaration)
+        return unless declaration.visibility == :public
+
         documentation = declaration.documentation.reject { |tag| tag.name == :raw }
         return if documentation.empty?
 

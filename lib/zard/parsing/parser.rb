@@ -60,6 +60,7 @@ module Zard
         attr_writer: :attribute_writer,
         attr_accessor: :attribute_accessor
       }.freeze
+      VISIBILITY_NAMES = %i[public protected private].freeze
 
       def initialize(source, path, comments, diagnostics, encoding)
         @source = source
@@ -70,6 +71,8 @@ module Zard
         @declarations = []
         @namespace = []
         @singleton_depth = 0
+        @instance_visibility = :public
+        @singleton_visibility = :public
       end
 
       def call(program)
@@ -98,10 +101,13 @@ module Zard
       end
 
       def visit_singleton_class_node(node)
+        previous_visibility = @singleton_visibility
+        @singleton_visibility = :public
         @singleton_depth += 1
         node.body&.accept(self)
       ensure
         @singleton_depth -= 1
+        @singleton_visibility = previous_visibility
       end
 
       def visit_def_node(node)
@@ -109,6 +115,7 @@ module Zard
           kind: singleton_method?(node) ? :singleton_method : :instance_method,
           name: node.name.to_s,
           namespace: @namespace.empty? ? nil : @namespace.join("::"),
+          visibility: method_visibility(node),
           parameters: parameter_names(node.parameters).freeze,
           node: node
         )
@@ -117,6 +124,9 @@ module Zard
       end
 
       def visit_call_node(node)
+        visibility = VISIBILITY_NAMES.find { |name| node.name == name && node.receiver.nil? }
+        return visit_visibility_call(node, visibility) { super } if visibility
+
         collect_attribute_declarations(node)
         super
       end
@@ -138,6 +148,7 @@ module Zard
             kind: kind,
             name: name,
             namespace: @namespace.join("::"),
+            visibility: current_visibility,
             parameters: [].freeze,
             node: node,
             comments: comments,
@@ -156,17 +167,19 @@ module Zard
           kind: kind,
           name: parts.last,
           namespace: (parts.length > 1) ? parts[0...-1].join("::") : nil,
+          visibility: :public,
           parameters: [].freeze,
           node: node
         )
       end
 
-      def collect_declaration(kind:, name:, namespace:, parameters:, node:)
+      def collect_declaration(kind:, name:, namespace:, visibility:, parameters:, node:)
         comments, parsed = parse_comments(node)
         append_declaration(
           kind: kind,
           name: name,
           namespace: namespace,
+          visibility: visibility,
           parameters: parameters,
           node: node,
           comments: comments,
@@ -174,11 +187,12 @@ module Zard
         )
       end
 
-      def append_declaration(kind:, name:, namespace:, parameters:, node:, comments:, parsed:)
+      def append_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, comments:, parsed:)
         @declarations << Model::V1::Declaration.new(
           kind: kind,
           name: name,
           namespace: namespace,
+          visibility: visibility,
           parameters: parameters,
           span: span(node.location),
           comment_span: comment_span(comments),
@@ -195,10 +209,16 @@ module Zard
 
       def within_namespace(name)
         previous_namespace = @namespace
+        previous_instance_visibility = @instance_visibility
+        previous_singleton_visibility = @singleton_visibility
         @namespace = namespace_parts(name)
+        @instance_visibility = :public
+        @singleton_visibility = :public
         yield
       ensure
         @namespace = previous_namespace
+        @instance_visibility = previous_instance_visibility
+        @singleton_visibility = previous_singleton_visibility
       end
 
       def namespace_parts(name)
@@ -208,6 +228,50 @@ module Zard
 
       def singleton_method?(node)
         !node.receiver.nil? || @singleton_depth.positive?
+      end
+
+      def method_visibility(node)
+        return :public if node.receiver && @singleton_depth.zero?
+
+        current_visibility
+      end
+
+      def current_visibility
+        @singleton_depth.positive? ? @singleton_visibility : @instance_visibility
+      end
+
+      def visit_visibility_call(node, visibility)
+        arguments = node.arguments&.arguments
+        if arguments.nil? || arguments.empty?
+          set_current_visibility(visibility)
+          return yield
+        end
+
+        if arguments.any? { |argument| visibility_declaration?(argument) }
+          return with_visibility(visibility) { yield }
+        end
+
+        yield
+      end
+
+      def visibility_declaration?(node)
+        node.is_a?(Prism::DefNode) || (node.is_a?(Prism::CallNode) && ATTRIBUTE_KINDS.key?(node.name))
+      end
+
+      def set_current_visibility(visibility)
+        if @singleton_depth.positive?
+          @singleton_visibility = visibility
+        else
+          @instance_visibility = visibility
+        end
+      end
+
+      def with_visibility(visibility)
+        previous_visibility = current_visibility
+        set_current_visibility(visibility)
+        yield
+      ensure
+        set_current_visibility(previous_visibility)
       end
 
       def parameter_names(parameters)

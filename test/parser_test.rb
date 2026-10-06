@@ -153,6 +153,45 @@ class ParserTest < Minitest::Test
     assert_empty attributes
   end
 
+  def test_tracks_lexical_and_inline_method_visibility
+    source = "class Reader\n  def visible = nil\n  private\n  def hidden = nil\n  protected def inherited = nil\n  public def shown = nil\n  def self.version = nil\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [
+      ["visible", :public],
+      ["hidden", :private],
+      ["inherited", :protected],
+      ["shown", :public],
+      ["version", :public]
+    ], methods.map { |declaration| [declaration.name, declaration.visibility] }
+  end
+
+  def test_resets_visibility_for_nested_and_singleton_classes
+    source = "class Outer\n  private\n  class Inner\n    def visible = nil\n  end\n  def hidden = nil\n  class << self\n    private\n    def internal = nil\n    public\n    def version = nil\n  end\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [
+      ["visible", :public],
+      ["hidden", :private],
+      ["internal", :private],
+      ["version", :public]
+    ], methods.map { |declaration| [declaration.name, declaration.visibility] }
+  end
+
+  def test_tracks_lexical_and_inline_attribute_visibility
+    source = "class Reader\n  private attr_reader :token\n  protected\n  attr_writer :name\n  public\n  attr_accessor :enabled\nend\n"
+    attributes = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.include?("attribute") }
+
+    assert_equal [
+      ["token", :private],
+      ["name", :protected],
+      ["enabled", :public]
+    ], attributes.map { |declaration| [declaration.name, declaration.visibility] }
+  end
+
   def test_resets_the_namespace_for_an_absolute_constant_path
     source = "module Outer\n  class ::Reader\n    def read = nil\n  end\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.kind == :instance_method }

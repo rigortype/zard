@@ -251,6 +251,8 @@ module Zard
           return with_visibility(visibility) { yield }
         end
 
+        names = arguments.filter_map { |argument| attribute_name(argument) }
+        apply_named_visibility(names, visibility, node) unless names.empty?
         yield
       end
 
@@ -272,6 +274,69 @@ module Zard
         yield
       ensure
         set_current_visibility(previous_visibility)
+      end
+
+      def apply_named_visibility(names, visibility, node)
+        attribute_match = false
+        @declarations.map! do |declaration|
+          next declaration unless declaration.namespace == current_namespace
+
+          if declaration.kind == current_method_kind && names.include?(declaration.name)
+            declaration_with_visibility(declaration, visibility)
+          elsif current_attribute?(declaration) && (attribute_method_names(declaration) & names).any?
+            attribute_match = true
+            (visibility == :public) ? declaration : declaration_with_visibility(declaration, visibility)
+          else
+            declaration
+          end
+        end
+
+        return unless attribute_match
+
+        @diagnostics << Model::V1::Diagnostic.new(
+          code: "visibility.named-attribute",
+          severity: :warning,
+          message: "Use a lexical or inline visibility modifier for an attribute declaration.",
+          span: span(node.location)
+        )
+      end
+
+      def current_namespace
+        @namespace.empty? ? nil : @namespace.join("::")
+      end
+
+      def current_method_kind
+        @singleton_depth.positive? ? :singleton_method : :instance_method
+      end
+
+      def current_attribute?(declaration)
+        scope = @singleton_depth.positive? ? "singleton_attribute_" : "instance_attribute_"
+        declaration.kind.to_s.start_with?(scope)
+      end
+
+      def attribute_method_names(declaration)
+        case declaration.kind.to_s
+        when /_attribute_reader\z/
+          [declaration.name]
+        when /_attribute_writer\z/
+          ["#{declaration.name}="]
+        else
+          [declaration.name, "#{declaration.name}="]
+        end
+      end
+
+      def declaration_with_visibility(declaration, visibility)
+        Model::V1::Declaration.new(
+          kind: declaration.kind,
+          name: declaration.name,
+          namespace: declaration.namespace,
+          visibility: visibility,
+          parameters: declaration.parameters,
+          span: declaration.span,
+          comment_span: declaration.comment_span,
+          documentation: declaration.documentation,
+          contracts: declaration.contracts
+        )
       end
 
       def parameter_names(parameters)

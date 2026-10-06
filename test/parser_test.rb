@@ -192,6 +192,36 @@ class ParserTest < Minitest::Test
     ], attributes.map { |declaration| [declaration.name, declaration.visibility] }
   end
 
+  def test_applies_named_method_visibility_without_changing_the_default
+    source = "class Reader\n  def old = nil\n  private :old\n  def current = nil\n  class << self\n    def version = nil\n    private :version\n  end\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [
+      ["old", :private],
+      ["current", :public],
+      ["version", :private]
+    ], methods.map { |declaration| [declaration.name, declaration.visibility] }
+  end
+
+  def test_conservatively_applies_named_nonpublic_visibility_to_attributes
+    source = "class Reader\n  attr_accessor :name\n  private :name\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    attribute = document.declarations.find { |declaration| declaration.kind == :instance_attribute_accessor }
+
+    assert_equal :private, attribute.visibility
+    assert_equal ["visibility.named-attribute"], document.diagnostics.map(&:code)
+  end
+
+  def test_does_not_guess_named_public_visibility_for_an_attribute
+    source = "class Reader\n  private attr_accessor :name\n  public :name\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    attribute = document.declarations.find { |declaration| declaration.kind == :instance_attribute_accessor }
+
+    assert_equal :private, attribute.visibility
+    assert_equal ["visibility.named-attribute"], document.diagnostics.map(&:code)
+  end
+
   def test_resets_the_namespace_for_an_absolute_constant_path
     source = "module Outer\n  class ::Reader\n    def read = nil\n  end\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.kind == :instance_method }

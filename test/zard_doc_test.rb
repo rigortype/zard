@@ -129,6 +129,24 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_a_conditionally_initialized_module_builder
+    source = "# Shared helpers.\nHelpers ||= Module.new do\n  # Visits each value.\n  def each = nil\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Module `Helpers`
+
+      Module builder: `Module.new`.
+
+      Shared helpers.
+
+      ## `Helpers#each()`
+
+      Visits each value.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_instance_and_singleton_attributes
     source = "class Reader\n  # Stored name.\n  attr_reader :name\n  class << self\n    # Current format version.\n    attr_accessor :version\n  end\nend\n"
     document = Zard.parse(source, path: "example.rb")

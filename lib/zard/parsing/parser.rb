@@ -140,6 +140,18 @@ module Zard
         super
       end
 
+      def visit_constant_or_write_node(node)
+        return visit_container_builder_write(node.name.to_s, node) if container_builder?(node.value)
+
+        super
+      end
+
+      def visit_constant_path_or_write_node(node)
+        return visit_container_builder_write(node.target.location.slice, node) if container_builder?(node.value)
+
+        super
+      end
+
       def visit_singleton_class_node(node)
         previous_visibility = @singleton_visibility
         previous_receiver = @singleton_receiver

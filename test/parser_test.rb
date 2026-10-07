@@ -116,6 +116,27 @@ class ParserTest < Minitest::Test
     assert_empty declarations
   end
 
+  def test_models_container_builders_used_for_conditional_constant_initialization
+    source = "# Registry API.\nRegistry ||= Class.new do\n  def fetch = nil\nend\nmodule Models\n  # Shared helpers.\n  Helpers ||= Module.new do\n    include Enumerable\n  end\nend\n"
+    registry, fetch, models, helpers = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:class, :instance_method, :module, :module], [registry, fetch, models, helpers].map(&:kind)
+    assert_equal ["Class.new", "Module.new"], [registry.container_builder, helpers.container_builder]
+    assert_equal [nil, "Registry", nil, "Models"], [registry.namespace, fetch.namespace, models.namespace, helpers.namespace]
+    assert_equal [[:include, "Enumerable"]], helpers.mixins.map { |mixin| [mixin.kind, mixin.target] }
+    assert_equal ["Registry API.", "Shared helpers."], [registry, helpers].map { |declaration| declaration.documentation.fetch(0).description }
+  end
+
+  def test_models_qualified_container_builder_conditional_initialization
+    source = "# Shared helpers.\nModels::Helpers ||= Module.new\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
+
+    assert_equal :module, declaration.kind
+    assert_equal "Helpers", declaration.name
+    assert_equal "Models", declaration.namespace
+    assert_equal "Module.new", declaration.container_builder
+  end
+
   def test_models_data_define_as_a_class_with_readers_and_block_members
     source = "# Pair values.\nPair = Data.define(:left, :right) do\n  # Returns both values.\n  def values = [left, right]\nend\n"
     klass, left, right, values = Zard.parse(source, path: "example.rb").declarations

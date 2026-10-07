@@ -64,6 +64,7 @@ Classes assigned from `Data.define` and `Struct.new` preserve the builder call, 
 Named subclasses such as `class Point < Data.define(:x)` also preserve the generated attributes while retaining the explicit superclass expression.
 `Class.new` assignments are also class builders, so their optional superclass, mixins, constants, and block members stay inside the generated class scope.
 `Module.new` assignments are module builders, so their mixins, constants, and block members stay inside the generated module scope.
+Container builders used with `||=` are treated as conditional class or module initialization. Other constant reassignments remain outside the declaration model.
 
 Class and module declarations preserve explicit `include`, `prepend`, and `extend` targets with source spans without resolving ancestry. Documented containers list these mixin references in Markdown.
 

@@ -47,7 +47,7 @@ class ZardDocTest < Minitest::Test
   end
 
   def test_renders_a_documented_autoload_constant
-    source = "module Models\n  # Loaded widget API.\n  autoload :Widget, \"models/widget\"\nend\n"
+    source = "module Models\n  # Loaded widget API.\n  self.autoload :Widget, \"models/widget\"\nend\n"
     document = Zard.parse(source, path: "example.rb")
     expected = <<~MARKDOWN
       ## Constant `Models::Widget`

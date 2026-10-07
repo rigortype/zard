@@ -117,7 +117,7 @@ class ParserTest < Minitest::Test
   end
 
   def test_collects_literal_autoload_declarations
-    source = "# Lazy root API.\nautoload \"RootApi\", \"root_api\"\nmodule Models\n  # Lazy widget API.\n  autoload :Widget, \"models/widget\"\n  autoload :Hidden, path_for(:hidden)\n  private_constant :Hidden\nend\n"
+    source = "# Lazy root API.\nself.autoload \"RootApi\", \"root_api\"\nmodule Models\n  # Lazy widget API.\n  self.autoload :Widget, \"models/widget\"\n  autoload :Hidden, path_for(:hidden)\n  private_constant :Hidden\nend\n"
     root, models, widget, hidden = Zard.parse(source, path: "example.rb").declarations
 
     assert_equal [:constant, :module, :constant, :constant], [root, models, widget, hidden].map(&:kind)
@@ -127,10 +127,10 @@ class ParserTest < Minitest::Test
   end
 
   def test_ignores_dynamic_received_and_method_body_autoload_calls
-    source = "autoload NAME, \"dynamic\"\nRegistry.autoload :Remote, \"remote\"\ndef configure\n  autoload :Nested, \"nested\"\nend\n"
+    source = "autoload NAME, \"dynamic\"\nRegistry.autoload :Remote, \"remote\"\nmodule Models\n  class << self\n    autoload :SingletonOwned, \"singleton_owned\"\n  end\n  refine String do\n    self.autoload :Refined, \"refined\"\n  end\nend\ndef configure\n  autoload :Nested, \"nested\"\nend\n"
     declarations = Zard.parse(source, path: "example.rb").declarations
 
-    assert_equal [[:instance_method, "configure"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+    assert_equal [[:module, "Models"], [:refinement, "String"], [:instance_method, "configure"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
   end
 
   def test_collects_literal_const_set_declarations_in_the_current_container

@@ -222,7 +222,10 @@ module Zard
       private
 
       def autoload_call?(node)
-        node.name == :autoload && node.receiver.nil? && node.block.nil? && node.arguments&.arguments&.length == 2
+        return false unless node.name == :autoload && node.block.nil? && node.arguments&.arguments&.length == 2
+        return false if @singleton_depth.positive? || @refinement
+
+        node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)
       end
 
       def collect_autoload_declaration(node)

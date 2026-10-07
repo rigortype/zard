@@ -335,6 +335,18 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_methods_from_current_owner_evaluation_blocks
+    source = "class Reader\n  self.class_eval do\n    # Reads a value.\n    def read = nil\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Reader#read()`
+
+      Reads a value.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_an_inline_module_function_definition_call
     source = "module Helpers\n  # Normalizes a value.\n  # @param value — Value to normalize.\n  module_function define_method(:normalize) { |value| value }\nend\n"
     document = Zard.parse(source, path: "example.rb")

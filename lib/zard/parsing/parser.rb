@@ -73,6 +73,7 @@ module Zard
       }.freeze
       MIXIN_NAMES = %i[include prepend extend].freeze
       METHOD_DEFINITION_NAMES = %i[define_method define_singleton_method].freeze
+      EVALUATION_NAMES = %i[class_eval module_eval class_exec module_exec].freeze
       CONTAINER_BUILDERS = {
         ["Data", :define] => {kind: :class, attribute_kind: :attribute_reader}.freeze,
         ["Struct", :new] => {kind: :class, attribute_kind: :attribute_accessor}.freeze,
@@ -187,6 +188,7 @@ module Zard
 
       def visit_call_node(node)
         return super if @method_depth.positive?
+        return if foreign_evaluation_call?(node)
 
         return visit_refinement_call(node) if refinement_call?(node)
         return visit_method_definition_call(node) if method_definition_call?(node)
@@ -220,6 +222,11 @@ module Zard
       end
 
       private
+
+      def foreign_evaluation_call?(node)
+        EVALUATION_NAMES.include?(node.name) && node.block && node.receiver &&
+          !node.receiver.is_a?(Prism::SelfNode)
+      end
 
       def autoload_call?(node)
         return false unless node.name == :autoload && node.block.nil? && node.arguments&.arguments&.length == 2

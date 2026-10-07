@@ -768,6 +768,22 @@ class ParserTest < Minitest::Test
     assert_empty document.diagnostics
   end
 
+  def test_collects_declarations_in_current_owner_evaluation_blocks
+    source = "class Reader\n  class_eval do\n    # Reads a value.\n    def read = nil\n  end\n  self.class_exec do\n    # Writes a value.\n    define_method(:write) { |value| value }\n  end\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind == :instance_method }
+
+    assert_equal [["read", []], ["write", ["value"]]], methods.map { |declaration| [declaration.name, declaration.parameters] }
+    assert_equal ["Reads a value.", "Writes a value."], methods.map { |declaration| declaration.documentation.fetch(0).description }
+  end
+
+  def test_ignores_declarations_in_foreign_owner_evaluation_blocks
+    source = "module Host\n  Other.class_eval do\n    def from_class_eval = nil\n  end\n  Other.module_eval do\n    VALUE = 1\n  end\n  target.class_exec do\n    attr_reader :from_class_exec\n  end\n  target.module_exec do\n    define_method(:from_module_exec) { nil }\n  end\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:module, "Host"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
   def test_resets_the_namespace_for_an_absolute_constant_path
     source = "module Outer\n  class ::Reader\n    def read = nil\n  end\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.kind == :instance_method }

@@ -796,7 +796,7 @@ module Zard
           return yield
         end
 
-        if arguments.any? { |argument| argument.is_a?(Prism::DefNode) }
+        if arguments.any? { |argument| module_function_declaration?(argument) }
           return with_module_function_mode { yield }
         end
 
@@ -811,6 +811,11 @@ module Zard
 
       def module_function_definition?(node)
         @module_function_mode && module_function_context? && node.receiver.nil?
+      end
+
+      def module_function_declaration?(node)
+        node.is_a?(Prism::DefNode) ||
+          (node.is_a?(Prism::CallNode) && node.name == :define_method && node.receiver.nil?)
       end
 
       def with_module_function_mode
@@ -843,6 +848,9 @@ module Zard
         names = arguments.filter_map do |argument|
           if argument.is_a?(Prism::DefNode) && argument.receiver
             argument.name.to_s
+          elsif argument.is_a?(Prism::CallNode) && argument.name == :define_singleton_method &&
+              (argument.receiver.nil? || argument.receiver.is_a?(Prism::SelfNode))
+            attribute_name(argument.arguments&.arguments&.first)
           else
             attribute_name(argument)
           end
@@ -877,7 +885,9 @@ module Zard
       end
 
       def visibility_declaration?(node)
-        node.is_a?(Prism::DefNode) || (node.is_a?(Prism::CallNode) && ATTRIBUTE_KINDS.key?(node.name))
+        node.is_a?(Prism::DefNode) ||
+          (node.is_a?(Prism::CallNode) && (ATTRIBUTE_KINDS.key?(node.name) ||
+            (node.name == :define_method && node.receiver.nil?)))
       end
 
       def set_current_visibility(visibility)

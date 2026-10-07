@@ -37,6 +37,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Preserve explicit singleton declaration receivers with source provenance.
 - Preserve Ruby refinements and keep their members in a separate scope.
 - Preserve methods declared by literal `define_method` and `define_singleton_method` calls.
+- Apply inline visibility and module-function modifiers to method definition calls.
 - Model classes assigned from `Data.define` and `Struct.new` builders.
 - Preserve generated attributes on named `Data.define` and `Struct.new` subclasses.
 - Model classes assigned from `Class.new` builders.

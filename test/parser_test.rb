@@ -512,6 +512,16 @@ class ParserTest < Minitest::Test
     assert_equal "String", declaration.refinement
   end
 
+  def test_applies_inline_modifiers_to_method_definition_calls
+    source = "module Helpers\n  # Internal helper.\n  private define_method(:hidden) { |value| value }\n  # Public helper.\n  module_function define_method(:call) { |value| value }\n  # Internal singleton helper.\n  private_class_method define_singleton_method(:secret) { nil }\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [[:instance_method, "hidden", :private], [:instance_method, "call", :private], [:singleton_method, "call", :public], [:singleton_method, "secret", :private]], methods.map { |declaration| [declaration.kind, declaration.name, declaration.visibility] }
+    assert_equal [["value"], ["value"], ["value"], []], methods.map(&:parameters)
+    assert_equal ["Internal helper.", "Public helper.", "Public helper.", "Internal singleton helper."], methods.map { |declaration| declaration.documentation.fetch(0).description }
+  end
+
   def test_ignores_dynamic_received_and_top_level_attribute_calls
     source = "attr_reader :top_level\nclass Reader\n  attr_reader(*NAMES)\n  helper.attr_reader :received\nend\n"
     attributes = Zard.parse(source, path: "example.rb").declarations

@@ -335,6 +335,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_an_inline_module_function_definition_call
+    source = "module Helpers\n  # Normalizes a value.\n  # @param value — Value to normalize.\n  module_function define_method(:normalize) { |value| value }\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Helpers.normalize(value)`
+
+      Normalizes a value.
+
+      ### Parameters
+
+      - `value` — Value to normalize.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_only_public_declarations
     source = "class Reader\n  # Visible API.\n  def visible = nil\n  private\n  # Internal helper.\n  def hidden = nil\n  # Internal state.\n  attr_reader :token\n  public\n  # Public state.\n  attr_reader :name\nend\n"
     document = Zard.parse(source, path: "example.rb")

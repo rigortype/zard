@@ -58,6 +58,7 @@ Ruby's `attr` declarations are readers by default. The legacy `attr :name, true`
 Method aliases preserve their target name and inherit visibility and parameters when the target is declared in the same source scope. Alias documentation remains separate from target documentation.
 
 Literal `define_method` and `define_singleton_method` calls produce method declarations. Their block parameters, visibility, receiver, refinement scope, and documentation provenance are preserved.
+Inline `private define_method`, `module_function define_method`, and class-method visibility modifiers around `define_singleton_method` preserve the visibility produced by Ruby.
 
 Class declarations preserve the explicit superclass expression and its source span without resolving ancestry.
 

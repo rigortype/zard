@@ -94,6 +94,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_methods_declared_by_method_definition_calls
+    source = "class Reader\n  # Reads a value.\n  define_method(:read) { |path| path }\nend\n# Builds a reader.\nRegistry.define_singleton_method(:build) { |path| path }\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Reader#read(path)`
+
+      Reads a value.
+
+      ## `Registry.build(path)`
+
+      Builds a reader.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_only_public_declarations
     source = "class Reader\n  # Visible API.\n  def visible = nil\n  private\n  # Internal helper.\n  def hidden = nil\n  # Internal state.\n  attr_reader :token\n  public\n  # Public state.\n  attr_reader :name\nend\n"
     document = Zard.parse(source, path: "example.rb")

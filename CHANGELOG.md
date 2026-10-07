@@ -36,5 +36,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Preserve `include`, `prepend`, and `extend` targets with source provenance.
 - Preserve explicit singleton declaration receivers with source provenance.
 - Preserve Ruby refinements and keep their members in a separate scope.
+- Preserve methods declared by literal `define_method` and `define_singleton_method` calls.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

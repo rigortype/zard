@@ -56,6 +56,8 @@ Declarations record `public`, `protected`, or `private` visibility. Markdown out
 
 Method aliases preserve their target name and inherit visibility and parameters when the target is declared in the same source scope. Alias documentation remains separate from target documentation.
 
+Literal `define_method` and `define_singleton_method` calls produce method declarations. Their block parameters, visibility, receiver, refinement scope, and documentation provenance are preserved.
+
 Class declarations preserve the explicit superclass expression and its source span without resolving ancestry.
 
 Class and module declarations preserve explicit `include`, `prepend`, and `extend` targets with source spans without resolving ancestry. Documented containers list these mixin references in Markdown.

@@ -203,6 +203,67 @@ class ParserTest < Minitest::Test
     assert_equal "Extensions::Helper", declaration.namespace
   end
 
+  def test_collects_literal_define_method_calls_with_block_parameters
+    source = "class Reader\n  # Reads a value.\n  define_method(:read) { |path, mode: :text, **options, &block| path }\n  class << self\n    define_method(\"version\") { 1 }\n  end\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations.select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [[:instance_method, "read"], [:singleton_method, "version"]], methods.map { |declaration| [declaration.kind, declaration.name] }
+    assert_equal ["path", "mode:", "**options", "&block"], methods.fetch(0).parameters
+    assert_equal "Reads a value.", methods.fetch(0).documentation.fetch(0).description
+    assert_equal "self", methods.fetch(1).receiver
+  end
+
+  def test_preserves_destructured_define_method_parameters
+    source = "class Pair\n  define_method(:each_pair) { |(left, right)| [left, right] }\nend\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.name == "each_pair" }
+
+    assert_equal ["(left, right)"], declaration.parameters
+  end
+
+  def test_collects_received_define_singleton_method_calls
+    source = "# Builds a reader.\nRegistry.define_singleton_method(:build) { |path| path }\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
+
+    assert_equal :singleton_method, declaration.kind
+    assert_equal "build", declaration.name
+    assert_equal "Registry", declaration.receiver
+    assert_equal ["path"], declaration.parameters
+    assert_equal "Registry", source.byteslice(declaration.receiver_span.start_offset...declaration.receiver_span.end_offset)
+  end
+
+  def test_collects_a_top_level_define_singleton_method_call
+    declaration = Zard.parse("define_singleton_method(:call) { nil }\n", path: "example.rb").declarations.fetch(0)
+
+    assert_equal :singleton_method, declaration.kind
+    assert_equal "self", declaration.receiver
+    assert_nil declaration.namespace
+  end
+
+  def test_applies_module_function_mode_to_define_method
+    source = "module Helpers\n  module_function\n  define_method(:normalize) { |value| value }\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations.select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [[:instance_method, :private], [:singleton_method, :public]], methods.map { |declaration| [declaration.kind, declaration.visibility] }
+  end
+
+  def test_keeps_define_method_bodies_out_of_the_declaration_dsl
+    source = "class Reader\n  define_method(method_name) do\n    private\n    attr_reader :ghost\n  end\n  def visible = nil\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    methods = document.declarations.select { |declaration| declaration.kind.to_s.end_with?("method") }
+    attributes = document.declarations.select { |declaration| declaration.kind.to_s.include?("attribute") }
+
+    assert_equal ["visible"], methods.map(&:name)
+    assert_equal [:public], methods.map(&:visibility)
+    assert_empty attributes
+  end
+
+  def test_keeps_define_method_inside_the_refinement_scope
+    source = "module Extensions\n  refine String do\n    define_method(:tagged) { self }\n  end\nend\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.name == "tagged" }
+
+    assert_equal "String", declaration.refinement
+  end
+
   def test_ignores_dynamic_received_and_top_level_attribute_calls
     source = "attr_reader :top_level\nclass Reader\n  attr_reader(*NAMES)\n  helper.attr_reader :received\nend\n"
     attributes = Zard.parse(source, path: "example.rb").declarations

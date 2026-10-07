@@ -70,6 +70,7 @@ module Zard
         public_constant: :public
       }.freeze
       MIXIN_NAMES = %i[include prepend extend].freeze
+      METHOD_DEFINITION_NAMES = %i[define_method define_singleton_method].freeze
 
       def initialize(source, path, comments, diagnostics, encoding)
         @source = source
@@ -153,6 +154,7 @@ module Zard
         return super if @method_depth.positive?
 
         return visit_refinement_call(node) if refinement_call?(node)
+        return visit_method_definition_call(node) if method_definition_call?(node)
 
         collect_mixin_references(node) if mixin_call?(node)
 
@@ -181,6 +183,47 @@ module Zard
       end
 
       private
+
+      def method_definition_call?(node)
+        return false unless METHOD_DEFINITION_NAMES.include?(node.name)
+        return true if node.name == :define_singleton_method
+
+        node.receiver.nil? && (!@namespace.empty? || @refinement)
+      end
+
+      def visit_method_definition_call(node)
+        arguments = node.arguments&.arguments || []
+        name = attribute_name(arguments.first) if arguments.first
+        collect_call_method_declaration(node, name) if name
+        within_method_body { node.block&.body&.accept(self) }
+      end
+
+      def collect_call_method_declaration(node, name)
+        parameters = parameter_names(node.block&.parameters&.parameters).freeze
+        singleton = node.name == :define_singleton_method
+        kind = singleton ? :singleton_method : current_method_kind
+        receiver = if singleton
+          node.receiver&.location&.slice || "self"
+        else
+          current_singleton_receiver
+        end
+        receiver_span = if singleton
+          span(node.receiver.location) if node.receiver
+        else
+          current_singleton_receiver_span
+        end
+        visibility = singleton ? @singleton_visibility : current_visibility
+        collect_method_entries(
+          kind: kind,
+          name: name,
+          namespace: current_namespace,
+          visibility: visibility,
+          parameters: parameters,
+          receiver: receiver,
+          receiver_span: receiver_span,
+          node: node
+        )
+      end
 
       def refinement_call?(node)
         node.name == :refine &&
@@ -287,12 +330,25 @@ module Zard
         parameters = parameter_names(node.parameters).freeze
         receiver = node.receiver&.location&.slice || current_singleton_receiver
         receiver_span = node.receiver ? span(node.receiver.location) : current_singleton_receiver_span
-        unless module_function_definition?(node)
+        collect_method_entries(
+          kind: kind,
+          name: name,
+          namespace: namespace,
+          visibility: method_visibility(node),
+          parameters: parameters,
+          receiver: receiver,
+          receiver_span: receiver_span,
+          node: node
+        )
+      end
+
+      def collect_method_entries(kind:, name:, namespace:, visibility:, parameters:, receiver:, receiver_span:, node:)
+        unless kind == :instance_method && module_function_definition?(node)
           return collect_declaration(
             kind: kind,
             name: name,
             namespace: namespace,
-            visibility: method_visibility(node),
+            visibility: visibility,
             parameters: parameters,
             receiver: receiver,
             receiver_span: receiver_span,
@@ -739,14 +795,20 @@ module Zard
         return [] unless parameters
 
         names = []
-        names.concat(parameters.requireds.map { |parameter| parameter.name.to_s })
-        names.concat(parameters.optionals.map { |parameter| parameter.name.to_s })
+        names.concat(parameters.requireds.map { |parameter| parameter_name(parameter) })
+        names.concat(parameters.optionals.map { |parameter| parameter_name(parameter) })
         names << prefixed_name("*", parameters.rest) if parameters.rest
-        names.concat(parameters.posts.map { |parameter| parameter.name.to_s })
+        names.concat(parameters.posts.map { |parameter| parameter_name(parameter) })
         names.concat(parameters.keywords.map { |parameter| "#{parameter.name}:" })
         names << prefixed_name("**", parameters.keyword_rest) if parameters.keyword_rest
         names << prefixed_name("&", parameters.block) if parameters.block
         names
+      end
+
+      def parameter_name(parameter)
+        return parameter.location.slice unless parameter.respond_to?(:name)
+
+        parameter.name.to_s
       end
 
       def prefixed_name(prefix, parameter)

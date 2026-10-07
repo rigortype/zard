@@ -28,6 +28,7 @@ module Zard
 
         parts = [heading(declaration)]
         parts << "Superclass: `#{declaration.superclass}`." if declaration.superclass
+        parts << render_class_builder(declaration.class_builder) if declaration.class_builder
         append_mixins(parts, declaration)
         parts << "Alias of `#{display_alias_target(declaration)}`." if declaration.alias_target
         text = documentation.select { |tag| tag.name == :text }.map(&:description)
@@ -107,6 +108,19 @@ module Zard
           targets = declaration.mixins.select { |mixin| mixin.kind == kind }.map(&:target)
           parts << "### #{heading}\n\n#{targets.map { |target| "- `#{target}`" }.join("\n")}" unless targets.empty?
         end
+      end
+
+      def render_class_builder(builder)
+        return "Class builder: `#{builder}`." unless builder.include?("\n")
+
+        "Class builder:\n\n```ruby\n#{dedent_continuation(builder)}\n```"
+      end
+
+      def dedent_continuation(source)
+        first, *continuation = source.lines(chomp: true)
+        margins = continuation.reject { |line| line.strip.empty? }.map { |line| line[/\A[\t ]*/].length }
+        margin = margins.min || 0
+        [first, *continuation.map { |line| line[margin..] }].join("\n")
       end
 
       def qualified_name(declaration)

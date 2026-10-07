@@ -70,9 +70,9 @@ module Zard
       end
 
       class Declaration
-        attr_reader :kind, :name, :namespace, :visibility, :parameters, :receiver, :receiver_span, :refinement, :refinement_span, :alias_target, :superclass, :superclass_span, :mixins, :span, :comment_span, :documentation, :contracts
+        attr_reader :kind, :name, :namespace, :visibility, :parameters, :receiver, :receiver_span, :refinement, :refinement_span, :alias_target, :superclass, :superclass_span, :class_builder, :class_builder_span, :mixins, :span, :comment_span, :documentation, :contracts
 
-        def initialize(kind:, name:, namespace:, visibility:, parameters:, span:, comment_span:, documentation:, contracts:, receiver: nil, receiver_span: nil, refinement: nil, refinement_span: nil, alias_target: nil, superclass: nil, superclass_span: nil, mixins: [].freeze)
+        def initialize(kind:, name:, namespace:, visibility:, parameters:, span:, comment_span:, documentation:, contracts:, receiver: nil, receiver_span: nil, refinement: nil, refinement_span: nil, alias_target: nil, superclass: nil, superclass_span: nil, class_builder: nil, class_builder_span: nil, mixins: [].freeze)
           @kind = kind
           @name = name
           @namespace = namespace
@@ -85,6 +85,8 @@ module Zard
           @alias_target = alias_target
           @superclass = superclass
           @superclass_span = superclass_span
+          @class_builder = class_builder
+          @class_builder_span = class_builder_span
           @mixins = mixins
           @span = span
           @comment_span = comment_span

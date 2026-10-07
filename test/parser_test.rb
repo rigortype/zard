@@ -116,6 +116,36 @@ class ParserTest < Minitest::Test
     assert_empty declarations
   end
 
+  def test_models_data_define_as_a_class_with_readers_and_block_members
+    source = "# Pair values.\nPair = Data.define(:left, :right) do\n  # Returns both values.\n  def values = [left, right]\nend\n"
+    klass, left, right, values = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:class, :instance_attribute_reader, :instance_attribute_reader, :instance_method], [klass, left, right, values].map(&:kind)
+    assert_equal [nil, "Pair", "Pair", "Pair"], [klass, left, right, values].map(&:namespace)
+    assert_equal "Data.define(:left, :right)", klass.class_builder
+    assert_equal klass.class_builder, source.byteslice(klass.class_builder_span.start_offset...klass.class_builder_span.end_offset)
+    assert_equal "Pair values.", klass.documentation.fetch(0).description
+    assert_empty left.documentation
+    assert_equal "Returns both values.", values.documentation.fetch(0).description
+  end
+
+  def test_models_struct_new_as_a_class_with_accessors
+    source = "module Models\n  Point = Struct.new(:x, :y, keyword_init: true)\nend\n"
+    mod, klass, x, y = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:module, :class, :instance_attribute_accessor, :instance_attribute_accessor], [mod, klass, x, y].map(&:kind)
+    assert_equal [nil, "Models", "Models::Point", "Models::Point"], [mod, klass, x, y].map(&:namespace)
+    assert_equal "Struct.new(:x, :y, keyword_init: true)", klass.class_builder
+  end
+
+  def test_does_not_invent_attributes_for_dynamic_class_builder_members
+    source = "Record = Data.define(*MEMBERS) do\n  def value = nil\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:class, "Record"], [:instance_method, "value"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+    assert_equal "Record", declarations.fetch(1).namespace
+  end
+
   def test_collects_instance_attributes_with_shared_documentation
     source = "class Reader\n  # Names exposed by the reader.\n  attr_reader :name, \"alias_name\"\n  attr_writer :token\n  attr_accessor(:enabled)\nend\n"
     attributes = Zard.parse(source, path: "example.rb").declarations

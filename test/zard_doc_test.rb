@@ -46,6 +46,45 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_class_builders_and_their_block_members
+    source = "# Pair values.\nPair = Data.define(:left, :right) do\n  # Returns both values.\n  def values = [left, right]\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Class `Pair`
+
+      Class builder: `Data.define(:left, :right)`.
+
+      Pair values.
+
+      ## `Pair#values()`
+
+      Returns both values.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_renders_a_multiline_class_builder_as_a_code_block
+    source = "module Models\n  # Pair values.\n  Pair = Data.define(\n    :left,\n    :right\n  )\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Class `Models::Pair`
+
+      Class builder:
+
+      ```ruby
+      Data.define(
+        :left,
+        :right
+      )
+      ```
+
+      Pair values.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_instance_and_singleton_attributes
     source = "class Reader\n  # Stored name.\n  attr_reader :name\n  class << self\n    # Current format version.\n    attr_accessor :version\n  end\nend\n"
     document = Zard.parse(source, path: "example.rb")

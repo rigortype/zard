@@ -40,6 +40,10 @@ _Avoid_: copied documentation
 The source expression explicitly named after `<` in a Ruby class declaration.
 _Avoid_: resolved ancestry, inferred parent
 
+**Class builder reference**:
+A source call assigned to a constant to create a class, such as `Data.define` or `Struct.new`.
+_Avoid_: superclass reference, resolved class
+
 **Mixin reference**:
 An `include`, `prepend`, or `extend` target written in a Ruby class or module body.
 _Avoid_: resolved ancestor

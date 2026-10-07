@@ -80,6 +80,8 @@ module Zard
         @declarations = []
         @namespace = []
         @singleton_depth = 0
+        @singleton_receiver = nil
+        @singleton_receiver_span = nil
         @instance_visibility = :public
         @singleton_visibility = :public
         @container_kind = nil
@@ -121,12 +123,18 @@ module Zard
 
       def visit_singleton_class_node(node)
         previous_visibility = @singleton_visibility
+        previous_receiver = @singleton_receiver
+        previous_receiver_span = @singleton_receiver_span
         @singleton_visibility = :public
+        @singleton_receiver = node.expression.location.slice
+        @singleton_receiver_span = span(node.expression.location)
         @singleton_depth += 1
         node.body&.accept(self)
       ensure
         @singleton_depth -= 1
         @singleton_visibility = previous_visibility
+        @singleton_receiver = previous_receiver
+        @singleton_receiver_span = previous_receiver_span
       end
 
       def visit_def_node(node)
@@ -209,6 +217,7 @@ module Zard
         original = @declarations.reverse_each.find do |declaration|
           declaration.kind == kind &&
             declaration.namespace == current_namespace &&
+            declaration_receiver_matches?(declaration, current_singleton_receiver) &&
             declaration.name == target
         end
         unless original
@@ -227,6 +236,8 @@ module Zard
           namespace: current_namespace,
           visibility: original&.visibility || current_visibility,
           parameters: original&.parameters || [].freeze,
+          receiver: current_singleton_receiver,
+          receiver_span: current_singleton_receiver_span,
           alias_target: target,
           node: node,
           comments: comments,
@@ -239,6 +250,8 @@ module Zard
         name = node.name.to_s
         namespace = current_namespace
         parameters = parameter_names(node.parameters).freeze
+        receiver = node.receiver&.location&.slice || current_singleton_receiver
+        receiver_span = node.receiver ? span(node.receiver.location) : current_singleton_receiver_span
         unless module_function_definition?(node)
           return collect_declaration(
             kind: kind,
@@ -246,6 +259,8 @@ module Zard
             namespace: namespace,
             visibility: method_visibility(node),
             parameters: parameters,
+            receiver: receiver,
+            receiver_span: receiver_span,
             node: node
           )
         end
@@ -257,6 +272,8 @@ module Zard
           namespace: namespace,
           visibility: :private,
           parameters: parameters,
+          receiver: receiver,
+          receiver_span: receiver_span,
           node: node,
           comments: comments,
           parsed: parsed
@@ -267,6 +284,8 @@ module Zard
           namespace: namespace,
           visibility: :public,
           parameters: parameters,
+          receiver: receiver,
+          receiver_span: receiver_span,
           node: node,
           comments: comments,
           parsed: parsed
@@ -290,6 +309,8 @@ module Zard
             namespace: @namespace.join("::"),
             visibility: current_visibility,
             parameters: [].freeze,
+            receiver: current_singleton_receiver,
+            receiver_span: current_singleton_receiver_span,
             node: node,
             comments: comments,
             parsed: parsed
@@ -315,7 +336,7 @@ module Zard
         )
       end
 
-      def collect_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, superclass: nil, superclass_span: nil)
+      def collect_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, receiver: nil, receiver_span: nil, superclass: nil, superclass_span: nil)
         comments, parsed = parse_comments(node)
         append_declaration(
           kind: kind,
@@ -323,6 +344,8 @@ module Zard
           namespace: namespace,
           visibility: visibility,
           parameters: parameters,
+          receiver: receiver,
+          receiver_span: receiver_span,
           superclass: superclass,
           superclass_span: superclass_span,
           node: node,
@@ -331,13 +354,15 @@ module Zard
         )
       end
 
-      def append_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, comments:, parsed:, alias_target: nil, superclass: nil, superclass_span: nil)
+      def append_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, comments:, parsed:, receiver: nil, receiver_span: nil, alias_target: nil, superclass: nil, superclass_span: nil)
         @declarations << Model::V1::Declaration.new(
           kind: kind,
           name: name,
           namespace: namespace,
           visibility: visibility,
           parameters: parameters,
+          receiver: receiver,
+          receiver_span: receiver_span,
           alias_target: alias_target,
           superclass: superclass,
           superclass_span: superclass_span,
@@ -416,7 +441,8 @@ module Zard
             visibility,
             node,
             method_kind: current_method_kind,
-            attribute_scope: current_attribute_scope
+            attribute_scope: current_attribute_scope,
+            receiver: current_singleton_receiver
           )
         end
         yield
@@ -487,7 +513,8 @@ module Zard
             visibility,
             node,
             method_kind: :singleton_method,
-            attribute_scope: "singleton_attribute_"
+            attribute_scope: "singleton_attribute_",
+            receiver: nil
           )
         end
       end
@@ -529,10 +556,11 @@ module Zard
         set_current_visibility(previous_visibility)
       end
 
-      def apply_named_visibility(names, visibility, node, method_kind:, attribute_scope:)
+      def apply_named_visibility(names, visibility, node, method_kind:, attribute_scope:, receiver:)
         attribute_match = false
         @declarations.map! do |declaration|
           next declaration unless declaration.namespace == current_namespace
+          next declaration unless declaration_receiver_matches?(declaration, receiver)
 
           if declaration.kind == method_kind && names.include?(declaration.name)
             declaration_with_visibility(declaration, visibility)
@@ -554,12 +582,28 @@ module Zard
         )
       end
 
+      def declaration_receiver_matches?(declaration, receiver)
+        if receiver.nil? || receiver == "self"
+          declaration.receiver.nil? || declaration.receiver == "self"
+        else
+          declaration.receiver == receiver
+        end
+      end
+
       def current_namespace
         @namespace.empty? ? nil : @namespace.join("::")
       end
 
       def current_method_kind
         @singleton_depth.positive? ? :singleton_method : :instance_method
+      end
+
+      def current_singleton_receiver
+        @singleton_receiver if @singleton_depth.positive?
+      end
+
+      def current_singleton_receiver_span
+        @singleton_receiver_span if @singleton_depth.positive?
       end
 
       def current_attribute_scope
@@ -596,6 +640,8 @@ module Zard
           namespace: declaration.namespace,
           visibility: visibility,
           parameters: declaration.parameters,
+          receiver: declaration.receiver,
+          receiver_span: declaration.receiver_span,
           alias_target: declaration.alias_target,
           superclass: declaration.superclass,
           superclass_span: declaration.superclass_span,

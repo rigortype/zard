@@ -112,17 +112,29 @@ module Zard
       end
 
       def display_name(declaration)
+        if declaration.kind.to_s.start_with?("singleton_")
+          owner = singleton_owner(declaration)
+          return owner ? "#{owner}.#{declaration.name}" : declaration.name
+        end
         return declaration.name unless declaration.namespace
 
-        separator = declaration.kind.to_s.start_with?("singleton_") ? "." : "#"
-        "#{declaration.namespace}#{separator}#{declaration.name}"
+        "#{declaration.namespace}##{declaration.name}"
       end
 
       def display_alias_target(declaration)
+        if declaration.kind.to_s.start_with?("singleton_")
+          owner = singleton_owner(declaration)
+          return owner ? "#{owner}.#{declaration.alias_target}" : declaration.alias_target
+        end
         return declaration.alias_target unless declaration.namespace
 
-        separator = declaration.kind.to_s.start_with?("singleton_") ? "." : "#"
-        "#{declaration.namespace}#{separator}#{declaration.alias_target}"
+        "#{declaration.namespace}##{declaration.alias_target}"
+      end
+
+      def singleton_owner(declaration)
+        return declaration.receiver unless declaration.receiver.nil? || declaration.receiver == "self"
+
+        declaration.namespace || declaration.receiver
       end
 
       def list_item(prefix, description)

@@ -60,6 +60,8 @@ Class declarations preserve the explicit superclass expression and its source sp
 
 Class and module declarations preserve explicit `include`, `prepend`, and `extend` targets with source spans without resolving ancestry. Documented containers list these mixin references in Markdown.
 
+Singleton methods and attributes preserve an explicit receiver or `class <<` expression with source provenance. Documentation renders that source receiver without resolving its runtime object.
+
 `private_constant` and `public_constant` update the visibility of class, module, and constant declarations in the same namespace.
 
 ## Installation

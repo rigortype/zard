@@ -44,6 +44,10 @@ _Avoid_: resolved ancestry, inferred parent
 An `include`, `prepend`, or `extend` target written in a Ruby class or module body.
 _Avoid_: resolved ancestor
 
+**Receiver reference**:
+The source expression that owns an explicitly received singleton declaration or a `class <<` body.
+_Avoid_: resolved object, inferred owner
+
 **Documentation claim**:
 An optional type written in an API documentation tag. Rigor may check it, but it does not replace a contract or an inferred fact.
 _Avoid_: authoritative type

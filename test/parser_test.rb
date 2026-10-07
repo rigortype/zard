@@ -145,6 +145,36 @@ class ParserTest < Minitest::Test
     assert_equal "Reader", attribute.namespace
   end
 
+  def test_preserves_direct_and_singleton_class_receiver_references
+    source = "# Builds a reader.\ndef Registry.build = nil\nclass Reader\n  class << Registry\n    # Current version.\n    attr_reader :version\n  end\nend\n"
+    build, reader, version = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal ["Registry", nil, "Registry"], [build.receiver, reader.receiver, version.receiver]
+    assert_equal "Registry", source.byteslice(build.receiver_span.start_offset...build.receiver_span.end_offset)
+    assert_equal "Registry", source.byteslice(version.receiver_span.start_offset...version.receiver_span.end_offset)
+    assert_equal [nil, nil, "Reader"], [build.namespace, reader.namespace, version.namespace]
+  end
+
+  def test_preserves_self_as_a_singleton_receiver
+    source = "class Reader\n  def self.build = new\n  class << self\n    def version = 1\n  end\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations.select { |declaration| declaration.kind == :singleton_method }
+
+    assert_equal ["self", "self"], methods.map(&:receiver)
+    assert_equal ["Reader", "Reader"], methods.map(&:namespace)
+  end
+
+  def test_keeps_alias_resolution_and_visibility_inside_the_receiver_scope
+    source = "class Reader\n  class << First\n    def call = nil\n  end\n  class << Second\n    alias invoke call\n    private :call\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    call = document.declarations.find { |declaration| declaration.name == "call" }
+    invoke = document.declarations.find { |declaration| declaration.name == "invoke" }
+
+    assert_equal :public, call.visibility
+    assert_equal "First", call.receiver
+    assert_equal "Second", invoke.receiver
+    assert_equal ["alias.unresolved-target"], document.diagnostics.map(&:code)
+  end
+
   def test_ignores_dynamic_received_and_top_level_attribute_calls
     source = "attr_reader :top_level\nclass Reader\n  attr_reader(*NAMES)\n  helper.attr_reader :received\nend\n"
     attributes = Zard.parse(source, path: "example.rb").declarations

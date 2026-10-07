@@ -62,6 +62,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_explicit_singleton_receivers
+    source = "# Builds a reader.\ndef Registry.build = nil\nclass Reader\n  class << Registry\n    # Current version.\n    attr_reader :version\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Registry.build()`
+
+      Builds a reader.
+
+      ## Attribute reader `Registry.version`
+
+      Current version.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_only_public_declarations
     source = "class Reader\n  # Visible API.\n  def visible = nil\n  private\n  # Internal helper.\n  def hidden = nil\n  # Internal state.\n  attr_reader :token\n  public\n  # Public state.\n  attr_reader :name\nend\n"
     document = Zard.parse(source, path: "example.rb")

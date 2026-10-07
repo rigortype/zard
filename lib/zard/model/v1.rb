@@ -70,14 +70,16 @@ module Zard
       end
 
       class Declaration
-        attr_reader :kind, :name, :namespace, :visibility, :parameters, :alias_target, :superclass, :superclass_span, :mixins, :span, :comment_span, :documentation, :contracts
+        attr_reader :kind, :name, :namespace, :visibility, :parameters, :receiver, :receiver_span, :alias_target, :superclass, :superclass_span, :mixins, :span, :comment_span, :documentation, :contracts
 
-        def initialize(kind:, name:, namespace:, visibility:, parameters:, span:, comment_span:, documentation:, contracts:, alias_target: nil, superclass: nil, superclass_span: nil, mixins: [].freeze)
+        def initialize(kind:, name:, namespace:, visibility:, parameters:, span:, comment_span:, documentation:, contracts:, receiver: nil, receiver_span: nil, alias_target: nil, superclass: nil, superclass_span: nil, mixins: [].freeze)
           @kind = kind
           @name = name
           @namespace = namespace
           @visibility = visibility
           @parameters = parameters
+          @receiver = receiver
+          @receiver_span = receiver_span
           @alias_target = alias_target
           @superclass = superclass
           @superclass_span = superclass_span

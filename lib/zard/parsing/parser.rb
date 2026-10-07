@@ -76,7 +76,8 @@ module Zard
         ["Data", :define] => {kind: :class, attribute_kind: :attribute_reader}.freeze,
         ["Struct", :new] => {kind: :class, attribute_kind: :attribute_accessor}.freeze,
         ["Class", :new] => {kind: :class, attribute_kind: nil}.freeze,
-        ["Module", :new] => {kind: :module, attribute_kind: nil}.freeze
+        ["Module", :new] => {kind: :module, attribute_kind: nil}.freeze,
+        [nil, :DelegateClass] => {kind: :class, attribute_kind: nil}.freeze
       }.freeze
 
       def initialize(source, path, comments, diagnostics, encoding, prism_source)
@@ -222,14 +223,15 @@ module Zard
       end
 
       def container_builder_descriptor(node)
-        return unless node.is_a?(Prism::CallNode) && node.receiver
+        key = container_builder_key(node)
+        return unless key
 
-        CONTAINER_BUILDERS[[node.receiver.location.slice.sub(/\A::/, ""), node.name]]
+        CONTAINER_BUILDERS[key]
       end
 
       def visit_container_builder_write(path, node)
         call = node.value
-        descriptor = CONTAINER_BUILDERS.fetch([call.receiver.location.slice.sub(/\A::/, ""), call.name])
+        descriptor = CONTAINER_BUILDERS.fetch(container_builder_key(call))
         builder, builder_span = container_builder_reference(call)
         declaration_index = collect_path_declaration(
           descriptor.fetch(:kind),
@@ -254,7 +256,7 @@ module Zard
       end
 
       def collect_container_builder_attributes(call)
-        descriptor = CONTAINER_BUILDERS.fetch([call.receiver.location.slice.sub(/\A::/, ""), call.name])
+        descriptor = CONTAINER_BUILDERS.fetch(container_builder_key(call))
         attribute_kind = descriptor.fetch(:attribute_kind)
         return unless attribute_kind
 
@@ -271,6 +273,13 @@ module Zard
             parsed: {documentation: [].freeze, contracts: [].freeze}
           )
         end
+      end
+
+      def container_builder_key(node)
+        return unless node.is_a?(Prism::CallNode)
+
+        receiver = node.receiver&.location&.slice&.sub(/\A::/, "")
+        [receiver, node.name]
       end
 
       def method_definition_call?(node)

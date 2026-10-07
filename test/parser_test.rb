@@ -232,6 +232,26 @@ class ParserTest < Minitest::Test
     assert_equal "Module.new", declaration.container_builder
   end
 
+  def test_models_delegate_class_assignments_as_classes
+    source = "# Wrapper API.\nWrapper = DelegateClass(Target)\nFallback ||= DelegateClass(Base)\n"
+    wrapper, fallback = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:class, :class], [wrapper.kind, fallback.kind]
+    assert_equal ["Wrapper", "Fallback"], [wrapper.name, fallback.name]
+    assert_equal ["DelegateClass(Target)", "DelegateClass(Base)"], [wrapper.container_builder, fallback.container_builder]
+    assert_equal wrapper.container_builder, source.byteslice(wrapper.container_builder_span.start_offset...wrapper.container_builder_span.end_offset)
+    assert_equal "Wrapper API.", wrapper.documentation.fetch(0).description
+  end
+
+  def test_preserves_delegate_class_as_a_named_subclass_superclass
+    source = "class Wrapper < DelegateClass(Target)\nend\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
+
+    assert_equal :class, declaration.kind
+    assert_equal "DelegateClass(Target)", declaration.superclass
+    assert_nil declaration.container_builder
+  end
+
   def test_collects_instance_attributes_with_shared_documentation
     source = "class Reader\n  # Names exposed by the reader.\n  attr_reader :name, \"alias_name\"\n  attr_writer :token\n  attr_accessor(:enabled)\nend\n"
     attributes = Zard.parse(source, path: "example.rb").declarations

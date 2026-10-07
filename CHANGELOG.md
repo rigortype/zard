@@ -42,5 +42,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Model classes assigned from `Class.new` builders.
 - Model modules assigned from `Module.new` builders.
 - Model container builders used in conditional constant initialization with `||=`.
+- Model classes assigned from standard library `DelegateClass` builders.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

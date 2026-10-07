@@ -393,6 +393,20 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_an_inline_module_function_alias
+    source = "module Helpers\n  def original(value) = value\n  # Calls the original helper.\n  module_function alias_method(:call, :original)\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Alias `Helpers.call`
+
+      Alias of `Helpers.original`.
+
+      Calls the original helper.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_a_documented_method_alias_without_copying_target_documentation
     source = "class Reader\n  # Reads a path.\n  def read(path) = path\n  # Compatibility name.\n  alias fetch read\nend\n"
     document = Zard.parse(source, path: "example.rb")

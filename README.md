@@ -56,6 +56,7 @@ Ruby's `attr` declarations are readers by default. The legacy `attr :name, true`
 `module_function` records its private instance method and public singleton copy as separate declarations with shared source provenance. Bare, named, and inline forms are supported.
 
 Method aliases preserve their target name and inherit visibility and parameters when the target is declared in the same source scope. Alias documentation remains separate from target documentation.
+Inline visibility and `module_function` modifiers around `alias_method` apply to the resulting alias.
 
 Literal `define_method` and `define_singleton_method` calls produce method declarations. Their block parameters, visibility, receiver, refinement scope, and documentation provenance are preserved.
 Inline `private define_method`, `module_function define_method`, and class-method visibility modifiers around `define_singleton_method` preserve the visibility produced by Ruby.

@@ -483,6 +483,13 @@ module Zard
         collect_method_alias(new_name, old_name, node) if new_name && old_name
       end
 
+      def inline_alias_method_name(node)
+        return unless node.is_a?(Prism::CallNode) && node.name == :alias_method && node.receiver.nil?
+
+        arguments = node.arguments&.arguments || []
+        attribute_name(arguments.first) if arguments.length == 2
+      end
+
       def collect_method_alias(name, target, node)
         kind = current_method_kind
         original = @declarations.reverse_each.find do |declaration|
@@ -774,7 +781,8 @@ module Zard
           return with_visibility(visibility) { yield }
         end
 
-        names = arguments.filter_map { |argument| attribute_name(argument) }
+        names = arguments.filter_map { |argument| attribute_name(argument) || inline_alias_method_name(argument) }
+        yield
         unless names.empty?
           apply_named_visibility(
             names,
@@ -785,7 +793,6 @@ module Zard
             receiver: current_singleton_receiver
           )
         end
-        yield
       end
 
       def visit_module_function_call(node)
@@ -801,7 +808,7 @@ module Zard
         end
 
         yield
-        names = arguments.filter_map { |argument| attribute_name(argument) }
+        names = arguments.filter_map { |argument| attribute_name(argument) || inline_alias_method_name(argument) }
         names.each { |name| apply_named_module_function(name) }
       end
 

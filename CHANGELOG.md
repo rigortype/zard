@@ -30,6 +30,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Apply named and inline class method visibility.
 - Model bare, named, and inline module functions as private instance methods with public singleton copies.
 - Preserve `alias` and `alias_method` declarations with their target metadata.
+- Apply inline visibility and module-function modifiers to `alias_method` calls.
 - Preserve explicit class superclass expressions with source provenance.
 - Apply private and public constant visibility to class, module, and constant declarations.
 - Ignore declaration DSL calls inside method bodies.

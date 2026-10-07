@@ -665,6 +665,16 @@ class ParserTest < Minitest::Test
     assert_equal [[:private, ["path"]], [:private, ["path"]]], aliases.map { |declaration| [declaration.visibility, declaration.parameters] }
   end
 
+  def test_applies_inline_modifiers_to_alias_method_calls
+    source = "module Helpers\n  def original(value) = value\n  # Internal alias.\n  private alias_method(:hidden, :original)\n  # Public module alias.\n  module_function alias_method(:call, :original)\nend\n"
+    aliases = Zard.parse(source, path: "example.rb").declarations.select(&:alias_target)
+
+    assert_equal [[:instance_method, "hidden", :private], [:instance_method, "call", :private], [:singleton_method, "call", :public]], aliases.map { |declaration| [declaration.kind, declaration.name, declaration.visibility] }
+    assert_equal ["original", "original", "original"], aliases.map(&:alias_target)
+    assert_equal [["value"], ["value"], ["value"]], aliases.map(&:parameters)
+    assert_equal ["Internal alias.", "Public module alias.", "Public module alias."], aliases.map { |declaration| declaration.documentation.fetch(0).description }
+  end
+
   def test_collects_singleton_method_aliases
     source = "class Reader\n  class << self\n    def build = new\n    alias create build\n    alias_method \"make\", \"build\"\n  end\nend\n"
     aliases = Zard.parse(source, path: "example.rb").declarations.select(&:alias_target)

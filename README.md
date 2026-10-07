@@ -62,6 +62,8 @@ Class and module declarations preserve explicit `include`, `prepend`, and `exten
 
 Singleton methods and attributes preserve an explicit receiver or `class <<` expression with source provenance. Documentation renders that source receiver without resolving its runtime object.
 
+Ruby refinements and their members remain separate from ordinary members of the enclosing module. The refinement target is preserved as a source expression with its span.
+
 `private_constant` and `public_constant` update the visibility of class, module, and constant declarations in the same namespace.
 
 ## Installation

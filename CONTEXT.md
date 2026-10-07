@@ -48,6 +48,10 @@ _Avoid_: resolved ancestor
 The source expression that owns an explicitly received singleton declaration or a `class <<` body.
 _Avoid_: resolved object, inferred owner
 
+**Refinement target**:
+The source expression named by `refine` that scopes its declarations separately from the enclosing module.
+_Avoid_: enclosing module member, resolved class
+
 **Documentation claim**:
 An optional type written in an API documentation tag. Rigor may check it, but it does not replace a contract or an inferred fact.
 _Avoid_: authoritative type

@@ -78,6 +78,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_refinements_separately_from_enclosing_module_members
+    source = "module TextExtensions\n  # String helpers.\n  refine String do\n    # Returns a tagged copy.\n    def tagged = self\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Refinement `TextExtensions[String]`
+
+      String helpers.
+
+      ## `TextExtensions[String]#tagged()`
+
+      Returns a tagged copy.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_only_public_declarations
     source = "class Reader\n  # Visible API.\n  def visible = nil\n  private\n  # Internal helper.\n  def hidden = nil\n  # Internal state.\n  attr_reader :token\n  public\n  # Public state.\n  attr_reader :name\nend\n"
     document = Zard.parse(source, path: "example.rb")

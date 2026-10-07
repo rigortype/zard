@@ -35,5 +35,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Ignore declaration DSL calls inside method bodies.
 - Preserve `include`, `prepend`, and `extend` targets with source provenance.
 - Preserve explicit singleton declaration receivers with source provenance.
+- Preserve Ruby refinements and keep their members in a separate scope.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

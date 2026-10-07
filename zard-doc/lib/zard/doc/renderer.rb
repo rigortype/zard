@@ -89,6 +89,8 @@ module Zard
           "## Module `#{qualified_name(declaration)}`"
         when :constant
           "## Constant `#{qualified_name(declaration)}`"
+        when :refinement
+          "## Refinement `#{refinement_owner(declaration)}`"
         when :instance_attribute_reader, :singleton_attribute_reader
           "## Attribute reader `#{display_name(declaration)}`"
         when :instance_attribute_writer, :singleton_attribute_writer
@@ -112,6 +114,11 @@ module Zard
       end
 
       def display_name(declaration)
+        if declaration.refinement
+          separator = declaration.kind.to_s.start_with?("singleton_") ? "." : "#"
+          return "#{refinement_owner(declaration)}#{separator}#{declaration.name}"
+        end
+
         if declaration.kind.to_s.start_with?("singleton_")
           owner = singleton_owner(declaration)
           return owner ? "#{owner}.#{declaration.name}" : declaration.name
@@ -122,6 +129,11 @@ module Zard
       end
 
       def display_alias_target(declaration)
+        if declaration.refinement
+          separator = declaration.kind.to_s.start_with?("singleton_") ? "." : "#"
+          return "#{refinement_owner(declaration)}#{separator}#{declaration.alias_target}"
+        end
+
         if declaration.kind.to_s.start_with?("singleton_")
           owner = singleton_owner(declaration)
           return owner ? "#{owner}.#{declaration.alias_target}" : declaration.alias_target
@@ -135,6 +147,12 @@ module Zard
         return declaration.receiver unless declaration.receiver.nil? || declaration.receiver == "self"
 
         declaration.namespace || declaration.receiver
+      end
+
+      def refinement_owner(declaration)
+        namespace = declaration.namespace
+        target = declaration.refinement || declaration.name
+        namespace ? "#{namespace}[#{target}]" : "[#{target}]"
       end
 
       def list_item(prefix, description)

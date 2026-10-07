@@ -175,6 +175,34 @@ class ParserTest < Minitest::Test
     assert_equal ["alias.unresolved-target"], document.diagnostics.map(&:code)
   end
 
+  def test_preserves_refinements_and_keeps_their_members_in_a_separate_scope
+    source = "module TextExtensions\n  # String helpers.\n  refine String do\n    # Returns a tagged copy.\n    def tagged = self\n    private\n    def internal = self\n  end\n  def ordinary = nil\nend\n"
+    mod, refinement, tagged, internal, ordinary = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:module, :refinement, :instance_method, :instance_method, :instance_method], [mod, refinement, tagged, internal, ordinary].map(&:kind)
+    assert_equal "String", refinement.name
+    assert_equal ["String", "String", nil], [tagged.refinement, internal.refinement, ordinary.refinement]
+    assert_equal [:public, :private, :public], [tagged.visibility, internal.visibility, ordinary.visibility]
+    assert_equal "String", source.byteslice(tagged.refinement_span.start_offset...tagged.refinement_span.end_offset)
+  end
+
+  def test_keeps_alias_resolution_inside_the_refinement_scope
+    source = "module Extensions\n  refine String do\n    def call = nil\n  end\n  refine Array do\n    alias invoke call\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    invoke = document.declarations.find { |declaration| declaration.name == "invoke" }
+
+    assert_equal "Array", invoke.refinement
+    assert_equal ["alias.unresolved-target"], document.diagnostics.map(&:code)
+  end
+
+  def test_does_not_carry_a_refinement_scope_into_a_nested_class
+    source = "module Extensions\n  refine String do\n    class Helper\n      def call = nil\n    end\n  end\nend\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.name == "call" }
+
+    assert_nil declaration.refinement
+    assert_equal "Extensions::Helper", declaration.namespace
+  end
+
   def test_ignores_dynamic_received_and_top_level_attribute_calls
     source = "attr_reader :top_level\nclass Reader\n  attr_reader(*NAMES)\n  helper.attr_reader :received\nend\n"
     attributes = Zard.parse(source, path: "example.rb").declarations

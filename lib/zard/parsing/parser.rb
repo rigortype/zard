@@ -82,6 +82,8 @@ module Zard
         @singleton_depth = 0
         @singleton_receiver = nil
         @singleton_receiver_span = nil
+        @refinement = nil
+        @refinement_span = nil
         @instance_visibility = :public
         @singleton_visibility = :public
         @container_kind = nil
@@ -150,6 +152,8 @@ module Zard
       def visit_call_node(node)
         return super if @method_depth.positive?
 
+        return visit_refinement_call(node) if refinement_call?(node)
+
         collect_mixin_references(node) if mixin_call?(node)
 
         if node.name == :module_function && node.receiver.nil? && module_function_context?
@@ -178,8 +182,37 @@ module Zard
 
       private
 
+      def refinement_call?(node)
+        node.name == :refine &&
+          node.receiver.nil? &&
+          node.block &&
+          @container_kind == :module &&
+          @singleton_depth.zero? &&
+          node.arguments&.arguments&.length == 1
+      end
+
+      def visit_refinement_call(node)
+        target_node = node.arguments.arguments.fetch(0)
+        target = target_node.location.slice
+        collect_declaration(
+          kind: :refinement,
+          name: target,
+          namespace: current_namespace,
+          visibility: :public,
+          parameters: [].freeze,
+          node: node
+        )
+        within_refinement(target, span(target_node.location)) do
+          node.block.body&.accept(self)
+        end
+      end
+
       def mixin_call?(node)
-        MIXIN_NAMES.include?(node.name) && node.receiver.nil? && @container_declaration_index && @singleton_depth.zero?
+        MIXIN_NAMES.include?(node.name) &&
+          node.receiver.nil? &&
+          %i[class module].include?(@container_kind) &&
+          @container_declaration_index &&
+          @singleton_depth.zero?
       end
 
       def collect_mixin_references(node)
@@ -217,7 +250,7 @@ module Zard
         original = @declarations.reverse_each.find do |declaration|
           declaration.kind == kind &&
             declaration.namespace == current_namespace &&
-            declaration_receiver_matches?(declaration, current_singleton_receiver) &&
+            declaration_scope_matches?(declaration, current_singleton_receiver) &&
             declaration.name == target
         end
         unless original
@@ -238,6 +271,8 @@ module Zard
           parameters: original&.parameters || [].freeze,
           receiver: current_singleton_receiver,
           receiver_span: current_singleton_receiver_span,
+          refinement: @refinement,
+          refinement_span: @refinement_span,
           alias_target: target,
           node: node,
           comments: comments,
@@ -261,6 +296,8 @@ module Zard
             parameters: parameters,
             receiver: receiver,
             receiver_span: receiver_span,
+            refinement: @refinement,
+            refinement_span: @refinement_span,
             node: node
           )
         end
@@ -274,6 +311,8 @@ module Zard
           parameters: parameters,
           receiver: receiver,
           receiver_span: receiver_span,
+          refinement: @refinement,
+          refinement_span: @refinement_span,
           node: node,
           comments: comments,
           parsed: parsed
@@ -286,6 +325,8 @@ module Zard
           parameters: parameters,
           receiver: receiver,
           receiver_span: receiver_span,
+          refinement: @refinement,
+          refinement_span: @refinement_span,
           node: node,
           comments: comments,
           parsed: parsed
@@ -311,6 +352,8 @@ module Zard
             parameters: [].freeze,
             receiver: current_singleton_receiver,
             receiver_span: current_singleton_receiver_span,
+            refinement: @refinement,
+            refinement_span: @refinement_span,
             node: node,
             comments: comments,
             parsed: parsed
@@ -336,7 +379,7 @@ module Zard
         )
       end
 
-      def collect_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, receiver: nil, receiver_span: nil, superclass: nil, superclass_span: nil)
+      def collect_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, receiver: nil, receiver_span: nil, refinement: nil, refinement_span: nil, superclass: nil, superclass_span: nil)
         comments, parsed = parse_comments(node)
         append_declaration(
           kind: kind,
@@ -346,6 +389,8 @@ module Zard
           parameters: parameters,
           receiver: receiver,
           receiver_span: receiver_span,
+          refinement: refinement,
+          refinement_span: refinement_span,
           superclass: superclass,
           superclass_span: superclass_span,
           node: node,
@@ -354,7 +399,7 @@ module Zard
         )
       end
 
-      def append_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, comments:, parsed:, receiver: nil, receiver_span: nil, alias_target: nil, superclass: nil, superclass_span: nil)
+      def append_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, comments:, parsed:, receiver: nil, receiver_span: nil, refinement: nil, refinement_span: nil, alias_target: nil, superclass: nil, superclass_span: nil)
         @declarations << Model::V1::Declaration.new(
           kind: kind,
           name: name,
@@ -363,6 +408,8 @@ module Zard
           parameters: parameters,
           receiver: receiver,
           receiver_span: receiver_span,
+          refinement: refinement,
+          refinement_span: refinement_span,
           alias_target: alias_target,
           superclass: superclass,
           superclass_span: superclass_span,
@@ -387,12 +434,16 @@ module Zard
         previous_container_kind = @container_kind
         previous_module_function_mode = @module_function_mode
         previous_container_declaration_index = @container_declaration_index
+        previous_refinement = @refinement
+        previous_refinement_span = @refinement_span
         @namespace = namespace_parts(name)
         @instance_visibility = :public
         @singleton_visibility = :public
         @container_kind = kind
         @module_function_mode = false
         @container_declaration_index = declaration_index
+        @refinement = nil
+        @refinement_span = nil
         yield
       ensure
         @namespace = previous_namespace
@@ -401,6 +452,34 @@ module Zard
         @container_kind = previous_container_kind
         @module_function_mode = previous_module_function_mode
         @container_declaration_index = previous_container_declaration_index
+        @refinement = previous_refinement
+        @refinement_span = previous_refinement_span
+      end
+
+      def within_refinement(target, target_span)
+        previous_instance_visibility = @instance_visibility
+        previous_singleton_visibility = @singleton_visibility
+        previous_container_kind = @container_kind
+        previous_module_function_mode = @module_function_mode
+        previous_container_declaration_index = @container_declaration_index
+        previous_refinement = @refinement
+        previous_refinement_span = @refinement_span
+        @instance_visibility = :public
+        @singleton_visibility = :public
+        @container_kind = :refinement
+        @module_function_mode = false
+        @container_declaration_index = nil
+        @refinement = target
+        @refinement_span = target_span
+        yield
+      ensure
+        @instance_visibility = previous_instance_visibility
+        @singleton_visibility = previous_singleton_visibility
+        @container_kind = previous_container_kind
+        @module_function_mode = previous_module_function_mode
+        @container_declaration_index = previous_container_declaration_index
+        @refinement = previous_refinement
+        @refinement_span = previous_refinement_span
       end
 
       def namespace_parts(name)
@@ -560,7 +639,7 @@ module Zard
         attribute_match = false
         @declarations.map! do |declaration|
           next declaration unless declaration.namespace == current_namespace
-          next declaration unless declaration_receiver_matches?(declaration, receiver)
+          next declaration unless declaration_scope_matches?(declaration, receiver)
 
           if declaration.kind == method_kind && names.include?(declaration.name)
             declaration_with_visibility(declaration, visibility)
@@ -582,12 +661,13 @@ module Zard
         )
       end
 
-      def declaration_receiver_matches?(declaration, receiver)
-        if receiver.nil? || receiver == "self"
+      def declaration_scope_matches?(declaration, receiver)
+        receiver_matches = if receiver.nil? || receiver == "self"
           declaration.receiver.nil? || declaration.receiver == "self"
         else
           declaration.receiver == receiver
         end
+        receiver_matches && declaration.refinement == @refinement
       end
 
       def current_namespace
@@ -642,6 +722,8 @@ module Zard
           parameters: declaration.parameters,
           receiver: declaration.receiver,
           receiver_span: declaration.receiver_span,
+          refinement: declaration.refinement,
+          refinement_span: declaration.refinement_span,
           alias_target: declaration.alias_target,
           superclass: declaration.superclass,
           superclass_span: declaration.superclass_span,

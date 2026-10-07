@@ -299,6 +299,18 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_honors_visibility_with_an_explicit_current_owner
+    source = "class Reader\n  # Internal reader.\n  self.private def hidden = nil\n  self.public\n  # Public reader.\n  def shown = nil\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Reader#shown()`
+
+      Public reader.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_explicit_singleton_receivers
     source = "# Builds a reader.\ndef Registry.build = nil\nclass Reader\n  class << Registry\n    # Current version.\n    attr_reader :version\n  end\nend\n"
     document = Zard.parse(source, path: "example.rb")

@@ -593,6 +593,19 @@ class ParserTest < Minitest::Test
     ], methods.map { |declaration| [declaration.name, declaration.visibility] }
   end
 
+  def test_tracks_visibility_with_an_explicit_current_owner
+    source = "class Reader\n  def old = nil\n  self.private :old\n  self.protected\n  def inherited = nil\n  self.public\n  def shown = nil\n  self.private def inline = nil\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind == :instance_method }
+
+    assert_equal [
+      ["old", :private],
+      ["inherited", :protected],
+      ["shown", :public],
+      ["inline", :private]
+    ], methods.map { |declaration| [declaration.name, declaration.visibility] }
+  end
+
   def test_conservatively_applies_named_nonpublic_visibility_to_attributes
     source = "class Reader\n  attr_accessor :name\n  private :name\nend\n"
     document = Zard.parse(source, path: "example.rb")

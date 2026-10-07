@@ -51,6 +51,7 @@ InlineRBS trailing prose after `--` is stored as a contract note. It is not copi
 Documentation descriptions continue across plain comment lines until the next annotation or contract. No continuation marker is required.
 
 Declarations record `public`, `protected`, or `private` visibility. Markdown output includes public declarations only. Bare visibility calls, inline forms such as `private def` and `private attr_reader`, named method modifiers such as `private :read`, and `private_class_method` / `public_class_method` are supported. Named attribute modifiers are diagnosed because one attribute declaration may represent two generated methods; use lexical or inline visibility for attributes.
+Instance visibility calls received by `self` belong to the current method scope, like their bare forms.
 Ruby's `attr` declarations are readers by default. The legacy `attr :name, true` form is preserved as an accessor.
 Attribute declarations received by `self` belong to the current owner, like their bare forms.
 

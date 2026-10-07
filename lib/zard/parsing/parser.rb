@@ -214,7 +214,9 @@ module Zard
           return visit_constant_visibility_call(node, constant_visibility) { super }
         end
 
-        visibility = VISIBILITY_NAMES.find { |name| node.name == name && node.receiver.nil? }
+        visibility = VISIBILITY_NAMES.find do |name|
+          node.name == name && (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode))
+        end
         return visit_visibility_call(node, visibility) { super } if visibility
 
         if node.name == :alias_method && (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode))

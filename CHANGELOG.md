@@ -58,5 +58,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Preserve attribute declarations explicitly received by the current owner.
 - Preserve mixin calls explicitly received by the current owner.
 - Preserve `alias_method` calls explicitly received by the current owner.
+- Apply instance visibility calls explicitly received by the current owner.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

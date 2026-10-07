@@ -110,6 +110,7 @@ module Zard
       end
 
       def visit_class_node(node)
+        builder_call = node.superclass if class_builder?(node.superclass)
         declaration_index = collect_path_declaration(
           :class,
           node.constant_path.location.slice,
@@ -117,7 +118,10 @@ module Zard
           superclass: node.superclass&.location&.slice,
           superclass_span: node.superclass ? span(node.superclass.location) : nil
         )
-        within_namespace(node.constant_path.location.slice, :class, declaration_index) { node.body&.accept(self) }
+        within_namespace(node.constant_path.location.slice, :class, declaration_index) do
+          collect_class_builder_attributes(builder_call) if builder_call
+          node.body&.accept(self)
+        end
       end
 
       def visit_constant_write_node(node)

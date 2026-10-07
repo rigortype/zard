@@ -223,6 +223,24 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_a_named_data_subclass_without_recasting_its_superclass
+    source = "# Pair values.\nclass Pair < Data.define(:left, :right)\n  # Returns both values.\n  def values = [left, right]\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Class `Pair`
+
+      Superclass: `Data.define(:left, :right)`.
+
+      Pair values.
+
+      ## `Pair#values()`
+
+      Returns both values.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_mixin_references_on_a_documented_container
     source = "# Reads values.\nclass Reader\n  include Enumerable, Readable\n  prepend Instrumentation\n  extend FactoryMethods\nend\n"
     document = Zard.parse(source, path: "example.rb")

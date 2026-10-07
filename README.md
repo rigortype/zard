@@ -61,6 +61,7 @@ Literal `define_method` and `define_singleton_method` calls produce method decla
 Class declarations preserve the explicit superclass expression and its source span without resolving ancestry.
 
 Classes assigned from `Data.define` and `Struct.new` preserve the builder call, generated attributes, and block members as one class scope.
+Named subclasses such as `class Point < Data.define(:x)` also preserve the generated attributes while retaining the explicit superclass expression.
 
 Class and module declarations preserve explicit `include`, `prepend`, and `extend` targets with source spans without resolving ancestry. Documented containers list these mixin references in Markdown.
 

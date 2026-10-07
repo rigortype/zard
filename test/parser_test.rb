@@ -146,6 +146,34 @@ class ParserTest < Minitest::Test
     assert_equal "Record", declarations.fetch(1).namespace
   end
 
+  def test_models_generated_attributes_on_named_data_subclasses
+    source = "class Pair < Data.define(:left, :right)\n  def values = [left, right]\nend\n"
+    klass, left, right, values = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal "Data.define(:left, :right)", klass.superclass
+    assert_nil klass.class_builder
+    assert_equal [:instance_attribute_reader, :instance_attribute_reader], [left.kind, right.kind]
+    assert_equal ["Pair", "Pair", "Pair"], [left.namespace, right.namespace, values.namespace]
+  end
+
+  def test_models_generated_attributes_on_named_struct_subclasses
+    source = "module Models\n  class Point < Struct.new(:x, :y, keyword_init: true)\n  end\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+    klass = declarations.find { |declaration| declaration.kind == :class }
+    attributes = declarations.select { |declaration| declaration.kind == :instance_attribute_accessor }
+
+    assert_equal "Struct.new(:x, :y, keyword_init: true)", klass.superclass
+    assert_equal ["x", "y"], attributes.map(&:name)
+    assert_equal ["Models::Point", "Models::Point"], attributes.map(&:namespace)
+  end
+
+  def test_does_not_invent_attributes_on_a_dynamic_named_data_subclass
+    source = "class Record < Data.define(*MEMBERS)\n  def value = nil\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:class, "Record"], [:instance_method, "value"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
   def test_collects_instance_attributes_with_shared_documentation
     source = "class Reader\n  # Names exposed by the reader.\n  attr_reader :name, \"alias_name\"\n  attr_writer :token\n  attr_accessor(:enabled)\nend\n"
     attributes = Zard.parse(source, path: "example.rb").declarations

@@ -636,6 +636,18 @@ class ParserTest < Minitest::Test
     ], methods.map { |declaration| [declaration.name, declaration.visibility] }
   end
 
+  def test_applies_class_method_visibility_with_an_explicit_current_owner
+    source = "class Reader\n  def self.hidden = nil\n  self.private_class_method :hidden\n  self.private_class_method def self.inline = nil\n  def self.shown = nil\n  self.private_class_method :shown\n  self.public_class_method :shown\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind == :singleton_method }
+
+    assert_equal [
+      ["hidden", :private],
+      ["inline", :private],
+      ["shown", :public]
+    ], methods.map { |declaration| [declaration.name, declaration.visibility] }
+  end
+
   def test_applies_class_method_visibility_to_singleton_class_methods
     source = "class Reader\n  class << self\n    def hidden = nil\n  end\n  private_class_method :hidden\nend\n"
     method = Zard.parse(source, path: "example.rb").declarations

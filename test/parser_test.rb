@@ -323,6 +323,24 @@ class ParserTest < Minitest::Test
     assert_equal "superclass_for(:reader)", declaration.superclass
   end
 
+  def test_applies_private_and_public_constant_visibility
+    source = "module Demo\n  VALUE = 1\n  class Internal\n  end\n  private_constant :VALUE, :Internal\n  public_constant \"VALUE\"\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    value = declarations.find { |declaration| declaration.kind == :constant }
+    internal = declarations.find { |declaration| declaration.kind == :class }
+    assert_equal :public, value.visibility
+    assert_equal :private, internal.visibility
+  end
+
+  def test_applies_constant_visibility_to_every_reopened_declaration
+    source = "module Demo\n  class Shared\n  end\n  class Shared\n  end\n  private_constant :Shared\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind == :class }
+
+    assert_equal [:private, :private], declarations.map(&:visibility)
+  end
+
   def test_resets_the_namespace_for_an_absolute_constant_path
     source = "module Outer\n  class ::Reader\n    def read = nil\n  end\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.kind == :instance_method }

@@ -58,6 +58,8 @@ Method aliases preserve their target name and inherit visibility and parameters 
 
 Class declarations preserve the explicit superclass expression and its source span without resolving ancestry.
 
+`private_constant` and `public_constant` update the visibility of class, module, and constant declarations in the same namespace.
+
 ## Installation
 
 Until the first RubyGems release, add the repository to your Gemfile:

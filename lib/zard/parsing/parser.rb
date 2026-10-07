@@ -65,6 +65,10 @@ module Zard
         private_class_method: :private,
         public_class_method: :public
       }.freeze
+      CONSTANT_VISIBILITY = {
+        private_constant: :private,
+        public_constant: :public
+      }.freeze
 
       def initialize(source, path, comments, diagnostics, encoding)
         @source = source
@@ -139,6 +143,10 @@ module Zard
 
         if node.receiver.nil? && (class_visibility = CLASS_METHOD_VISIBILITY[node.name])
           return visit_class_method_visibility_call(node, class_visibility) { super }
+        end
+
+        if node.receiver.nil? && (constant_visibility = CONSTANT_VISIBILITY[node.name])
+          return visit_constant_visibility_call(node, constant_visibility) { super }
         end
 
         visibility = VISIBILITY_NAMES.find { |name| node.name == name && node.receiver.nil? }
@@ -444,6 +452,23 @@ module Zard
             method_kind: :singleton_method,
             attribute_scope: "singleton_attribute_"
           )
+        end
+      end
+
+      def visit_constant_visibility_call(node, visibility)
+        arguments = node.arguments&.arguments || []
+        yield
+        names = arguments.filter_map { |argument| attribute_name(argument) }
+        return if names.empty?
+
+        @declarations.map! do |declaration|
+          if %i[class module constant].include?(declaration.kind) &&
+              declaration.namespace == current_namespace &&
+              names.include?(declaration.name)
+            declaration_with_visibility(declaration, visibility)
+          else
+            declaration
+          end
         end
       end
 

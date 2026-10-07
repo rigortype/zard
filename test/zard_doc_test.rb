@@ -257,6 +257,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_attr_readers_and_legacy_writable_attributes
+    source = "class Reader\n  # Stored name.\n  attr :name\n  # Mutable token.\n  attr(:token, true)\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Attribute reader `Reader#name`
+
+      Stored name.
+
+      ## Attribute accessor `Reader#token`
+
+      Mutable token.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_explicit_singleton_receivers
     source = "# Builds a reader.\ndef Registry.build = nil\nclass Reader\n  class << Registry\n    # Current version.\n    attr_reader :version\n  end\nend\n"
     document = Zard.parse(source, path: "example.rb")

@@ -57,6 +57,7 @@ module Zard
 
     class DeclarationCollector < Prism::Visitor
       ATTRIBUTE_KINDS = {
+        attr: :attribute_reader,
         attr_reader: :attribute_reader,
         attr_writer: :attribute_writer,
         attr_accessor: :attribute_accessor
@@ -579,7 +580,11 @@ module Zard
         attribute_kind = ATTRIBUTE_KINDS[node.name]
         return unless attribute_kind && node.receiver.nil? && !@namespace.empty?
 
-        names = node.arguments&.arguments&.filter_map { |argument| attribute_name(argument) } || []
+        arguments = node.arguments&.arguments || []
+        if node.name == :attr && arguments.length == 2 && arguments.last.is_a?(Prism::TrueNode)
+          attribute_kind = :attribute_accessor
+        end
+        names = arguments.filter_map { |argument| attribute_name(argument) }
         return if names.empty?
 
         comments, parsed = parse_comments(node)

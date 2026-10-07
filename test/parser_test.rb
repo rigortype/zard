@@ -354,6 +354,17 @@ class ParserTest < Minitest::Test
     assert_equal attributes.fetch(0).comment_span.end_offset, attributes.fetch(1).comment_span.end_offset
   end
 
+  def test_collects_attr_readers_and_legacy_writable_attributes
+    source = "class Reader\n  # Stored values.\n  attr :name, :format\n  attr(:token, true)\n  private attr(:secret, false)\n  class << self\n    attr :version\n  end\nend\n"
+    attributes = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.include?("attribute") }
+
+    assert_equal %i[instance_attribute_reader instance_attribute_reader instance_attribute_accessor instance_attribute_reader singleton_attribute_reader], attributes.map(&:kind)
+    assert_equal ["name", "format", "token", "secret", "version"], attributes.map(&:name)
+    assert_equal %i[public public public private public], attributes.map(&:visibility)
+    assert_equal ["Stored values.", "Stored values."], attributes.first(2).map { |declaration| declaration.documentation.fetch(0).description }
+  end
+
   def test_reports_a_shared_attribute_comment_diagnostic_once
     source = "class Reader\n  #  @note Shared description.\n  attr_reader :name, :age\nend\n"
     document = Zard.parse(source, path: "example.rb")

@@ -256,6 +256,9 @@ module Zard
       end
 
       def collect_container_builder_attributes(call)
+        call = attribute_builder_call(call)
+        return unless call
+
         descriptor = CONTAINER_BUILDERS.fetch(container_builder_key(call))
         attribute_kind = descriptor.fetch(:attribute_kind)
         return unless attribute_kind
@@ -273,6 +276,28 @@ module Zard
             parsed: {documentation: [].freeze, contracts: [].freeze}
           )
         end
+      end
+
+      def attribute_builder_call(call)
+        wrapped = false
+        while class_new_builder?(call)
+          return if wrapped && call.block
+
+          arguments = call.arguments&.arguments
+          return unless arguments&.one?
+
+          call = arguments.first
+          wrapped = true
+        end
+        return unless call.is_a?(Prism::CallNode)
+        return if wrapped && call.block
+
+        descriptor = CONTAINER_BUILDERS[container_builder_key(call)]
+        call if descriptor&.fetch(:attribute_kind)
+      end
+
+      def class_new_builder?(call)
+        container_builder_key(call) == ["Class", :new]
       end
 
       def container_builder_key(node)

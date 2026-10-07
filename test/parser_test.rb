@@ -288,6 +288,24 @@ class ParserTest < Minitest::Test
     assert declarations.all? { |declaration| declaration.container_builder.nil? }
   end
 
+  def test_models_generated_attributes_inherited_through_class_new
+    source = "Record = Class.new(Struct.new(:name, :age)) do\n  def label = name\nend\nPoint = Class.new(Class.new(Data.define(:x)))\n"
+    record, name, age, label, point, x = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:class, :instance_attribute_accessor, :instance_attribute_accessor, :instance_method], [record, name, age, label].map(&:kind)
+    assert_equal [:class, :instance_attribute_reader], [point.kind, x.kind]
+    assert_equal ["Record", "Record", "Record"], [name.namespace, age.namespace, label.namespace]
+    assert_equal "Point", x.namespace
+    assert_equal ["Class.new(Struct.new(:name, :age))", "Class.new(Class.new(Data.define(:x)))"], [record.container_builder, point.container_builder]
+  end
+
+  def test_does_not_move_attributes_through_nested_factory_blocks
+    source = "Outer = Class.new(Struct.new(:x) do\n  def x = nil\nend)\nNested = Class.new(Class.new(Data.define(:y)) do\nend)\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:class, "Outer"], [:class, "Nested"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
   def test_collects_instance_attributes_with_shared_documentation
     source = "class Reader\n  # Names exposed by the reader.\n  attr_reader :name, \"alias_name\"\n  attr_writer :token\n  attr_accessor(:enabled)\nend\n"
     attributes = Zard.parse(source, path: "example.rb").declarations

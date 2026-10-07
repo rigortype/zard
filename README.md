@@ -68,6 +68,7 @@ Container builders used with `||=` are treated as conditional class or module in
 Assignments from the standard library's `DelegateClass(Target)` are class builders and preserve the delegated target expression as source provenance.
 Argumentless `.freeze` tails are transparent for container builders, including block-form and repeated tails.
 Self-referential guards such as `Registry = Registry || Module.new` are treated like the equivalent `||=` initialization.
+`Class.new(Struct.new(...))` and `Class.new(Data.define(...))` chains preserve inherited generated attributes when no intermediate factory block can override them.
 
 Class and module declarations preserve explicit `include`, `prepend`, and `extend` targets with source spans without resolving ancestry. Documented containers list these mixin references in Markdown.
 

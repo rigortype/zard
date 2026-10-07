@@ -83,6 +83,7 @@ module Zard
         @singleton_visibility = :public
         @container_kind = nil
         @module_function_mode = false
+        @method_depth = 0
       end
 
       def call(program)
@@ -129,7 +130,7 @@ module Zard
       def visit_def_node(node)
         collect_method_declarations(node)
 
-        node.body&.accept(self)
+        within_method_body { node.body&.accept(self) }
       end
 
       def visit_alias_method_node(node)
@@ -137,6 +138,8 @@ module Zard
       end
 
       def visit_call_node(node)
+        return super if @method_depth.positive?
+
         if node.name == :module_function && node.receiver.nil? && module_function_context?
           return visit_module_function_call(node) { super }
         end
@@ -162,6 +165,13 @@ module Zard
       end
 
       private
+
+      def within_method_body
+        @method_depth += 1
+        yield
+      ensure
+        @method_depth -= 1
+      end
 
       def collect_alias_method_call(node)
         arguments = node.arguments&.arguments || []

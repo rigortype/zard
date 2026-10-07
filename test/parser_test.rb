@@ -341,6 +341,18 @@ class ParserTest < Minitest::Test
     assert_equal [:private, :private], declarations.map(&:visibility)
   end
 
+  def test_does_not_treat_calls_inside_method_bodies_as_declaration_dsl
+    source = "class Reader\n  def configure\n    private\n    attr_reader :ghost\n    alias_method :copy, :source\n    private_constant :Ghost\n  end\n  def visible = nil\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    methods = document.declarations.select { |declaration| declaration.kind == :instance_method }
+    attributes = document.declarations.select { |declaration| declaration.kind.to_s.include?("attribute") }
+
+    assert_equal ["configure", "visible"], methods.map(&:name)
+    assert_equal [:public, :public], methods.map(&:visibility)
+    assert_empty attributes
+    assert_empty document.diagnostics
+  end
+
   def test_resets_the_namespace_for_an_absolute_constant_path
     source = "module Outer\n  class ::Reader\n    def read = nil\n  end\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.kind == :instance_method }

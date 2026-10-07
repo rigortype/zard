@@ -465,6 +465,20 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_an_alias_method_with_an_explicit_current_owner
+    source = "class Reader\n  def read(path) = path\n  # Compatibility name.\n  self.alias_method :fetch, :read\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Alias `Reader#fetch`
+
+      Alias of `Reader#read`.
+
+      Compatibility name.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_an_explicit_superclass
     source = "# Reads stored values.\nclass Reader < BaseReader\nend\n"
     document = Zard.parse(source, path: "example.rb")

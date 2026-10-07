@@ -687,6 +687,16 @@ class ParserTest < Minitest::Test
     assert_equal ["Internal alias.", "Public module alias.", "Public module alias."], aliases.map { |declaration| declaration.documentation.fetch(0).description }
   end
 
+  def test_collects_alias_method_with_an_explicit_current_owner
+    source = "class Reader\n  def read(value) = value\n  # Compatibility alias.\n  self.alias_method :fetch, :read\n  # Internal alias.\n  private self.alias_method(:hidden, :read)\nend\n"
+    aliases = Zard.parse(source, path: "example.rb").declarations.select(&:alias_target)
+
+    assert_equal ["fetch", "hidden"], aliases.map(&:name)
+    assert_equal ["read", "read"], aliases.map(&:alias_target)
+    assert_equal [[:public, ["value"]], [:private, ["value"]]], aliases.map { |declaration| [declaration.visibility, declaration.parameters] }
+    assert_equal ["Compatibility alias.", "Internal alias."], aliases.map { |declaration| declaration.documentation.fetch(0).description }
+  end
+
   def test_collects_singleton_method_aliases
     source = "class Reader\n  class << self\n    def build = new\n    alias create build\n    alias_method \"make\", \"build\"\n  end\nend\n"
     aliases = Zard.parse(source, path: "example.rb").declarations.select(&:alias_target)

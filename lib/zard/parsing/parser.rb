@@ -217,7 +217,7 @@ module Zard
         visibility = VISIBILITY_NAMES.find { |name| node.name == name && node.receiver.nil? }
         return visit_visibility_call(node, visibility) { super } if visibility
 
-        if node.name == :alias_method && node.receiver.nil?
+        if node.name == :alias_method && (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode))
           collect_alias_method_call(node)
           return super
         end
@@ -521,7 +521,8 @@ module Zard
       end
 
       def inline_alias_method_name(node)
-        return unless node.is_a?(Prism::CallNode) && node.name == :alias_method && node.receiver.nil?
+        return unless node.is_a?(Prism::CallNode) && node.name == :alias_method
+        return unless node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)
 
         arguments = node.arguments&.arguments || []
         attribute_name(arguments.first) if arguments.length == 2

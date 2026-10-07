@@ -46,5 +46,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Recognize container builders behind value-preserving `.freeze` tails.
 - Model self-referential `CONST = CONST || builder` initialization.
 - Preserve generated attributes inherited through `Class.new` builder chains.
+- Preserve constants declared by bare `autoload` calls with literal names.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

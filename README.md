@@ -77,6 +77,7 @@ Singleton methods and attributes preserve an explicit receiver or `class <<` exp
 Ruby refinements and their members remain separate from ordinary members of the enclosing module. The refinement target is preserved as a source expression with its span.
 
 `private_constant` and `public_constant` update the visibility of class, module, and constant declarations in the same namespace.
+Bare `autoload` calls with literal Symbol or String names produce constant declarations without guessing the loaded value's class or module kind.
 
 ## Installation
 

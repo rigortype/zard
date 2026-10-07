@@ -46,6 +46,18 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_a_documented_autoload_constant
+    source = "module Models\n  # Loaded widget API.\n  autoload :Widget, \"models/widget\"\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Constant `Models::Widget`
+
+      Loaded widget API.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_class_builders_and_their_block_members
     source = "# Pair values.\nPair = Data.define(:left, :right) do\n  # Returns both values.\n  def values = [left, right]\nend\n"
     document = Zard.parse(source, path: "example.rb")

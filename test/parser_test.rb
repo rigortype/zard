@@ -116,6 +116,23 @@ class ParserTest < Minitest::Test
     assert_empty declarations
   end
 
+  def test_collects_literal_autoload_declarations
+    source = "# Lazy root API.\nautoload \"RootApi\", \"root_api\"\nmodule Models\n  # Lazy widget API.\n  autoload :Widget, \"models/widget\"\n  autoload :Hidden, path_for(:hidden)\n  private_constant :Hidden\nend\n"
+    root, models, widget, hidden = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:constant, :module, :constant, :constant], [root, models, widget, hidden].map(&:kind)
+    assert_equal [nil, nil, "Models", "Models"], [root, models, widget, hidden].map(&:namespace)
+    assert_equal [:public, :public, :public, :private], [root, models, widget, hidden].map(&:visibility)
+    assert_equal ["Lazy root API.", "Lazy widget API."], [root, widget].map { |declaration| declaration.documentation.fetch(0).description }
+  end
+
+  def test_ignores_dynamic_received_and_method_body_autoload_calls
+    source = "autoload NAME, \"dynamic\"\nRegistry.autoload :Remote, \"remote\"\ndef configure\n  autoload :Nested, \"nested\"\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:instance_method, "configure"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
   def test_models_container_builders_used_for_conditional_constant_initialization
     source = "# Registry API.\nRegistry ||= Class.new do\n  def fetch = nil\nend\nmodule Models\n  # Shared helpers.\n  Helpers ||= Module.new do\n    include Enumerable\n  end\nend\n"
     registry, fetch, models, helpers = Zard.parse(source, path: "example.rb").declarations

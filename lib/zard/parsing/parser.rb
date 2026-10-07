@@ -190,6 +190,7 @@ module Zard
         return visit_refinement_call(node) if refinement_call?(node)
         return visit_method_definition_call(node) if method_definition_call?(node)
 
+        collect_autoload_declaration(node) if autoload_call?(node)
         collect_mixin_references(node) if mixin_call?(node)
 
         if node.name == :module_function && node.receiver.nil? && module_function_context?
@@ -217,6 +218,15 @@ module Zard
       end
 
       private
+
+      def autoload_call?(node)
+        node.name == :autoload && node.receiver.nil? && node.block.nil? && node.arguments&.arguments&.length == 2
+      end
+
+      def collect_autoload_declaration(node)
+        name = attribute_name(node.arguments.arguments.first)
+        collect_path_declaration(:constant, name, node) if name
+      end
 
       def class_builder?(node)
         descriptor = container_builder_descriptor(node)

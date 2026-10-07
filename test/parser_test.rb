@@ -252,6 +252,24 @@ class ParserTest < Minitest::Test
     assert_nil declaration.container_builder
   end
 
+  def test_models_container_builders_behind_freeze_tails
+    source = "Record = Data.define(:name).freeze\nHelpers = Module.new do\n  include Enumerable\n  def each = nil\nend.freeze.freeze\n"
+    record, name, helpers, each = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:class, :instance_attribute_reader, :module, :instance_method], [record, name, helpers, each].map(&:kind)
+    assert_equal ["Data.define(:name)", "Module.new"], [record.container_builder, helpers.container_builder]
+    assert_equal ["Record", "Helpers"], [name.namespace, each.namespace]
+    assert_equal [[:include, "Enumerable"]], helpers.mixins.map { |mixin| [mixin.kind, mixin.target] }
+  end
+
+  def test_does_not_unwrap_noncanonical_freeze_tails
+    source = "Safe = Module.new&.freeze\nArgument = Module.new.freeze(:later)\nBlocked = Module.new.freeze {}\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:constant, "Safe"], [:constant, "Argument"], [:constant, "Blocked"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+    assert declarations.all? { |declaration| declaration.container_builder.nil? }
+  end
+
   def test_collects_instance_attributes_with_shared_documentation
     source = "class Reader\n  # Names exposed by the reader.\n  attr_reader :name, \"alias_name\"\n  attr_writer :token\n  attr_accessor(:enabled)\nend\n"
     attributes = Zard.parse(source, path: "example.rb").declarations

@@ -128,27 +128,31 @@ module Zard
       end
 
       def visit_constant_write_node(node)
-        return visit_container_builder_write(node.name.to_s, node) if container_builder?(node.value)
+        call = container_builder_call(node.value)
+        return visit_container_builder_write(node.name.to_s, node, call) if call
 
         collect_path_declaration(:constant, node.name.to_s, node)
         super
       end
 
       def visit_constant_path_write_node(node)
-        return visit_container_builder_write(node.target.location.slice, node) if container_builder?(node.value)
+        call = container_builder_call(node.value)
+        return visit_container_builder_write(node.target.location.slice, node, call) if call
 
         collect_path_declaration(:constant, node.target.location.slice, node)
         super
       end
 
       def visit_constant_or_write_node(node)
-        return visit_container_builder_write(node.name.to_s, node) if container_builder?(node.value)
+        call = container_builder_call(node.value)
+        return visit_container_builder_write(node.name.to_s, node, call) if call
 
         super
       end
 
       def visit_constant_path_or_write_node(node)
-        return visit_container_builder_write(node.target.location.slice, node) if container_builder?(node.value)
+        call = container_builder_call(node.value)
+        return visit_container_builder_write(node.target.location.slice, node, call) if call
 
         super
       end
@@ -218,19 +222,14 @@ module Zard
         descriptor && descriptor.fetch(:kind) == :class
       end
 
-      def container_builder?(node)
-        !container_builder_descriptor(node).nil?
-      end
-
       def container_builder_descriptor(node)
-        key = container_builder_key(node)
-        return unless key
+        call = container_builder_call(node)
+        return unless call
 
-        CONTAINER_BUILDERS[key]
+        CONTAINER_BUILDERS[container_builder_key(call)]
       end
 
-      def visit_container_builder_write(path, node)
-        call = node.value
+      def visit_container_builder_write(path, node, call)
         descriptor = CONTAINER_BUILDERS.fetch(container_builder_key(call))
         builder, builder_span = container_builder_reference(call)
         declaration_index = collect_path_declaration(
@@ -280,6 +279,18 @@ module Zard
 
         receiver = node.receiver&.location&.slice&.sub(/\A::/, "")
         [receiver, node.name]
+      end
+
+      def container_builder_call(node)
+        node = node.receiver while freeze_tail?(node)
+        return unless node.is_a?(Prism::CallNode)
+
+        node if CONTAINER_BUILDERS.key?(container_builder_key(node))
+      end
+
+      def freeze_tail?(node)
+        node.is_a?(Prism::CallNode) && node.name == :freeze && !node.safe_navigation? &&
+          node.receiver && node.arguments.nil? && node.block.nil?
       end
 
       def method_definition_call?(node)

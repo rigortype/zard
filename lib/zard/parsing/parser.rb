@@ -69,6 +69,7 @@ module Zard
         private_constant: :private,
         public_constant: :public
       }.freeze
+      MIXIN_NAMES = %i[include prepend extend].freeze
 
       def initialize(source, path, comments, diagnostics, encoding)
         @source = source
@@ -84,6 +85,7 @@ module Zard
         @container_kind = nil
         @module_function_mode = false
         @method_depth = 0
+        @container_declaration_index = nil
       end
 
       def call(program)
@@ -92,19 +94,19 @@ module Zard
       end
 
       def visit_module_node(node)
-        collect_path_declaration(:module, node.constant_path.location.slice, node)
-        within_namespace(node.constant_path.location.slice, :module) { node.body&.accept(self) }
+        declaration_index = collect_path_declaration(:module, node.constant_path.location.slice, node)
+        within_namespace(node.constant_path.location.slice, :module, declaration_index) { node.body&.accept(self) }
       end
 
       def visit_class_node(node)
-        collect_path_declaration(
+        declaration_index = collect_path_declaration(
           :class,
           node.constant_path.location.slice,
           node,
           superclass: node.superclass&.location&.slice,
           superclass_span: node.superclass ? span(node.superclass.location) : nil
         )
-        within_namespace(node.constant_path.location.slice, :class) { node.body&.accept(self) }
+        within_namespace(node.constant_path.location.slice, :class, declaration_index) { node.body&.accept(self) }
       end
 
       def visit_constant_write_node(node)
@@ -140,6 +142,8 @@ module Zard
       def visit_call_node(node)
         return super if @method_depth.positive?
 
+        collect_mixin_references(node) if mixin_call?(node)
+
         if node.name == :module_function && node.receiver.nil? && module_function_context?
           return visit_module_function_call(node) { super }
         end
@@ -165,6 +169,25 @@ module Zard
       end
 
       private
+
+      def mixin_call?(node)
+        MIXIN_NAMES.include?(node.name) && node.receiver.nil? && @container_declaration_index && @singleton_depth.zero?
+      end
+
+      def collect_mixin_references(node)
+        arguments = node.arguments&.arguments || []
+        return if arguments.empty?
+
+        declaration = @declarations.fetch(@container_declaration_index)
+        mixins = arguments.map do |argument|
+          Model::V1::MixinReference.new(
+            kind: node.name,
+            target: argument.location.slice,
+            span: span(argument.location)
+          )
+        end
+        @declarations[@container_declaration_index] = declaration_with_mixins(declaration, declaration.mixins + mixins)
+      end
 
       def within_method_body
         @method_depth += 1
@@ -323,6 +346,7 @@ module Zard
           documentation: parsed.fetch(:documentation).freeze,
           contracts: parsed.fetch(:contracts).freeze
         )
+        @declarations.length - 1
       end
 
       def parse_comments(node)
@@ -331,17 +355,19 @@ module Zard
         [comments, parsed]
       end
 
-      def within_namespace(name, kind)
+      def within_namespace(name, kind, declaration_index)
         previous_namespace = @namespace
         previous_instance_visibility = @instance_visibility
         previous_singleton_visibility = @singleton_visibility
         previous_container_kind = @container_kind
         previous_module_function_mode = @module_function_mode
+        previous_container_declaration_index = @container_declaration_index
         @namespace = namespace_parts(name)
         @instance_visibility = :public
         @singleton_visibility = :public
         @container_kind = kind
         @module_function_mode = false
+        @container_declaration_index = declaration_index
         yield
       ensure
         @namespace = previous_namespace
@@ -349,6 +375,7 @@ module Zard
         @singleton_visibility = previous_singleton_visibility
         @container_kind = previous_container_kind
         @module_function_mode = previous_module_function_mode
+        @container_declaration_index = previous_container_declaration_index
       end
 
       def namespace_parts(name)
@@ -558,7 +585,11 @@ module Zard
         declaration_with_kind_and_visibility(declaration, declaration.kind, visibility)
       end
 
-      def declaration_with_kind_and_visibility(declaration, kind, visibility)
+      def declaration_with_mixins(declaration, mixins)
+        declaration_with_kind_and_visibility(declaration, declaration.kind, declaration.visibility, mixins: mixins.freeze)
+      end
+
+      def declaration_with_kind_and_visibility(declaration, kind, visibility, mixins: declaration.mixins)
         Model::V1::Declaration.new(
           kind: kind,
           name: declaration.name,
@@ -568,6 +599,7 @@ module Zard
           alias_target: declaration.alias_target,
           superclass: declaration.superclass,
           superclass_span: declaration.superclass_span,
+          mixins: mixins,
           span: declaration.span,
           comment_span: declaration.comment_span,
           documentation: declaration.documentation,

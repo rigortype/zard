@@ -136,6 +136,31 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_mixin_references_on_a_documented_container
+    source = "# Reads values.\nclass Reader\n  include Enumerable, Readable\n  prepend Instrumentation\n  extend FactoryMethods\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Class `Reader`
+
+      ### Includes
+
+      - `Enumerable`
+      - `Readable`
+
+      ### Prepends
+
+      - `Instrumentation`
+
+      ### Extends
+
+      - `FactoryMethods`
+
+      Reads values.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_hides_private_constants_and_classes
     source = "module Demo\n  # Internal value.\n  VALUE = 1\n  # Internal implementation.\n  class Internal\n  end\n  private_constant :VALUE, :Internal\nend\n"
     document = Zard.parse(source, path: "example.rb")

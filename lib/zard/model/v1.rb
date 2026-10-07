@@ -58,10 +58,21 @@ module Zard
         end
       end
 
-      class Declaration
-        attr_reader :kind, :name, :namespace, :visibility, :parameters, :alias_target, :superclass, :superclass_span, :span, :comment_span, :documentation, :contracts
+      class MixinReference
+        attr_reader :kind, :target, :span
 
-        def initialize(kind:, name:, namespace:, visibility:, parameters:, span:, comment_span:, documentation:, contracts:, alias_target: nil, superclass: nil, superclass_span: nil)
+        def initialize(kind:, target:, span:)
+          @kind = kind
+          @target = target
+          @span = span
+          freeze
+        end
+      end
+
+      class Declaration
+        attr_reader :kind, :name, :namespace, :visibility, :parameters, :alias_target, :superclass, :superclass_span, :mixins, :span, :comment_span, :documentation, :contracts
+
+        def initialize(kind:, name:, namespace:, visibility:, parameters:, span:, comment_span:, documentation:, contracts:, alias_target: nil, superclass: nil, superclass_span: nil, mixins: [].freeze)
           @kind = kind
           @name = name
           @namespace = namespace
@@ -70,6 +81,7 @@ module Zard
           @alias_target = alias_target
           @superclass = superclass
           @superclass_span = superclass_span
+          @mixins = mixins
           @span = span
           @comment_span = comment_span
           @documentation = documentation

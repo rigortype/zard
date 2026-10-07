@@ -323,6 +323,32 @@ class ParserTest < Minitest::Test
     assert_equal "superclass_for(:reader)", declaration.superclass
   end
 
+  def test_preserves_mixin_references_and_spans_without_resolving_them
+    source = "class Reader\n  include Enumerable, Namespace::Readable\n  prepend instrumentation_for(:reader)\n  extend FactoryMethods\nend\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
+
+    assert_equal %i[include include prepend extend], declaration.mixins.map(&:kind)
+    assert_equal ["Enumerable", "Namespace::Readable", "instrumentation_for(:reader)", "FactoryMethods"], declaration.mixins.map(&:target)
+    declaration.mixins.each do |mixin|
+      assert_equal mixin.target, source.byteslice(mixin.span.start_offset...mixin.span.end_offset)
+    end
+  end
+
+  def test_attaches_mixin_references_to_the_lexical_container_only
+    source = "module Outer\n  include OuterFeature\n  class Reader\n    prepend ReaderFeature\n  end\n  extend OuterMethods\nend\n"
+    outer, reader = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:include, "OuterFeature"], [:extend, "OuterMethods"]], outer.mixins.map { |mixin| [mixin.kind, mixin.target] }
+    assert_equal [[:prepend, "ReaderFeature"]], reader.mixins.map { |mixin| [mixin.kind, mixin.target] }
+  end
+
+  def test_ignores_received_and_singleton_class_mixin_calls
+    source = "class Reader\n  helper.include Feature\n  class << self\n    include SingletonFeature\n  end\nend\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
+
+    assert_empty declaration.mixins
+  end
+
   def test_applies_private_and_public_constant_visibility
     source = "module Demo\n  VALUE = 1\n  class Internal\n  end\n  private_constant :VALUE, :Internal\n  public_constant \"VALUE\"\nend\n"
     declarations = Zard.parse(source, path: "example.rb").declarations
@@ -342,14 +368,16 @@ class ParserTest < Minitest::Test
   end
 
   def test_does_not_treat_calls_inside_method_bodies_as_declaration_dsl
-    source = "class Reader\n  def configure\n    private\n    attr_reader :ghost\n    alias_method :copy, :source\n    private_constant :Ghost\n  end\n  def visible = nil\nend\n"
+    source = "class Reader\n  def configure\n    private\n    attr_reader :ghost\n    alias_method :copy, :source\n    private_constant :Ghost\n    include GhostFeature\n  end\n  def visible = nil\nend\n"
     document = Zard.parse(source, path: "example.rb")
     methods = document.declarations.select { |declaration| declaration.kind == :instance_method }
     attributes = document.declarations.select { |declaration| declaration.kind.to_s.include?("attribute") }
+    reader = document.declarations.find { |declaration| declaration.kind == :class }
 
     assert_equal ["configure", "visible"], methods.map(&:name)
     assert_equal [:public, :public], methods.map(&:visibility)
     assert_empty attributes
+    assert_empty reader.mixins
     assert_empty document.diagnostics
   end
 

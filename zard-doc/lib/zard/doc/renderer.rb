@@ -28,6 +28,7 @@ module Zard
 
         parts = [heading(declaration)]
         parts << "Superclass: `#{declaration.superclass}`." if declaration.superclass
+        append_mixins(parts, declaration)
         parts << "Alias of `#{display_alias_target(declaration)}`." if declaration.alias_target
         text = documentation.select { |tag| tag.name == :text }.map(&:description)
         parts << text.join("\n") unless text.empty?
@@ -96,6 +97,13 @@ module Zard
           "## Attribute accessor `#{display_name(declaration)}`"
         else
           "## `#{display_name(declaration)}(#{declaration.parameters.join(", ")})`"
+        end
+      end
+
+      def append_mixins(parts, declaration)
+        {include: "Includes", prepend: "Prepends", extend: "Extends"}.each do |kind, heading|
+          targets = declaration.mixins.select { |mixin| mixin.kind == kind }.map(&:target)
+          parts << "### #{heading}\n\n#{targets.map { |target| "- `#{target}`" }.join("\n")}" unless targets.empty?
         end
       end
 

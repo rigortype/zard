@@ -33,5 +33,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Preserve explicit class superclass expressions with source provenance.
 - Apply private and public constant visibility to class, module, and constant declarations.
 - Ignore declaration DSL calls inside method bodies.
+- Preserve `include`, `prepend`, and `extend` targets with source provenance.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

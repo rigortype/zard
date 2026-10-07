@@ -39,5 +39,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Preserve methods declared by literal `define_method` and `define_singleton_method` calls.
 - Model classes assigned from `Data.define` and `Struct.new` builders.
 - Preserve generated attributes on named `Data.define` and `Struct.new` subclasses.
+- Model classes assigned from `Class.new` builders.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

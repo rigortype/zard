@@ -174,6 +174,25 @@ class ParserTest < Minitest::Test
     assert_equal [[:class, "Record"], [:instance_method, "value"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
   end
 
+  def test_models_class_new_as_a_class_with_block_members
+    source = "module Models\n  Record = Class.new(BaseRecord) do\n    include Enumerable\n    VALUE = 1\n    def each = nil\n  end\nend\n"
+    mod, klass, value, each = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:module, :class, :constant, :instance_method], [mod, klass, value, each].map(&:kind)
+    assert_equal "Class.new(BaseRecord)", klass.class_builder
+    assert_equal ["Models", "Models::Record", "Models::Record"], [klass.namespace, value.namespace, each.namespace]
+    assert_equal [[:include, "Enumerable"]], klass.mixins.map { |mixin| [mixin.kind, mixin.target] }
+  end
+
+  def test_models_a_class_new_assignment_without_a_block
+    source = "Error = Class.new(StandardError)\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
+
+    assert_equal :class, declaration.kind
+    assert_equal "Error", declaration.name
+    assert_equal "Class.new(StandardError)", declaration.class_builder
+  end
+
   def test_collects_instance_attributes_with_shared_documentation
     source = "class Reader\n  # Names exposed by the reader.\n  attr_reader :name, \"alias_name\"\n  attr_writer :token\n  attr_accessor(:enabled)\nend\n"
     attributes = Zard.parse(source, path: "example.rb").declarations

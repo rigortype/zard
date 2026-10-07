@@ -74,7 +74,8 @@ module Zard
       METHOD_DEFINITION_NAMES = %i[define_method define_singleton_method].freeze
       CLASS_BUILDERS = {
         ["Data", :define] => :attribute_reader,
-        ["Struct", :new] => :attribute_accessor
+        ["Struct", :new] => :attribute_accessor,
+        ["Class", :new] => nil
       }.freeze
 
       def initialize(source, path, comments, diagnostics, encoding, prism_source)
@@ -231,6 +232,8 @@ module Zard
 
       def collect_class_builder_attributes(call)
         attribute_kind = CLASS_BUILDERS.fetch([call.receiver.location.slice.sub(/\A::/, ""), call.name])
+        return unless attribute_kind
+
         arguments = call.arguments&.arguments || []
         arguments.grep(Prism::SymbolNode).each do |argument|
           append_declaration(

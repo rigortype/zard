@@ -271,6 +271,18 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_an_attribute_with_an_explicit_current_owner
+    source = "class Reader\n  # Stored name.\n  self.attr_reader :name\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Attribute reader `Reader#name`
+
+      Stored name.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_attr_readers_and_legacy_writable_attributes
     source = "class Reader\n  # Stored name.\n  attr :name\n  # Mutable token.\n  attr(:token, true)\nend\n"
     document = Zard.parse(source, path: "example.rb")

@@ -639,7 +639,8 @@ module Zard
 
       def collect_attribute_declarations(node)
         attribute_kind = ATTRIBUTE_KINDS[node.name]
-        return unless attribute_kind && node.receiver.nil? && !@namespace.empty?
+        current_owner = node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)
+        return unless attribute_kind && current_owner && !@namespace.empty?
 
         arguments = node.arguments&.arguments || []
         if node.name == :attr && arguments.length == 2 && arguments.last.is_a?(Prism::TrueNode)

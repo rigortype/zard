@@ -366,6 +366,18 @@ class ParserTest < Minitest::Test
     assert_equal attributes.fetch(0).comment_span.end_offset, attributes.fetch(1).comment_span.end_offset
   end
 
+  def test_collects_attributes_with_an_explicit_current_owner
+    source = "class Reader\n  # Stored name.\n  self.attr_reader :name\n  self.attr_writer :token\n  self.attr_accessor :enabled\nend\n"
+    attributes = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.include?("attribute") }
+
+    assert_equal %i[instance_attribute_reader instance_attribute_writer instance_attribute_accessor], attributes.map(&:kind)
+    assert_equal ["name", "token", "enabled"], attributes.map(&:name)
+    assert_equal ["Reader"] * 3, attributes.map(&:namespace)
+    assert attributes.all? { |declaration| declaration.receiver.nil? }
+    assert_equal "Stored name.", attributes.fetch(0).documentation.fetch(0).description
+  end
+
   def test_collects_attr_readers_and_legacy_writable_attributes
     source = "class Reader\n  # Stored values.\n  attr :name, :format\n  attr(:token, true)\n  private attr(:secret, false)\n  class << self\n    attr :version\n  end\nend\n"
     attributes = Zard.parse(source, path: "example.rb").declarations

@@ -52,6 +52,8 @@ Documentation descriptions continue across plain comment lines until the next an
 
 Declarations record `public`, `protected`, or `private` visibility. Markdown output includes public declarations only. Bare visibility calls, inline forms such as `private def` and `private attr_reader`, named method modifiers such as `private :read`, and `private_class_method` / `public_class_method` are supported. Named attribute modifiers are diagnosed because one attribute declaration may represent two generated methods; use lexical or inline visibility for attributes.
 
+`module_function` records its private instance method and public singleton copy as separate declarations with shared source provenance. Bare, named, and inline forms are supported.
+
 ## Installation
 
 Until the first RubyGems release, add the repository to your Gemfile:

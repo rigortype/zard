@@ -77,6 +77,8 @@ module Zard
         @singleton_depth = 0
         @instance_visibility = :public
         @singleton_visibility = :public
+        @container_kind = nil
+        @module_function_mode = false
       end
 
       def call(program)
@@ -86,12 +88,12 @@ module Zard
 
       def visit_module_node(node)
         collect_path_declaration(:module, node.constant_path.location.slice, node)
-        within_namespace(node.constant_path.location.slice) { node.body&.accept(self) }
+        within_namespace(node.constant_path.location.slice, :module) { node.body&.accept(self) }
       end
 
       def visit_class_node(node)
         collect_path_declaration(:class, node.constant_path.location.slice, node)
-        within_namespace(node.constant_path.location.slice) { node.body&.accept(self) }
+        within_namespace(node.constant_path.location.slice, :class) { node.body&.accept(self) }
       end
 
       def visit_constant_write_node(node)
@@ -115,19 +117,16 @@ module Zard
       end
 
       def visit_def_node(node)
-        collect_declaration(
-          kind: singleton_method?(node) ? :singleton_method : :instance_method,
-          name: node.name.to_s,
-          namespace: @namespace.empty? ? nil : @namespace.join("::"),
-          visibility: method_visibility(node),
-          parameters: parameter_names(node.parameters).freeze,
-          node: node
-        )
+        collect_method_declarations(node)
 
         node.body&.accept(self)
       end
 
       def visit_call_node(node)
+        if node.name == :module_function && node.receiver.nil? && module_function_context?
+          return visit_module_function_call(node) { super }
+        end
+
         if node.receiver.nil? && (class_visibility = CLASS_METHOD_VISIBILITY[node.name])
           return visit_class_method_visibility_call(node, class_visibility) { super }
         end
@@ -140,6 +139,45 @@ module Zard
       end
 
       private
+
+      def collect_method_declarations(node)
+        kind = singleton_method?(node) ? :singleton_method : :instance_method
+        name = node.name.to_s
+        namespace = current_namespace
+        parameters = parameter_names(node.parameters).freeze
+        unless module_function_definition?(node)
+          return collect_declaration(
+            kind: kind,
+            name: name,
+            namespace: namespace,
+            visibility: method_visibility(node),
+            parameters: parameters,
+            node: node
+          )
+        end
+
+        comments, parsed = parse_comments(node)
+        append_declaration(
+          kind: :instance_method,
+          name: name,
+          namespace: namespace,
+          visibility: :private,
+          parameters: parameters,
+          node: node,
+          comments: comments,
+          parsed: parsed
+        )
+        append_declaration(
+          kind: :singleton_method,
+          name: name,
+          namespace: namespace,
+          visibility: :public,
+          parameters: parameters,
+          node: node,
+          comments: comments,
+          parsed: parsed
+        )
+      end
 
       def collect_attribute_declarations(node)
         attribute_kind = ATTRIBUTE_KINDS[node.name]
@@ -215,18 +253,24 @@ module Zard
         [comments, parsed]
       end
 
-      def within_namespace(name)
+      def within_namespace(name, kind)
         previous_namespace = @namespace
         previous_instance_visibility = @instance_visibility
         previous_singleton_visibility = @singleton_visibility
+        previous_container_kind = @container_kind
+        previous_module_function_mode = @module_function_mode
         @namespace = namespace_parts(name)
         @instance_visibility = :public
         @singleton_visibility = :public
+        @container_kind = kind
+        @module_function_mode = false
         yield
       ensure
         @namespace = previous_namespace
         @instance_visibility = previous_instance_visibility
         @singleton_visibility = previous_singleton_visibility
+        @container_kind = previous_container_kind
+        @module_function_mode = previous_module_function_mode
       end
 
       def namespace_parts(name)
@@ -251,6 +295,7 @@ module Zard
       def visit_visibility_call(node, visibility)
         arguments = node.arguments&.arguments
         if arguments.nil? || arguments.empty?
+          @module_function_mode = false if module_function_context?
           set_current_visibility(visibility)
           return yield
         end
@@ -270,6 +315,55 @@ module Zard
           )
         end
         yield
+      end
+
+      def visit_module_function_call(node)
+        arguments = node.arguments&.arguments
+        if arguments.nil? || arguments.empty?
+          @instance_visibility = :private
+          @module_function_mode = true
+          return yield
+        end
+
+        if arguments.any? { |argument| argument.is_a?(Prism::DefNode) }
+          return with_module_function_mode { yield }
+        end
+
+        yield
+        names = arguments.filter_map { |argument| attribute_name(argument) }
+        names.each { |name| apply_named_module_function(name) }
+      end
+
+      def module_function_context?
+        @container_kind == :module && @singleton_depth.zero?
+      end
+
+      def module_function_definition?(node)
+        @module_function_mode && module_function_context? && node.receiver.nil?
+      end
+
+      def with_module_function_mode
+        previous_visibility = @instance_visibility
+        previous_mode = @module_function_mode
+        @instance_visibility = :private
+        @module_function_mode = true
+        yield
+      ensure
+        @instance_visibility = previous_visibility
+        @module_function_mode = previous_mode
+      end
+
+      def apply_named_module_function(name)
+        index = @declarations.rindex do |declaration|
+          declaration.kind == :instance_method &&
+            declaration.namespace == current_namespace &&
+            declaration.name == name
+        end
+        return unless index
+
+        declaration = @declarations.fetch(index)
+        @declarations[index] = declaration_with_visibility(declaration, :private)
+        @declarations << declaration_with_kind_and_visibility(declaration, :singleton_method, :public)
       end
 
       def visit_class_method_visibility_call(node, visibility)
@@ -366,8 +460,12 @@ module Zard
       end
 
       def declaration_with_visibility(declaration, visibility)
+        declaration_with_kind_and_visibility(declaration, declaration.kind, visibility)
+      end
+
+      def declaration_with_kind_and_visibility(declaration, kind, visibility)
         Model::V1::Declaration.new(
-          kind: declaration.kind,
+          kind: kind,
           name: declaration.name,
           namespace: declaration.namespace,
           visibility: visibility,

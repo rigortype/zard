@@ -242,6 +242,41 @@ class ParserTest < Minitest::Test
     assert_equal :private, method.visibility
   end
 
+  def test_models_bare_named_and_inline_module_functions
+    source = "module Helpers\n  module_function\n  def first = nil\n  public\n  def second = nil\n  module_function :second\n  module_function def third = nil\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [
+      [:instance_method, "first", :private],
+      [:singleton_method, "first", :public],
+      [:instance_method, "second", :private],
+      [:singleton_method, "second", :public],
+      [:instance_method, "third", :private],
+      [:singleton_method, "third", :public]
+    ], methods.map { |declaration| [declaration.kind, declaration.name, declaration.visibility] }
+  end
+
+  def test_bare_visibility_ends_module_function_mode
+    source = "module Helpers\n  module_function\n  def copied = nil\n  protected\n  def inherited = nil\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [
+      [:instance_method, "copied", :private],
+      [:singleton_method, "copied", :public],
+      [:instance_method, "inherited", :protected]
+    ], methods.map { |declaration| [declaration.kind, declaration.name, declaration.visibility] }
+  end
+
+  def test_ignores_module_function_mode_in_classes
+    source = "class Helpers\n  module_function\n  def visible = nil\nend\n"
+    method = Zard.parse(source, path: "example.rb").declarations
+      .find { |declaration| declaration.kind == :instance_method }
+
+    assert_equal :public, method.visibility
+  end
+
   def test_resets_the_namespace_for_an_absolute_constant_path
     source = "module Outer\n  class ::Reader\n    def read = nil\n  end\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.kind == :instance_method }

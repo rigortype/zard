@@ -27,5 +27,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Preserve instance and singleton attribute declarations in the ZARD model and render their documentation.
 - Track lexical declaration visibility and render public API documentation only.
 - Apply named method visibility and diagnose ambiguous named attribute visibility.
+- Apply named and inline class method visibility.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

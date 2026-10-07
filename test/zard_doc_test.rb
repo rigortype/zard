@@ -85,6 +85,13 @@ class ZardDocTest < Minitest::Test
     assert_equal "", Zard::Doc.render(document)
   end
 
+  def test_hides_private_class_methods
+    source = "class Reader\n  # Internal constructor.\n  def self.build = new\n  private_class_method :build\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+
+    assert_equal "", Zard::Doc.render(document)
+  end
+
   def test_renders_yield_parameters_and_return_value
     source = "# @yieldparam value — Each value.\n# @yieldreturn The consumed length.\ndef each_value = yield(\"value\")\n"
     document = Zard.parse(source, path: "example.rb")

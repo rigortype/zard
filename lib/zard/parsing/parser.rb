@@ -61,6 +61,10 @@ module Zard
         attr_accessor: :attribute_accessor
       }.freeze
       VISIBILITY_NAMES = %i[public protected private].freeze
+      CLASS_METHOD_VISIBILITY = {
+        private_class_method: :private,
+        public_class_method: :public
+      }.freeze
 
       def initialize(source, path, comments, diagnostics, encoding)
         @source = source
@@ -124,6 +128,10 @@ module Zard
       end
 
       def visit_call_node(node)
+        if node.receiver.nil? && (class_visibility = CLASS_METHOD_VISIBILITY[node.name])
+          return visit_class_method_visibility_call(node, class_visibility) { super }
+        end
+
         visibility = VISIBILITY_NAMES.find { |name| node.name == name && node.receiver.nil? }
         return visit_visibility_call(node, visibility) { super } if visibility
 
@@ -252,8 +260,37 @@ module Zard
         end
 
         names = arguments.filter_map { |argument| attribute_name(argument) }
-        apply_named_visibility(names, visibility, node) unless names.empty?
+        unless names.empty?
+          apply_named_visibility(
+            names,
+            visibility,
+            node,
+            method_kind: current_method_kind,
+            attribute_scope: current_attribute_scope
+          )
+        end
         yield
+      end
+
+      def visit_class_method_visibility_call(node, visibility)
+        arguments = node.arguments&.arguments || []
+        yield
+        names = arguments.filter_map do |argument|
+          if argument.is_a?(Prism::DefNode) && argument.receiver
+            argument.name.to_s
+          else
+            attribute_name(argument)
+          end
+        end
+        unless names.empty?
+          apply_named_visibility(
+            names,
+            visibility,
+            node,
+            method_kind: :singleton_method,
+            attribute_scope: "singleton_attribute_"
+          )
+        end
       end
 
       def visibility_declaration?(node)
@@ -276,14 +313,14 @@ module Zard
         set_current_visibility(previous_visibility)
       end
 
-      def apply_named_visibility(names, visibility, node)
+      def apply_named_visibility(names, visibility, node, method_kind:, attribute_scope:)
         attribute_match = false
         @declarations.map! do |declaration|
           next declaration unless declaration.namespace == current_namespace
 
-          if declaration.kind == current_method_kind && names.include?(declaration.name)
+          if declaration.kind == method_kind && names.include?(declaration.name)
             declaration_with_visibility(declaration, visibility)
-          elsif current_attribute?(declaration) && (attribute_method_names(declaration) & names).any?
+          elsif attribute_in_scope?(declaration, attribute_scope) && (attribute_method_names(declaration) & names).any?
             attribute_match = true
             (visibility == :public) ? declaration : declaration_with_visibility(declaration, visibility)
           else
@@ -309,8 +346,11 @@ module Zard
         @singleton_depth.positive? ? :singleton_method : :instance_method
       end
 
-      def current_attribute?(declaration)
-        scope = @singleton_depth.positive? ? "singleton_attribute_" : "instance_attribute_"
+      def current_attribute_scope
+        @singleton_depth.positive? ? "singleton_attribute_" : "instance_attribute_"
+      end
+
+      def attribute_in_scope?(declaration, scope)
         declaration.kind.to_s.start_with?(scope)
       end
 

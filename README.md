@@ -50,7 +50,7 @@ InlineRBS trailing prose after `--` is stored as a contract note. It is not copi
 
 Documentation descriptions continue across plain comment lines until the next annotation or contract. No continuation marker is required.
 
-Declarations record `public`, `protected`, or `private` visibility. Markdown output includes public declarations only. Bare visibility calls, inline forms such as `private def` and `private attr_reader`, and named method modifiers such as `private :read` are supported. Named attribute modifiers are diagnosed because one attribute declaration may represent two generated methods; use lexical or inline visibility for attributes.
+Declarations record `public`, `protected`, or `private` visibility. Markdown output includes public declarations only. Bare visibility calls, inline forms such as `private def` and `private attr_reader`, named method modifiers such as `private :read`, and `private_class_method` / `public_class_method` are supported. Named attribute modifiers are diagnosed because one attribute declaration may represent two generated methods; use lexical or inline visibility for attributes.
 
 ## Installation
 

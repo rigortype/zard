@@ -222,6 +222,26 @@ class ParserTest < Minitest::Test
     assert_equal ["visibility.named-attribute"], document.diagnostics.map(&:code)
   end
 
+  def test_applies_named_and_inline_class_method_visibility
+    source = "class Reader\n  def self.hidden = nil\n  private_class_method :hidden\n  private_class_method def self.inline = nil\n  def self.shown = nil\n  private_class_method :shown\n  public_class_method \"shown\"\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind == :singleton_method }
+
+    assert_equal [
+      ["hidden", :private],
+      ["inline", :private],
+      ["shown", :public]
+    ], methods.map { |declaration| [declaration.name, declaration.visibility] }
+  end
+
+  def test_applies_class_method_visibility_to_singleton_class_methods
+    source = "class Reader\n  class << self\n    def hidden = nil\n  end\n  private_class_method :hidden\nend\n"
+    method = Zard.parse(source, path: "example.rb").declarations
+      .find { |declaration| declaration.kind == :singleton_method }
+
+    assert_equal :private, method.visibility
+  end
+
   def test_resets_the_namespace_for_an_absolute_constant_path
     source = "module Outer\n  class ::Reader\n    def read = nil\n  end\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.kind == :instance_method }

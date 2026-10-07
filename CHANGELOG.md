@@ -47,5 +47,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Model self-referential `CONST = CONST || builder` initialization.
 - Preserve generated attributes inherited through `Class.new` builder chains.
 - Preserve constants declared by bare `autoload` calls with literal names.
+- Preserve literal `const_set` declarations owned by the current class or module.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

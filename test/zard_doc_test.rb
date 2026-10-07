@@ -58,6 +58,24 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_documented_const_set_declarations
+    source = "module Models\n  # Default limit.\n  const_set :LIMIT, 3\n  # Record API.\n  self.const_set(:Record, Class.new)\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Constant `Models::LIMIT`
+
+      Default limit.
+
+      ## Class `Models::Record`
+
+      Class builder: `Class.new`.
+
+      Record API.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_class_builders_and_their_block_members
     source = "# Pair values.\nPair = Data.define(:left, :right) do\n  # Returns both values.\n  def values = [left, right]\nend\n"
     document = Zard.parse(source, path: "example.rb")

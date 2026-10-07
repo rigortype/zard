@@ -189,6 +189,7 @@ module Zard
 
         return visit_refinement_call(node) if refinement_call?(node)
         return visit_method_definition_call(node) if method_definition_call?(node)
+        return visit_const_set_call(node) if const_set_call?(node)
 
         collect_autoload_declaration(node) if autoload_call?(node)
         collect_mixin_references(node) if mixin_call?(node)
@@ -226,6 +227,24 @@ module Zard
       def collect_autoload_declaration(node)
         name = attribute_name(node.arguments.arguments.first)
         collect_path_declaration(:constant, name, node) if name
+      end
+
+      def const_set_call?(node)
+        return false unless node.name == :const_set && node.block.nil? && node.arguments&.arguments&.length == 2
+        return false if @namespace.empty? || @singleton_depth.positive? || @refinement
+
+        node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)
+      end
+
+      def visit_const_set_call(node)
+        name_node, value = node.arguments.arguments
+        name = attribute_name(name_node)
+        return unless name
+
+        call = container_builder_call(value)
+        return visit_container_builder_write(name, node, call) if call
+
+        collect_path_declaration(:constant, name, node)
       end
 
       def class_builder?(node)

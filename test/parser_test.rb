@@ -133,6 +133,24 @@ class ParserTest < Minitest::Test
     assert_equal [[:instance_method, "configure"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
   end
 
+  def test_collects_literal_const_set_declarations_in_the_current_container
+    source = "module Models\n  # Default limit.\n  const_set :LIMIT, 3\n  # Record API.\n  self.const_set(:Record, Data.define(:name))\n  private_constant :LIMIT\nend\n"
+    models, limit, record, name = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:module, :constant, :class, :instance_attribute_reader], [models, limit, record, name].map(&:kind)
+    assert_equal ["Models", "Models", "Models::Record"], [limit.namespace, record.namespace, name.namespace]
+    assert_equal [:private, :public, :public], [limit.visibility, record.visibility, name.visibility]
+    assert_equal "Data.define(:name)", record.container_builder
+    assert_equal ["Default limit.", "Record API."], [limit, record].map { |declaration| declaration.documentation.fetch(0).description }
+  end
+
+  def test_ignores_const_set_when_the_owner_is_not_the_current_ordinary_container
+    source = "const_set(:Root, 1)\nmodule Models\n  Registry.const_set(:Remote, 1)\n  const_set(NAME, 1)\n  class << self\n    const_set(:SingletonOwned, 1)\n  end\n  refine String do\n    const_set(:Refined, 1)\n  end\n  def configure\n    const_set(:Nested, 1)\n  end\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:module, "Models"], [:refinement, "String"], [:instance_method, "configure"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
   def test_models_container_builders_used_for_conditional_constant_initialization
     source = "# Registry API.\nRegistry ||= Class.new do\n  def fetch = nil\nend\nmodule Models\n  # Shared helpers.\n  Helpers ||= Module.new do\n    include Enumerable\n  end\nend\n"
     registry, fetch, models, helpers = Zard.parse(source, path: "example.rb").declarations

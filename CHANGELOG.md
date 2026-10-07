@@ -56,5 +56,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Preserve literal `const_set` declarations owned by the current class or module.
 - Preserve `attr` readers and the legacy writable form.
 - Preserve attribute declarations explicitly received by the current owner.
+- Preserve mixin calls explicitly received by the current owner.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

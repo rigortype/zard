@@ -741,7 +741,18 @@ class ParserTest < Minitest::Test
     assert_equal [[:prepend, "ReaderFeature"]], reader.mixins.map { |mixin| [mixin.kind, mixin.target] }
   end
 
-  def test_ignores_received_and_singleton_class_mixin_calls
+  def test_preserves_mixin_references_with_an_explicit_current_owner
+    source = "class Reader\n  self.include Enumerable\n  self.prepend Instrumentation\n  self.extend FactoryMethods\nend\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
+
+    assert_equal %i[include prepend extend], declaration.mixins.map(&:kind)
+    assert_equal ["Enumerable", "Instrumentation", "FactoryMethods"], declaration.mixins.map(&:target)
+    declaration.mixins.each do |mixin|
+      assert_equal mixin.target, source.byteslice(mixin.span.start_offset...mixin.span.end_offset)
+    end
+  end
+
+  def test_ignores_foreign_received_and_singleton_class_mixin_calls
     source = "class Reader\n  helper.include Feature\n  class << self\n    include SingletonFeature\n  end\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
 

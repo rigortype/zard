@@ -484,7 +484,7 @@ module Zard
 
       def mixin_call?(node)
         MIXIN_NAMES.include?(node.name) &&
-          node.receiver.nil? &&
+          (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
           %i[class module].include?(@container_kind) &&
           @container_declaration_index &&
           @singleton_depth.zero?

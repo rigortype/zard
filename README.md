@@ -78,6 +78,7 @@ Self-referential guards such as `Registry = Registry || Module.new` are treated 
 `Class.new(Struct.new(...))` and `Class.new(Data.define(...))` chains preserve inherited generated attributes when no intermediate factory block can override them.
 
 Class and module declarations preserve explicit `include`, `prepend`, and `extend` targets with source spans without resolving ancestry. Documented containers list these mixin references in Markdown.
+Mixin calls received by `self` belong to the current container, like their bare forms.
 
 Singleton methods and attributes preserve an explicit receiver or `class <<` expression with source provenance. Documentation renders that source receiver without resolving its runtime object.
 

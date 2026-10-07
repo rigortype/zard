@@ -522,6 +522,30 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_mixin_references_with_an_explicit_current_owner
+    source = "# Reads values.\nclass Reader\n  self.include Enumerable\n  self.prepend Instrumentation\n  self.extend FactoryMethods\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Class `Reader`
+
+      ### Includes
+
+      - `Enumerable`
+
+      ### Prepends
+
+      - `Instrumentation`
+
+      ### Extends
+
+      - `FactoryMethods`
+
+      Reads values.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_hides_private_constants_and_classes
     source = "module Demo\n  # Internal value.\n  VALUE = 1\n  # Internal implementation.\n  class Internal\n  end\n  private_constant :VALUE, :Internal\nend\n"
     document = Zard.parse(source, path: "example.rb")

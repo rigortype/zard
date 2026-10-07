@@ -296,8 +296,7 @@ module Zard
         attribute_kind = descriptor.fetch(:attribute_kind)
         return unless attribute_kind
 
-        arguments = call.arguments&.arguments || []
-        arguments.grep(Prism::SymbolNode).each do |argument|
+        builder_attribute_arguments(call).each do |argument|
           append_declaration(
             kind: :"instance_#{attribute_kind}",
             name: argument.unescaped,
@@ -309,6 +308,12 @@ module Zard
             parsed: {documentation: [].freeze, contracts: [].freeze}
           )
         end
+      end
+
+      def builder_attribute_arguments(call)
+        arguments = call.arguments&.arguments || []
+        arguments = arguments.drop(1) if container_builder_key(call) == ["Struct", :new] && arguments.first.is_a?(Prism::StringNode)
+        arguments.select { |argument| argument.is_a?(Prism::SymbolNode) || argument.is_a?(Prism::StringNode) }
       end
 
       def attribute_builder_call(call)

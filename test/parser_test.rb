@@ -194,6 +194,18 @@ class ParserTest < Minitest::Test
     assert_equal "Struct.new(:x, :y, keyword_init: true)", klass.container_builder
   end
 
+  def test_models_literal_string_builder_members
+    source = "Pair = Data.define(\"left\", :right)\nCustomer = Struct.new(\"Customer\", \"name\", :age)\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+    pair, left, right, customer, name, age = declarations
+
+    assert_equal [:class, :instance_attribute_reader, :instance_attribute_reader, :class, :instance_attribute_accessor, :instance_attribute_accessor], declarations.map(&:kind)
+    assert_equal ["left", "right", "name", "age"], [left, right, name, age].map(&:name)
+    assert_equal ["Pair", "Pair", "Customer", "Customer"], [left, right, name, age].map(&:namespace)
+    assert_equal "Data.define(\"left\", :right)", pair.container_builder
+    assert_equal "Struct.new(\"Customer\", \"name\", :age)", customer.container_builder
+  end
+
   def test_does_not_invent_attributes_for_dynamic_class_builder_members
     source = "Record = Data.define(*MEMBERS) do\n  def value = nil\nend\n"
     declarations = Zard.parse(source, path: "example.rb").declarations

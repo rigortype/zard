@@ -94,6 +94,20 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_a_data_builder_with_string_members
+    source = "# Pair values.\nPair = Data.define(\"left\", :right)\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Class `Pair`
+
+      Class builder: `Data.define("left", :right)`.
+
+      Pair values.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_a_multiline_class_builder_as_a_code_block
     source = "module Models\n  # Pair values.\n  Pair = Data.define(\n    :left,\n    :right\n  )\nend\n"
     document = Zard.parse(source, path: "example.rb")

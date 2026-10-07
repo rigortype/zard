@@ -122,8 +122,8 @@ class ParserTest < Minitest::Test
 
     assert_equal [:class, :instance_attribute_reader, :instance_attribute_reader, :instance_method], [klass, left, right, values].map(&:kind)
     assert_equal [nil, "Pair", "Pair", "Pair"], [klass, left, right, values].map(&:namespace)
-    assert_equal "Data.define(:left, :right)", klass.class_builder
-    assert_equal klass.class_builder, source.byteslice(klass.class_builder_span.start_offset...klass.class_builder_span.end_offset)
+    assert_equal "Data.define(:left, :right)", klass.container_builder
+    assert_equal klass.container_builder, source.byteslice(klass.container_builder_span.start_offset...klass.container_builder_span.end_offset)
     assert_equal "Pair values.", klass.documentation.fetch(0).description
     assert_empty left.documentation
     assert_equal "Returns both values.", values.documentation.fetch(0).description
@@ -135,7 +135,7 @@ class ParserTest < Minitest::Test
 
     assert_equal [:module, :class, :instance_attribute_accessor, :instance_attribute_accessor], [mod, klass, x, y].map(&:kind)
     assert_equal [nil, "Models", "Models::Point", "Models::Point"], [mod, klass, x, y].map(&:namespace)
-    assert_equal "Struct.new(:x, :y, keyword_init: true)", klass.class_builder
+    assert_equal "Struct.new(:x, :y, keyword_init: true)", klass.container_builder
   end
 
   def test_does_not_invent_attributes_for_dynamic_class_builder_members
@@ -151,7 +151,7 @@ class ParserTest < Minitest::Test
     klass, left, right, values = Zard.parse(source, path: "example.rb").declarations
 
     assert_equal "Data.define(:left, :right)", klass.superclass
-    assert_nil klass.class_builder
+    assert_nil klass.container_builder
     assert_equal [:instance_attribute_reader, :instance_attribute_reader], [left.kind, right.kind]
     assert_equal ["Pair", "Pair", "Pair"], [left.namespace, right.namespace, values.namespace]
   end
@@ -179,7 +179,7 @@ class ParserTest < Minitest::Test
     mod, klass, value, each = Zard.parse(source, path: "example.rb").declarations
 
     assert_equal [:module, :class, :constant, :instance_method], [mod, klass, value, each].map(&:kind)
-    assert_equal "Class.new(BaseRecord)", klass.class_builder
+    assert_equal "Class.new(BaseRecord)", klass.container_builder
     assert_equal ["Models", "Models::Record", "Models::Record"], [klass.namespace, value.namespace, each.namespace]
     assert_equal [[:include, "Enumerable"]], klass.mixins.map { |mixin| [mixin.kind, mixin.target] }
   end
@@ -190,7 +190,25 @@ class ParserTest < Minitest::Test
 
     assert_equal :class, declaration.kind
     assert_equal "Error", declaration.name
-    assert_equal "Class.new(StandardError)", declaration.class_builder
+    assert_equal "Class.new(StandardError)", declaration.container_builder
+  end
+
+  def test_models_module_new_as_a_module_with_block_members
+    source = "module Models\n  Helpers = Module.new do\n    include Enumerable\n    VALUE = 1\n    def each = nil\n  end\nend\n"
+    outer, mod, value, each = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:module, :module, :constant, :instance_method], [outer, mod, value, each].map(&:kind)
+    assert_equal "Module.new", mod.container_builder
+    assert_equal ["Models", "Models::Helpers", "Models::Helpers"], [mod.namespace, value.namespace, each.namespace]
+    assert_equal [[:include, "Enumerable"]], mod.mixins.map { |mixin| [mixin.kind, mixin.target] }
+  end
+
+  def test_models_a_module_new_assignment_without_a_block
+    declaration = Zard.parse("Helpers = Module.new\n", path: "example.rb").declarations.fetch(0)
+
+    assert_equal :module, declaration.kind
+    assert_equal "Helpers", declaration.name
+    assert_equal "Module.new", declaration.container_builder
   end
 
   def test_collects_instance_attributes_with_shared_documentation

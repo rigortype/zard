@@ -28,7 +28,7 @@ module Zard
 
         parts = [heading(declaration)]
         parts << "Superclass: `#{declaration.superclass}`." if declaration.superclass
-        parts << render_class_builder(declaration.class_builder) if declaration.class_builder
+        parts << render_container_builder(declaration) if declaration.container_builder
         append_mixins(parts, declaration)
         parts << "Alias of `#{display_alias_target(declaration)}`." if declaration.alias_target
         text = documentation.select { |tag| tag.name == :text }.map(&:description)
@@ -110,10 +110,16 @@ module Zard
         end
       end
 
-      def render_class_builder(builder)
-        return "Class builder: `#{builder}`." unless builder.include?("\n")
+      def render_container_builder(declaration)
+        builder = declaration.container_builder
+        label = if declaration.kind == :module
+          "Module builder"
+        else
+          "Class builder"
+        end
+        return "#{label}: `#{builder}`." unless builder.include?("\n")
 
-        "Class builder:\n\n```ruby\n#{dedent_continuation(builder)}\n```"
+        "#{label}:\n\n```ruby\n#{dedent_continuation(builder)}\n```"
       end
 
       def dedent_continuation(source)

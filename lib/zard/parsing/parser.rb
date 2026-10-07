@@ -72,10 +72,11 @@ module Zard
       }.freeze
       MIXIN_NAMES = %i[include prepend extend].freeze
       METHOD_DEFINITION_NAMES = %i[define_method define_singleton_method].freeze
-      CLASS_BUILDERS = {
-        ["Data", :define] => :attribute_reader,
-        ["Struct", :new] => :attribute_accessor,
-        ["Class", :new] => nil
+      CONTAINER_BUILDERS = {
+        ["Data", :define] => {kind: :class, attribute_kind: :attribute_reader}.freeze,
+        ["Struct", :new] => {kind: :class, attribute_kind: :attribute_accessor}.freeze,
+        ["Class", :new] => {kind: :class, attribute_kind: nil}.freeze,
+        ["Module", :new] => {kind: :module, attribute_kind: nil}.freeze
       }.freeze
 
       def initialize(source, path, comments, diagnostics, encoding, prism_source)
@@ -120,20 +121,20 @@ module Zard
           superclass_span: node.superclass ? span(node.superclass.location) : nil
         )
         within_namespace(node.constant_path.location.slice, :class, declaration_index) do
-          collect_class_builder_attributes(builder_call) if builder_call
+          collect_container_builder_attributes(builder_call) if builder_call
           node.body&.accept(self)
         end
       end
 
       def visit_constant_write_node(node)
-        return visit_class_builder_write(node.name.to_s, node) if class_builder?(node.value)
+        return visit_container_builder_write(node.name.to_s, node) if container_builder?(node.value)
 
         collect_path_declaration(:constant, node.name.to_s, node)
         super
       end
 
       def visit_constant_path_write_node(node)
-        return visit_class_builder_write(node.target.location.slice, node) if class_builder?(node.value)
+        return visit_container_builder_write(node.target.location.slice, node) if container_builder?(node.value)
 
         collect_path_declaration(:constant, node.target.location.slice, node)
         super
@@ -200,28 +201,38 @@ module Zard
       private
 
       def class_builder?(node)
-        return false unless node.is_a?(Prism::CallNode) && node.receiver
-
-        CLASS_BUILDERS.key?([node.receiver.location.slice.sub(/\A::/, ""), node.name])
+        descriptor = container_builder_descriptor(node)
+        descriptor && descriptor.fetch(:kind) == :class
       end
 
-      def visit_class_builder_write(path, node)
+      def container_builder?(node)
+        !container_builder_descriptor(node).nil?
+      end
+
+      def container_builder_descriptor(node)
+        return unless node.is_a?(Prism::CallNode) && node.receiver
+
+        CONTAINER_BUILDERS[[node.receiver.location.slice.sub(/\A::/, ""), node.name]]
+      end
+
+      def visit_container_builder_write(path, node)
         call = node.value
-        builder, builder_span = class_builder_reference(call)
+        descriptor = CONTAINER_BUILDERS.fetch([call.receiver.location.slice.sub(/\A::/, ""), call.name])
+        builder, builder_span = container_builder_reference(call)
         declaration_index = collect_path_declaration(
-          :class,
+          descriptor.fetch(:kind),
           path,
           node,
-          class_builder: builder,
-          class_builder_span: builder_span
+          container_builder: builder,
+          container_builder_span: builder_span
         )
-        within_namespace(path, :class, declaration_index) do
-          collect_class_builder_attributes(call)
+        within_namespace(path, descriptor.fetch(:kind), declaration_index) do
+          collect_container_builder_attributes(call)
           call.block&.body&.accept(self)
         end
       end
 
-      def class_builder_reference(call)
+      def container_builder_reference(call)
         return [call.location.slice, span(call.location)] unless call.block
 
         length = call.block.location.start_offset - call.location.start_offset
@@ -230,8 +241,9 @@ module Zard
         [source, span(location)]
       end
 
-      def collect_class_builder_attributes(call)
-        attribute_kind = CLASS_BUILDERS.fetch([call.receiver.location.slice.sub(/\A::/, ""), call.name])
+      def collect_container_builder_attributes(call)
+        descriptor = CONTAINER_BUILDERS.fetch([call.receiver.location.slice.sub(/\A::/, ""), call.name])
+        attribute_kind = descriptor.fetch(:attribute_kind)
         return unless attribute_kind
 
         arguments = call.arguments&.arguments || []
@@ -486,7 +498,7 @@ module Zard
         argument.unescaped if argument.is_a?(Prism::SymbolNode) || argument.is_a?(Prism::StringNode)
       end
 
-      def collect_path_declaration(kind, path, node, superclass: nil, superclass_span: nil, class_builder: nil, class_builder_span: nil)
+      def collect_path_declaration(kind, path, node, superclass: nil, superclass_span: nil, container_builder: nil, container_builder_span: nil)
         parts = namespace_parts(path)
         collect_declaration(
           kind: kind,
@@ -496,13 +508,13 @@ module Zard
           parameters: [].freeze,
           superclass: superclass,
           superclass_span: superclass_span,
-          class_builder: class_builder,
-          class_builder_span: class_builder_span,
+          container_builder: container_builder,
+          container_builder_span: container_builder_span,
           node: node
         )
       end
 
-      def collect_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, receiver: nil, receiver_span: nil, refinement: nil, refinement_span: nil, superclass: nil, superclass_span: nil, class_builder: nil, class_builder_span: nil)
+      def collect_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, receiver: nil, receiver_span: nil, refinement: nil, refinement_span: nil, superclass: nil, superclass_span: nil, container_builder: nil, container_builder_span: nil)
         comments, parsed = parse_comments(node)
         append_declaration(
           kind: kind,
@@ -516,15 +528,15 @@ module Zard
           refinement_span: refinement_span,
           superclass: superclass,
           superclass_span: superclass_span,
-          class_builder: class_builder,
-          class_builder_span: class_builder_span,
+          container_builder: container_builder,
+          container_builder_span: container_builder_span,
           node: node,
           comments: comments,
           parsed: parsed
         )
       end
 
-      def append_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, comments:, parsed:, receiver: nil, receiver_span: nil, refinement: nil, refinement_span: nil, alias_target: nil, superclass: nil, superclass_span: nil, class_builder: nil, class_builder_span: nil)
+      def append_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, comments:, parsed:, receiver: nil, receiver_span: nil, refinement: nil, refinement_span: nil, alias_target: nil, superclass: nil, superclass_span: nil, container_builder: nil, container_builder_span: nil)
         @declarations << Model::V1::Declaration.new(
           kind: kind,
           name: name,
@@ -538,8 +550,8 @@ module Zard
           alias_target: alias_target,
           superclass: superclass,
           superclass_span: superclass_span,
-          class_builder: class_builder,
-          class_builder_span: class_builder_span,
+          container_builder: container_builder,
+          container_builder_span: container_builder_span,
           span: span(node.location),
           comment_span: comment_span(comments),
           documentation: parsed.fetch(:documentation).freeze,
@@ -854,8 +866,8 @@ module Zard
           alias_target: declaration.alias_target,
           superclass: declaration.superclass,
           superclass_span: declaration.superclass_span,
-          class_builder: declaration.class_builder,
-          class_builder_span: declaration.class_builder_span,
+          container_builder: declaration.container_builder,
+          container_builder_span: declaration.container_builder_span,
           mixins: mixins,
           span: declaration.span,
           comment_span: declaration.comment_span,

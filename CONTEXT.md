@@ -36,6 +36,10 @@ _Avoid_: documentation item
 The method name that an alias refers to in the same Ruby scope.
 _Avoid_: copied documentation
 
+**Superclass reference**:
+The source expression explicitly named after `<` in a Ruby class declaration.
+_Avoid_: resolved ancestry, inferred parent
+
 **Documentation claim**:
 An optional type written in an API documentation tag. Rigor may check it, but it does not replace a contract or an inferred fact.
 _Avoid_: authoritative type

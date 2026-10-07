@@ -92,7 +92,13 @@ module Zard
       end
 
       def visit_class_node(node)
-        collect_path_declaration(:class, node.constant_path.location.slice, node)
+        collect_path_declaration(
+          :class,
+          node.constant_path.location.slice,
+          node,
+          superclass: node.superclass&.location&.slice,
+          superclass_span: node.superclass ? span(node.superclass.location) : nil
+        )
         within_namespace(node.constant_path.location.slice, :class) { node.body&.accept(self) }
       end
 
@@ -254,7 +260,7 @@ module Zard
         argument.unescaped if argument.is_a?(Prism::SymbolNode) || argument.is_a?(Prism::StringNode)
       end
 
-      def collect_path_declaration(kind, path, node)
+      def collect_path_declaration(kind, path, node, superclass: nil, superclass_span: nil)
         parts = namespace_parts(path)
         collect_declaration(
           kind: kind,
@@ -262,11 +268,13 @@ module Zard
           namespace: (parts.length > 1) ? parts[0...-1].join("::") : nil,
           visibility: :public,
           parameters: [].freeze,
+          superclass: superclass,
+          superclass_span: superclass_span,
           node: node
         )
       end
 
-      def collect_declaration(kind:, name:, namespace:, visibility:, parameters:, node:)
+      def collect_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, superclass: nil, superclass_span: nil)
         comments, parsed = parse_comments(node)
         append_declaration(
           kind: kind,
@@ -274,13 +282,15 @@ module Zard
           namespace: namespace,
           visibility: visibility,
           parameters: parameters,
+          superclass: superclass,
+          superclass_span: superclass_span,
           node: node,
           comments: comments,
           parsed: parsed
         )
       end
 
-      def append_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, comments:, parsed:, alias_target: nil)
+      def append_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, comments:, parsed:, alias_target: nil, superclass: nil, superclass_span: nil)
         @declarations << Model::V1::Declaration.new(
           kind: kind,
           name: name,
@@ -288,6 +298,8 @@ module Zard
           visibility: visibility,
           parameters: parameters,
           alias_target: alias_target,
+          superclass: superclass,
+          superclass_span: superclass_span,
           span: span(node.location),
           comment_span: comment_span(comments),
           documentation: parsed.fetch(:documentation).freeze,
@@ -519,6 +531,8 @@ module Zard
           visibility: visibility,
           parameters: declaration.parameters,
           alias_target: declaration.alias_target,
+          superclass: declaration.superclass,
+          superclass_span: declaration.superclass_span,
           span: declaration.span,
           comment_span: declaration.comment_span,
           documentation: declaration.documentation,

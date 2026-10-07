@@ -27,6 +27,7 @@ module Zard
         return if documentation.empty?
 
         parts = [heading(declaration)]
+        parts << "Superclass: `#{declaration.superclass}`." if declaration.superclass
         parts << "Alias of `#{display_alias_target(declaration)}`." if declaration.alias_target
         text = documentation.select { |tag| tag.name == :text }.map(&:description)
         parts << text.join("\n") unless text.empty?

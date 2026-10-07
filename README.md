@@ -56,6 +56,8 @@ Declarations record `public`, `protected`, or `private` visibility. Markdown out
 
 Method aliases preserve their target name and inherit visibility and parameters when the target is declared in the same source scope. Alias documentation remains separate from target documentation.
 
+Class declarations preserve the explicit superclass expression and its source span without resolving ancestry.
+
 ## Installation
 
 Until the first RubyGems release, add the repository to your Gemfile:

@@ -306,6 +306,23 @@ class ParserTest < Minitest::Test
     assert_equal ["alias.unresolved-target"], document.diagnostics.map(&:code)
   end
 
+  def test_preserves_the_class_superclass_expression_and_span
+    source = "# Reads values.\nclass Demo::Reader < ::Base\nend\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
+
+    assert_equal :class, declaration.kind
+    assert_equal "::Base", declaration.superclass
+    assert_equal "::Base", source.byteslice(declaration.superclass_span.start_offset...declaration.superclass_span.end_offset)
+    assert_equal 2, declaration.superclass_span.start_line
+  end
+
+  def test_preserves_a_dynamic_superclass_expression_without_resolving_it
+    source = "class Reader < superclass_for(:reader)\nend\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
+
+    assert_equal "superclass_for(:reader)", declaration.superclass
+  end
+
   def test_resets_the_namespace_for_an_absolute_constant_path
     source = "module Outer\n  class ::Reader\n    def read = nil\n  end\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.kind == :instance_method }

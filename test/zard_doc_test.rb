@@ -104,6 +104,24 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_a_documented_method_alias_without_copying_target_documentation
+    source = "class Reader\n  # Reads a path.\n  def read(path) = path\n  # Compatibility name.\n  alias fetch read\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Reader#read(path)`
+
+      Reads a path.
+
+      ## Alias `Reader#fetch`
+
+      Alias of `Reader#read`.
+
+      Compatibility name.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_yield_parameters_and_return_value
     source = "# @yieldparam value — Each value.\n# @yieldreturn The consumed length.\ndef each_value = yield(\"value\")\n"
     document = Zard.parse(source, path: "example.rb")

@@ -277,6 +277,35 @@ class ParserTest < Minitest::Test
     assert_equal :public, method.visibility
   end
 
+  def test_collects_alias_and_alias_method_with_target_metadata
+    source = "class Reader\n  private\n  def read(path) = path\n  public\n  # Fetches a path.\n  alias fetch read\n  # Loads a path.\n  alias_method :load, :read\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    aliases = document.declarations.select(&:alias_target)
+
+    assert_empty document.diagnostics
+    assert_equal ["fetch", "load"], aliases.map(&:name)
+    assert_equal ["read", "read"], aliases.map(&:alias_target)
+    assert_equal [[:private, ["path"]], [:private, ["path"]]], aliases.map { |declaration| [declaration.visibility, declaration.parameters] }
+  end
+
+  def test_collects_singleton_method_aliases
+    source = "class Reader\n  class << self\n    def build = new\n    alias create build\n    alias_method \"make\", \"build\"\n  end\nend\n"
+    aliases = Zard.parse(source, path: "example.rb").declarations.select(&:alias_target)
+
+    assert_equal [:singleton_method, :singleton_method], aliases.map(&:kind)
+    assert_equal ["build", "build"], aliases.map(&:alias_target)
+  end
+
+  def test_preserves_an_unresolved_alias_with_a_diagnostic
+    source = "class Reader\n  alias fetch inherited_read\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    declaration = document.declarations.find(&:alias_target)
+
+    assert_equal "inherited_read", declaration.alias_target
+    assert_equal :public, declaration.visibility
+    assert_equal ["alias.unresolved-target"], document.diagnostics.map(&:code)
+  end
+
   def test_resets_the_namespace_for_an_absolute_constant_path
     source = "module Outer\n  class ::Reader\n    def read = nil\n  end\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.kind == :instance_method }

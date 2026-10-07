@@ -54,6 +54,8 @@ Declarations record `public`, `protected`, or `private` visibility. Markdown out
 
 `module_function` records its private instance method and public singleton copy as separate declarations with shared source provenance. Bare, named, and inline forms are supported.
 
+Method aliases preserve their target name and inherit visibility and parameters when the target is declared in the same source scope. Alias documentation remains separate from target documentation.
+
 ## Installation
 
 Until the first RubyGems release, add the repository to your Gemfile:

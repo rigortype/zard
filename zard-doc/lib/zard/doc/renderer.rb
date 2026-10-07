@@ -27,6 +27,7 @@ module Zard
         return if documentation.empty?
 
         parts = [heading(declaration)]
+        parts << "Alias of `#{display_alias_target(declaration)}`." if declaration.alias_target
         text = documentation.select { |tag| tag.name == :text }.map(&:description)
         parts << text.join("\n") unless text.empty?
 
@@ -77,6 +78,8 @@ module Zard
       end
 
       def heading(declaration)
+        return "## Alias `#{display_name(declaration)}`" if declaration.alias_target
+
         case declaration.kind
         when :class
           "## Class `#{qualified_name(declaration)}`"
@@ -104,6 +107,13 @@ module Zard
 
         separator = declaration.kind.to_s.start_with?("singleton_") ? "." : "#"
         "#{declaration.namespace}#{separator}#{declaration.name}"
+      end
+
+      def display_alias_target(declaration)
+        return declaration.alias_target unless declaration.namespace
+
+        separator = declaration.kind.to_s.start_with?("singleton_") ? "." : "#"
+        "#{declaration.namespace}#{separator}#{declaration.alias_target}"
       end
 
       def list_item(prefix, description)

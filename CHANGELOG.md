@@ -29,5 +29,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Apply named method visibility and diagnose ambiguous named attribute visibility.
 - Apply named and inline class method visibility.
 - Model bare, named, and inline module functions as private instance methods with public singleton copies.
+- Preserve `alias` and `alias_method` declarations with their target metadata.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

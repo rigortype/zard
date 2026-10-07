@@ -32,6 +32,10 @@ _Avoid_: type contract
 A Ruby class, module, constant, attribute, or method represented in the versioned ZARD model.
 _Avoid_: documentation item
 
+**Alias target**:
+The method name that an alias refers to in the same Ruby scope.
+_Avoid_: copied documentation
+
 **Documentation claim**:
 An optional type written in an API documentation tag. Rigor may check it, but it does not replace a contract or an inferred fact.
 _Avoid_: authoritative type

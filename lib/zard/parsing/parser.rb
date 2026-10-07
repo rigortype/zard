@@ -122,6 +122,10 @@ module Zard
         node.body&.accept(self)
       end
 
+      def visit_alias_method_node(node)
+        collect_method_alias(node.new_name.unescaped, node.old_name.unescaped, node)
+      end
+
       def visit_call_node(node)
         if node.name == :module_function && node.receiver.nil? && module_function_context?
           return visit_module_function_call(node) { super }
@@ -134,11 +138,54 @@ module Zard
         visibility = VISIBILITY_NAMES.find { |name| node.name == name && node.receiver.nil? }
         return visit_visibility_call(node, visibility) { super } if visibility
 
+        if node.name == :alias_method && node.receiver.nil?
+          collect_alias_method_call(node)
+          return super
+        end
+
         collect_attribute_declarations(node)
         super
       end
 
       private
+
+      def collect_alias_method_call(node)
+        arguments = node.arguments&.arguments || []
+        return unless arguments.length == 2
+
+        new_name, old_name = arguments.map { |argument| attribute_name(argument) }
+        collect_method_alias(new_name, old_name, node) if new_name && old_name
+      end
+
+      def collect_method_alias(name, target, node)
+        kind = current_method_kind
+        original = @declarations.reverse_each.find do |declaration|
+          declaration.kind == kind &&
+            declaration.namespace == current_namespace &&
+            declaration.name == target
+        end
+        unless original
+          @diagnostics << Model::V1::Diagnostic.new(
+            code: "alias.unresolved-target",
+            severity: :warning,
+            message: "The alias target is not declared in this source scope.",
+            span: span(node.location)
+          )
+        end
+
+        comments, parsed = parse_comments(node)
+        append_declaration(
+          kind: kind,
+          name: name,
+          namespace: current_namespace,
+          visibility: original&.visibility || current_visibility,
+          parameters: original&.parameters || [].freeze,
+          alias_target: target,
+          node: node,
+          comments: comments,
+          parsed: parsed
+        )
+      end
 
       def collect_method_declarations(node)
         kind = singleton_method?(node) ? :singleton_method : :instance_method
@@ -233,13 +280,14 @@ module Zard
         )
       end
 
-      def append_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, comments:, parsed:)
+      def append_declaration(kind:, name:, namespace:, visibility:, parameters:, node:, comments:, parsed:, alias_target: nil)
         @declarations << Model::V1::Declaration.new(
           kind: kind,
           name: name,
           namespace: namespace,
           visibility: visibility,
           parameters: parameters,
+          alias_target: alias_target,
           span: span(node.location),
           comment_span: comment_span(comments),
           documentation: parsed.fetch(:documentation).freeze,
@@ -470,6 +518,7 @@ module Zard
           namespace: declaration.namespace,
           visibility: visibility,
           parameters: declaration.parameters,
+          alias_target: declaration.alias_target,
           span: declaration.span,
           comment_span: declaration.comment_span,
           documentation: declaration.documentation,

@@ -35,6 +35,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Apply private and public constant visibility to class, module, and constant declarations.
 - Ignore declaration DSL calls inside method bodies.
 - Avoid attributing declarations from foreign receiver evaluation blocks to the lexical owner.
+- Preserve mixed method ownership in current-owner instance-evaluation blocks.
 - Preserve `include`, `prepend`, and `extend` targets with source provenance.
 - Preserve explicit singleton declaration receivers with source provenance.
 - Preserve Ruby refinements and keep their members in a separate scope.

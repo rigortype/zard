@@ -784,6 +784,23 @@ class ParserTest < Minitest::Test
     assert_equal [[:module, "Host"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
   end
 
+  def test_models_mixed_owners_in_current_instance_evaluation_blocks
+    source = "class Reader\n  self.instance_eval do\n    # Builds a reader.\n    def build = new\n    # Reads a value.\n    define_method(:read) { |key| key }\n    attr_reader :name\n    VALUE = 1\n  end\nend\n"
+    reader, build, read, name, value = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:class, :singleton_method, :instance_method, :instance_attribute_reader, :constant], [reader, build, read, name, value].map(&:kind)
+    assert_equal ["self", nil, nil, nil], [build.receiver, read.receiver, name.receiver, value.receiver]
+    assert_equal [[], ["key"]], [build.parameters, read.parameters]
+    assert_equal ["Builds a reader.", "Reads a value."], [build, read].map { |declaration| declaration.documentation.fetch(0).description }
+  end
+
+  def test_ignores_declarations_in_foreign_instance_evaluation_blocks
+    source = "module Host\n  Other.instance_eval do\n    def remote = nil\n    define_method(:member) { nil }\n    attr_reader :name\n  end\n  target.instance_exec do\n    VALUE = 1\n  end\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:module, "Host"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
   def test_resets_the_namespace_for_an_absolute_constant_path
     source = "module Outer\n  class ::Reader\n    def read = nil\n  end\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.kind == :instance_method }

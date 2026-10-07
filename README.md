@@ -61,6 +61,7 @@ Inline visibility and `module_function` modifiers around `alias_method` apply to
 Literal `define_method` and `define_singleton_method` calls produce method declarations. Their block parameters, visibility, receiver, refinement scope, and documentation provenance are preserved.
 Inline `private define_method`, `module_function define_method`, and class-method visibility modifiers around `define_singleton_method` preserve the visibility produced by Ruby.
 Declarations in bare or `self` evaluation blocks remain in the current owner. Blocks evaluated by another receiver are not attributed to the lexical owner.
+In bare or `self.instance_eval` blocks, a bare `def` is a singleton method while method-definition calls, attributes, and constants retain their lexical owner. Foreign instance-evaluation blocks are not resolved.
 
 Class declarations preserve the explicit superclass expression and its source span without resolving ancestry.
 

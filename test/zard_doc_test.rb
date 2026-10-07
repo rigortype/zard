@@ -347,6 +347,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_mixed_method_owners_from_current_instance_evaluation
+    source = "class Reader\n  self.instance_eval do\n    # Builds a reader.\n    def build = new\n    # Reads a value.\n    define_method(:read) { nil }\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Reader.build()`
+
+      Builds a reader.
+
+      ## `Reader#read()`
+
+      Reads a value.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_an_inline_module_function_definition_call
     source = "module Helpers\n  # Normalizes a value.\n  # @param value — Value to normalize.\n  module_function define_method(:normalize) { |value| value }\nend\n"
     document = Zard.parse(source, path: "example.rb")

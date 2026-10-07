@@ -74,6 +74,7 @@ module Zard
       MIXIN_NAMES = %i[include prepend extend].freeze
       METHOD_DEFINITION_NAMES = %i[define_method define_singleton_method].freeze
       EVALUATION_NAMES = %i[class_eval module_eval class_exec module_exec].freeze
+      INSTANCE_EVALUATION_NAMES = %i[instance_eval instance_exec].freeze
       CONTAINER_BUILDERS = {
         ["Data", :define] => {kind: :class, attribute_kind: :attribute_reader}.freeze,
         ["Struct", :new] => {kind: :class, attribute_kind: :attribute_accessor}.freeze,
@@ -102,6 +103,8 @@ module Zard
         @module_function_mode = false
         @method_depth = 0
         @container_declaration_index = nil
+        @instance_evaluation_receiver = nil
+        @instance_evaluation_receiver_span = nil
       end
 
       def call(program)
@@ -188,6 +191,8 @@ module Zard
 
       def visit_call_node(node)
         return super if @method_depth.positive?
+        return visit_current_instance_evaluation_call(node) if current_instance_evaluation_call?(node)
+        return if foreign_instance_evaluation_call?(node)
         return if foreign_evaluation_call?(node)
 
         return visit_refinement_call(node) if refinement_call?(node)
@@ -222,6 +227,31 @@ module Zard
       end
 
       private
+
+      def current_instance_evaluation_call?(node)
+        instance_evaluation_call?(node) &&
+          (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode))
+      end
+
+      def foreign_instance_evaluation_call?(node)
+        instance_evaluation_call?(node) && node.receiver &&
+          !node.receiver.is_a?(Prism::SelfNode)
+      end
+
+      def instance_evaluation_call?(node)
+        INSTANCE_EVALUATION_NAMES.include?(node.name) && node.block
+      end
+
+      def visit_current_instance_evaluation_call(node)
+        previous_receiver = @instance_evaluation_receiver
+        previous_receiver_span = @instance_evaluation_receiver_span
+        @instance_evaluation_receiver = node.receiver&.location&.slice || "self"
+        @instance_evaluation_receiver_span = span(node.receiver.location) if node.receiver
+        node.block.body&.accept(self)
+      ensure
+        @instance_evaluation_receiver = previous_receiver
+        @instance_evaluation_receiver_span = previous_receiver_span
+      end
 
       def foreign_evaluation_call?(node)
         EVALUATION_NAMES.include?(node.name) && node.block && node.receiver &&
@@ -533,22 +563,31 @@ module Zard
       end
 
       def collect_method_declarations(node)
-        kind = singleton_method?(node) ? :singleton_method : :instance_method
+        instance_evaluation_method = instance_evaluation_method?(node)
+        kind = (singleton_method?(node) || instance_evaluation_method) ? :singleton_method : :instance_method
         name = node.name.to_s
         namespace = current_namespace
         parameters = parameter_names(node.parameters).freeze
-        receiver = node.receiver&.location&.slice || current_singleton_receiver
-        receiver_span = node.receiver ? span(node.receiver.location) : current_singleton_receiver_span
+        receiver = node.receiver&.location&.slice || current_singleton_receiver || @instance_evaluation_receiver
+        receiver_span = if node.receiver
+          span(node.receiver.location)
+        else
+          current_singleton_receiver_span || @instance_evaluation_receiver_span
+        end
         collect_method_entries(
           kind: kind,
           name: name,
           namespace: namespace,
-          visibility: method_visibility(node),
+          visibility: instance_evaluation_method ? :public : method_visibility(node),
           parameters: parameters,
           receiver: receiver,
           receiver_span: receiver_span,
           node: node
         )
+      end
+
+      def instance_evaluation_method?(node)
+        @instance_evaluation_receiver && @singleton_depth.zero? && node.receiver.nil?
       end
 
       def collect_method_entries(kind:, name:, namespace:, visibility:, parameters:, receiver:, receiver_span:, node:)
@@ -711,6 +750,8 @@ module Zard
         previous_container_declaration_index = @container_declaration_index
         previous_refinement = @refinement
         previous_refinement_span = @refinement_span
+        previous_instance_evaluation_receiver = @instance_evaluation_receiver
+        previous_instance_evaluation_receiver_span = @instance_evaluation_receiver_span
         @namespace = namespace_parts(name)
         @instance_visibility = :public
         @singleton_visibility = :public
@@ -719,6 +760,8 @@ module Zard
         @container_declaration_index = declaration_index
         @refinement = nil
         @refinement_span = nil
+        @instance_evaluation_receiver = nil
+        @instance_evaluation_receiver_span = nil
         yield
       ensure
         @namespace = previous_namespace
@@ -729,6 +772,8 @@ module Zard
         @container_declaration_index = previous_container_declaration_index
         @refinement = previous_refinement
         @refinement_span = previous_refinement_span
+        @instance_evaluation_receiver = previous_instance_evaluation_receiver
+        @instance_evaluation_receiver_span = previous_instance_evaluation_receiver_span
       end
 
       def within_refinement(target, target_span)
@@ -739,6 +784,8 @@ module Zard
         previous_container_declaration_index = @container_declaration_index
         previous_refinement = @refinement
         previous_refinement_span = @refinement_span
+        previous_instance_evaluation_receiver = @instance_evaluation_receiver
+        previous_instance_evaluation_receiver_span = @instance_evaluation_receiver_span
         @instance_visibility = :public
         @singleton_visibility = :public
         @container_kind = :refinement
@@ -746,6 +793,8 @@ module Zard
         @container_declaration_index = nil
         @refinement = target
         @refinement_span = target_span
+        @instance_evaluation_receiver = nil
+        @instance_evaluation_receiver_span = nil
         yield
       ensure
         @instance_visibility = previous_instance_visibility
@@ -755,6 +804,8 @@ module Zard
         @container_declaration_index = previous_container_declaration_index
         @refinement = previous_refinement
         @refinement_span = previous_refinement_span
+        @instance_evaluation_receiver = previous_instance_evaluation_receiver
+        @instance_evaluation_receiver_span = previous_instance_evaluation_receiver_span
       end
 
       def namespace_parts(name)

@@ -67,6 +67,7 @@ Named subclasses such as `class Point < Data.define(:x)` also preserve the gener
 Container builders used with `||=` are treated as conditional class or module initialization. Other constant reassignments remain outside the declaration model.
 Assignments from the standard library's `DelegateClass(Target)` are class builders and preserve the delegated target expression as source provenance.
 Argumentless `.freeze` tails are transparent for container builders, including block-form and repeated tails.
+Self-referential guards such as `Registry = Registry || Module.new` are treated like the equivalent `||=` initialization.
 
 Class and module declarations preserve explicit `include`, `prepend`, and `extend` targets with source spans without resolving ancestry. Documented containers list these mixin references in Markdown.
 

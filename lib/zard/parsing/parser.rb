@@ -128,7 +128,7 @@ module Zard
       end
 
       def visit_constant_write_node(node)
-        call = container_builder_call(node.value)
+        call = container_builder_call(node.value, guarded_name: node.name.to_s)
         return visit_container_builder_write(node.name.to_s, node, call) if call
 
         collect_path_declaration(:constant, node.name.to_s, node)
@@ -136,10 +136,11 @@ module Zard
       end
 
       def visit_constant_path_write_node(node)
-        call = container_builder_call(node.value)
-        return visit_container_builder_write(node.target.location.slice, node, call) if call
+        path = node.target.location.slice
+        call = container_builder_call(node.value, guarded_name: constant_reference_name(node.target))
+        return visit_container_builder_write(path, node, call) if call
 
-        collect_path_declaration(:constant, node.target.location.slice, node)
+        collect_path_declaration(:constant, path, node)
         super
       end
 
@@ -281,11 +282,33 @@ module Zard
         [receiver, node.name]
       end
 
-      def container_builder_call(node)
+      def container_builder_call(node, guarded_name: nil)
+        node = unwrap_builder_guard(node, guarded_name) if guarded_name
         node = node.receiver while freeze_tail?(node)
         return unless node.is_a?(Prism::CallNode)
 
         node if CONTAINER_BUILDERS.key?(container_builder_key(node))
+      end
+
+      def unwrap_builder_guard(node, guarded_name)
+        return node unless node.is_a?(Prism::OrNode)
+
+        if constant_reference_name(node.left) == guarded_name
+          node.right
+        else
+          node
+        end
+      end
+
+      def constant_reference_name(node)
+        return node.name.to_s if node.is_a?(Prism::ConstantReadNode)
+        return unless node.is_a?(Prism::ConstantPathNode)
+
+        parent = node.parent
+        return node.name.to_s unless parent
+
+        parent_name = constant_reference_name(parent)
+        "#{parent_name}::#{node.name}" if parent_name
       end
 
       def freeze_tail?(node)

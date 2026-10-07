@@ -270,6 +270,24 @@ class ParserTest < Minitest::Test
     assert declarations.all? { |declaration| declaration.container_builder.nil? }
   end
 
+  def test_models_container_builders_behind_self_referential_or_guards
+    source = "Registry = Registry || Class.new\nModels::Helpers = ::Models::Helpers || Module.new.freeze\n"
+    registry, helpers = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:class, :module], [registry.kind, helpers.kind]
+    assert_equal ["Registry", "Helpers"], [registry.name, helpers.name]
+    assert_equal [nil, "Models"], [registry.namespace, helpers.namespace]
+    assert_equal ["Class.new", "Module.new"], [registry.container_builder, helpers.container_builder]
+  end
+
+  def test_does_not_unwrap_or_guards_for_different_or_dynamic_constants
+    source = "Current = Other || Module.new\nself::Dynamic = self::Dynamic || Class.new\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:constant, "Current"], [:constant, "Dynamic"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+    assert declarations.all? { |declaration| declaration.container_builder.nil? }
+  end
+
   def test_collects_instance_attributes_with_shared_documentation
     source = "class Reader\n  # Names exposed by the reader.\n  attr_reader :name, \"alias_name\"\n  attr_writer :token\n  attr_accessor(:enabled)\nend\n"
     attributes = Zard.parse(source, path: "example.rb").declarations

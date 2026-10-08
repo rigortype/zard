@@ -591,6 +591,18 @@ class ZardDocTest < Minitest::Test
     assert_equal "", Zard::Doc.render(document)
   end
 
+  def test_honors_constant_visibility_with_an_explicit_current_owner
+    source = "module Demo\n  # Public value.\n  VALUE = 1\n  # Internal implementation.\n  class Internal\n  end\n  self.private_constant :VALUE, :Internal\n  self.public_constant :VALUE\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Constant `Demo::VALUE`
+
+      Public value.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_yield_parameters_and_return_value
     source = "# @yieldparam value — Each value.\n# @yieldreturn The consumed length.\ndef each_value = yield(\"value\")\n"
     document = Zard.parse(source, path: "example.rb")

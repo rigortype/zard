@@ -211,7 +211,8 @@ module Zard
           return visit_class_method_visibility_call(node, class_visibility) { super }
         end
 
-        if node.receiver.nil? && (constant_visibility = CONSTANT_VISIBILITY[node.name])
+        if (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
+            (constant_visibility = CONSTANT_VISIBILITY[node.name])
           return visit_constant_visibility_call(node, constant_visibility) { super }
         end
 

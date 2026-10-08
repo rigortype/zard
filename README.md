@@ -88,6 +88,7 @@ Singleton methods and attributes preserve an explicit receiver or `class <<` exp
 Ruby refinements and their members remain separate from ordinary members of the enclosing module. The refinement target is preserved as a source expression with its span.
 
 `private_constant` and `public_constant` update the visibility of class, module, and constant declarations in the same namespace.
+Constant visibility calls received by `self` belong to the current namespace, like their bare forms.
 Bare or `self.autoload` calls with literal Symbol or String names produce constant declarations for the current ordinary owner without guessing the loaded value's class or module kind.
 Bare or `self.const_set` calls with literal names produce declarations in the current ordinary class or module body; container-builder values retain their generated scope.
 

@@ -804,6 +804,16 @@ class ParserTest < Minitest::Test
     assert_equal :private, internal.visibility
   end
 
+  def test_applies_constant_visibility_with_an_explicit_current_owner
+    source = "module Demo\n  VALUE = 1\n  class Internal\n  end\n  self.private_constant :VALUE, :Internal\n  self.public_constant :VALUE\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    value = declarations.find { |declaration| declaration.kind == :constant }
+    internal = declarations.find { |declaration| declaration.kind == :class }
+    assert_equal :public, value.visibility
+    assert_equal :private, internal.visibility
+  end
+
   def test_applies_constant_visibility_to_every_reopened_declaration
     source = "module Demo\n  class Shared\n  end\n  class Shared\n  end\n  private_constant :Shared\nend\n"
     declarations = Zard.parse(source, path: "example.rb").declarations

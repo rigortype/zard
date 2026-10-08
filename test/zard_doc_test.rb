@@ -537,6 +537,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_omits_removed_methods_and_renders_the_remaining_attribute_side
+    source = "class Reader\n  # Reads a value.\n  def read = nil\n  # Fetches a value.\n  alias fetch read\n  # Stored name.\n  attr_accessor :name\n  # Stored token.\n  attr_accessor :token\n  undef read, name, token=\n  self.remove_method :fetch, :name=\n  class << self\n    # Builds a reader.\n    def build = new\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Attribute reader `Reader#token`
+
+      Stored token.
+
+      ## `Reader.build()`
+
+      Builds a reader.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_an_alias_method_with_an_explicit_current_owner
     source = "class Reader\n  def read(path) = path\n  # Compatibility name.\n  self.alias_method :fetch, :read\nend\n"
     document = Zard.parse(source, path: "example.rb")

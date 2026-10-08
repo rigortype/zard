@@ -779,6 +779,24 @@ class ParserTest < Minitest::Test
     assert_equal ["alias.unresolved-target"], document.diagnostics.map(&:code)
   end
 
+  def test_removes_methods_and_reduces_accessors_in_the_current_scope
+    source = "class Reader\n  def read = nil\n  alias fetch read\n  def obsolete = nil\n  attr_accessor :name, :token\n  undef read, name, token=\n  self.remove_method :fetch, :name=\n  self.undef_method :obsolete\n  class << self\n    def read = nil\n  end\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [
+      [:class, "Reader"],
+      [:instance_attribute_reader, "token"],
+      [:singleton_method, "read"]
+    ], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
+  def test_ignores_method_removal_calls_received_by_another_owner
+    source = "class Reader\n  def read = nil\n  Other.remove_method :read\n  target.undef_method :read\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:class, "Reader"], [:instance_method, "read"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
   def test_preserves_the_class_superclass_expression_and_span
     source = "# Reads values.\nclass Demo::Reader < ::Base\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)

@@ -73,6 +73,7 @@ module Zard
       }.freeze
       MIXIN_NAMES = %i[include prepend extend].freeze
       METHOD_DEFINITION_NAMES = %i[define_method define_singleton_method].freeze
+      METHOD_REMOVAL_NAMES = %i[remove_method undef_method].freeze
       EVALUATION_NAMES = %i[class_eval module_eval class_exec module_exec].freeze
       INSTANCE_EVALUATION_NAMES = %i[instance_eval instance_exec].freeze
       CONTAINER_BUILDERS = {
@@ -189,6 +190,12 @@ module Zard
         collect_method_alias(node.new_name.unescaped, node.old_name.unescaped, node)
       end
 
+      def visit_undef_node(node)
+        return super if @method_depth.positive?
+
+        remove_method_declarations(node.names.map(&:unescaped))
+      end
+
       def visit_call_node(node)
         return super if @method_depth.positive?
         return visit_current_instance_evaluation_call(node) if current_instance_evaluation_call?(node)
@@ -225,6 +232,12 @@ module Zard
 
         if node.name == :alias_method && (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode))
           collect_alias_method_call(node)
+          return super
+        end
+
+        if method_removal_call?(node)
+          names = node.arguments.arguments.filter_map { |argument| attribute_name(argument) }
+          remove_method_declarations(names)
           return super
         end
 
@@ -525,6 +538,52 @@ module Zard
 
         new_name, old_name = arguments.map { |argument| attribute_name(argument) }
         collect_method_alias(new_name, old_name, node) if new_name && old_name
+      end
+
+      def method_removal_call?(node)
+        METHOD_REMOVAL_NAMES.include?(node.name) &&
+          (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
+          node.block.nil? &&
+          node.arguments
+      end
+
+      def remove_method_declarations(names)
+        return if names.empty?
+
+        @declarations = @declarations.filter_map do |declaration|
+          if removable_method_declaration?(declaration)
+            declaration_after_method_removal(declaration, names)
+          else
+            declaration
+          end
+        end
+      end
+
+      def removable_method_declaration?(declaration)
+        declaration.namespace == current_namespace &&
+          declaration_scope_matches?(declaration, current_singleton_receiver) &&
+          (declaration.kind == current_method_kind || attribute_in_scope?(declaration, current_attribute_scope))
+      end
+
+      def declaration_after_method_removal(declaration, names)
+        unless declaration.kind.to_s.include?("attribute")
+          return if names.include?(declaration.name)
+
+          return declaration
+        end
+
+        remaining = attribute_method_names(declaration) - names
+        return if remaining.empty?
+        return declaration unless declaration.kind.to_s.end_with?("_attribute_accessor")
+
+        kind = if remaining == [declaration.name]
+          :"#{current_attribute_scope}reader"
+        elsif remaining == ["#{declaration.name}="]
+          :"#{current_attribute_scope}writer"
+        else
+          declaration.kind
+        end
+        declaration_with_kind_and_visibility(declaration, kind, declaration.visibility)
       end
 
       def inline_alias_method_name(node)

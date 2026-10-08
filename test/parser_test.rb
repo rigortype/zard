@@ -446,6 +446,16 @@ class ParserTest < Minitest::Test
     assert_equal "String", source.byteslice(tagged.refinement_span.start_offset...tagged.refinement_span.end_offset)
   end
 
+  def test_preserves_a_refinement_with_an_explicit_current_owner
+    source = "module TextExtensions\n  self.refine String do\n    # Returns a tagged copy.\n    def tagged = self\n  end\nend\n"
+    mod, refinement, tagged = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:module, :refinement, :instance_method], [mod, refinement, tagged].map(&:kind)
+    assert_equal [nil, "TextExtensions", "TextExtensions"], [mod, refinement, tagged].map(&:namespace)
+    assert_equal [nil, nil, "String"], [mod, refinement, tagged].map(&:refinement)
+    assert_equal "Returns a tagged copy.", tagged.documentation.fetch(0).description
+  end
+
   def test_keeps_alias_resolution_inside_the_refinement_scope
     source = "module Extensions\n  refine String do\n    def call = nil\n  end\n  refine Array do\n    alias invoke call\n  end\nend\n"
     document = Zard.parse(source, path: "example.rb")

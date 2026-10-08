@@ -355,6 +355,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_a_refinement_with_an_explicit_current_owner
+    source = "module TextExtensions\n  # String helpers.\n  self.refine String do\n    # Returns a tagged copy.\n    def tagged = self\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Refinement `TextExtensions[String]`
+
+      String helpers.
+
+      ## `TextExtensions[String]#tagged()`
+
+      Returns a tagged copy.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_methods_declared_by_method_definition_calls
     source = "class Reader\n  # Reads a value.\n  define_method(:read) { |path| path }\nend\n# Builds a reader.\nRegistry.define_singleton_method(:build) { |path| path }\n"
     document = Zard.parse(source, path: "example.rb")

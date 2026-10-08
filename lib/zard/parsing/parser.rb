@@ -466,7 +466,7 @@ module Zard
 
       def refinement_call?(node)
         node.name == :refine &&
-          node.receiver.nil? &&
+          (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
           node.block &&
           @container_kind == :module &&
           @singleton_depth.zero? &&

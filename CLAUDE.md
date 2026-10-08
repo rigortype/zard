@@ -12,6 +12,10 @@ Use the default labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-
 
 This repo uses a single-context layout. See `docs/agents/domain.md`.
 
+### Release preparation
+
+When preparing or cutting a ZARD release, read [zard-release-prep](skills/zard-release-prep/SKILL.md) for the two-gem release workflow and its completion criteria.
+
 ## Types come from Rigor, not from reading code
 
 This project is type-checked by [Rigor](https://github.com/rigortype/rigor). A type you did not obtain from Rigor is a guess, and a guessed type is never written anywhere: not in `sig/`, not in an inline annotation (`#:`, `# @rbs`), not in a doc comment, not in a review comment, and not as the reason for a nil check or an `is_a?` guard.

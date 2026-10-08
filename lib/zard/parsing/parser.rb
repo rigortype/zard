@@ -57,6 +57,7 @@ module Zard
 
     class DeclarationCollector < Prism::Visitor
       ATTRIBUTE_KINDS = {
+        attr: :attribute_reader,
         attr_reader: :attribute_reader,
         attr_writer: :attribute_writer,
         attr_accessor: :attribute_accessor
@@ -72,6 +73,9 @@ module Zard
       }.freeze
       MIXIN_NAMES = %i[include prepend extend].freeze
       METHOD_DEFINITION_NAMES = %i[define_method define_singleton_method].freeze
+      METHOD_REMOVAL_NAMES = %i[remove_method undef_method].freeze
+      EVALUATION_NAMES = %i[class_eval module_eval class_exec module_exec].freeze
+      INSTANCE_EVALUATION_NAMES = %i[instance_eval instance_exec].freeze
       CONTAINER_BUILDERS = {
         ["Data", :define] => {kind: :class, attribute_kind: :attribute_reader}.freeze,
         ["Struct", :new] => {kind: :class, attribute_kind: :attribute_accessor}.freeze,
@@ -100,6 +104,8 @@ module Zard
         @module_function_mode = false
         @method_depth = 0
         @container_declaration_index = nil
+        @instance_evaluation_receiver = nil
+        @instance_evaluation_receiver_span = nil
       end
 
       def call(program)
@@ -128,19 +134,25 @@ module Zard
       end
 
       def visit_constant_write_node(node)
-        call = container_builder_call(node.value, guarded_name: node.name.to_s)
-        return visit_container_builder_write(node.name.to_s, node, call) if call
+        path = node.name.to_s
+        visibility = constant_visibility_for(path)
+        replace_constant_declarations(path) unless self_referential_constant_guard?(node.value, path)
+        call = container_builder_call(node.value, guarded_name: path)
+        return visit_container_builder_write(path, node, call, visibility: visibility) if call
 
-        collect_path_declaration(:constant, node.name.to_s, node)
+        collect_path_declaration(:constant, path, node, visibility: visibility)
         super
       end
 
       def visit_constant_path_write_node(node)
         path = node.target.location.slice
-        call = container_builder_call(node.value, guarded_name: constant_reference_name(node.target))
-        return visit_container_builder_write(path, node, call) if call
+        visibility = constant_visibility_for(path)
+        guarded_name = constant_reference_name(node.target)
+        replace_constant_declarations(path) unless self_referential_constant_guard?(node.value, guarded_name)
+        call = container_builder_call(node.value, guarded_name: guarded_name)
+        return visit_container_builder_write(path, node, call, visibility: visibility) if call
 
-        collect_path_declaration(:constant, path, node)
+        collect_path_declaration(:constant, path, node, visibility: visibility)
         super
       end
 
@@ -184,33 +196,55 @@ module Zard
         collect_method_alias(node.new_name.unescaped, node.old_name.unescaped, node)
       end
 
+      def visit_undef_node(node)
+        return super if @method_depth.positive?
+
+        remove_method_declarations(node.names.filter_map { |name| attribute_name(name) })
+      end
+
       def visit_call_node(node)
         return super if @method_depth.positive?
+        return visit_current_instance_evaluation_call(node) if current_instance_evaluation_call?(node)
+        return if foreign_instance_evaluation_call?(node)
+        return if foreign_evaluation_call?(node)
 
         return visit_refinement_call(node) if refinement_call?(node)
         return visit_method_definition_call(node) if method_definition_call?(node)
         return visit_const_set_call(node) if const_set_call?(node)
+        return visit_remove_const_call(node) if remove_const_call?(node)
 
         collect_autoload_declaration(node) if autoload_call?(node)
         collect_mixin_references(node) if mixin_call?(node)
 
-        if node.name == :module_function && node.receiver.nil? && module_function_context?
+        if node.name == :module_function &&
+            (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
+            module_function_context?
           return visit_module_function_call(node) { super }
         end
 
-        if node.receiver.nil? && (class_visibility = CLASS_METHOD_VISIBILITY[node.name])
+        if (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
+            (class_visibility = CLASS_METHOD_VISIBILITY[node.name])
           return visit_class_method_visibility_call(node, class_visibility) { super }
         end
 
-        if node.receiver.nil? && (constant_visibility = CONSTANT_VISIBILITY[node.name])
+        if (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
+            (constant_visibility = CONSTANT_VISIBILITY[node.name])
           return visit_constant_visibility_call(node, constant_visibility) { super }
         end
 
-        visibility = VISIBILITY_NAMES.find { |name| node.name == name && node.receiver.nil? }
+        visibility = VISIBILITY_NAMES.find do |name|
+          node.name == name && (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode))
+        end
         return visit_visibility_call(node, visibility) { super } if visibility
 
-        if node.name == :alias_method && node.receiver.nil?
+        if node.name == :alias_method && (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode))
           collect_alias_method_call(node)
+          return super
+        end
+
+        if method_removal_call?(node)
+          names = node.arguments.arguments.filter_map { |argument| attribute_name(argument) }
+          remove_method_declarations(names)
           return super
         end
 
@@ -220,8 +254,41 @@ module Zard
 
       private
 
+      def current_instance_evaluation_call?(node)
+        instance_evaluation_call?(node) &&
+          (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode))
+      end
+
+      def foreign_instance_evaluation_call?(node)
+        instance_evaluation_call?(node) && node.receiver &&
+          !node.receiver.is_a?(Prism::SelfNode)
+      end
+
+      def instance_evaluation_call?(node)
+        INSTANCE_EVALUATION_NAMES.include?(node.name) && node.block
+      end
+
+      def visit_current_instance_evaluation_call(node)
+        previous_receiver = @instance_evaluation_receiver
+        previous_receiver_span = @instance_evaluation_receiver_span
+        @instance_evaluation_receiver = node.receiver&.location&.slice || "self"
+        @instance_evaluation_receiver_span = span(node.receiver.location) if node.receiver
+        node.block.body&.accept(self)
+      ensure
+        @instance_evaluation_receiver = previous_receiver
+        @instance_evaluation_receiver_span = previous_receiver_span
+      end
+
+      def foreign_evaluation_call?(node)
+        EVALUATION_NAMES.include?(node.name) && node.block && node.receiver &&
+          !node.receiver.is_a?(Prism::SelfNode)
+      end
+
       def autoload_call?(node)
-        node.name == :autoload && node.receiver.nil? && node.block.nil? && node.arguments&.arguments&.length == 2
+        return false unless node.name == :autoload && node.block.nil? && node.arguments&.arguments&.length == 2
+        return false if @singleton_depth.positive? || @refinement
+
+        node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)
       end
 
       def collect_autoload_declaration(node)
@@ -241,10 +308,58 @@ module Zard
         name = attribute_name(name_node)
         return unless name
 
+        visibility = constant_visibility_for(name)
+        replace_constant_declarations(name)
         call = container_builder_call(value)
-        return visit_container_builder_write(name, node, call) if call
+        return visit_container_builder_write(name, node, call, visibility: visibility) if call
 
-        collect_path_declaration(:constant, name, node)
+        collect_path_declaration(:constant, name, node, visibility: visibility)
+      end
+
+      def remove_const_call?(node)
+        return false unless node.name == :remove_const && node.block.nil? && node.arguments&.arguments&.one?
+        return false if @namespace.empty? || @singleton_depth.positive? || @refinement
+
+        (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
+          attribute_name(node.arguments.arguments.first)
+      end
+
+      def visit_remove_const_call(node)
+        remove_constant_declarations(attribute_name(node.arguments.arguments.first))
+      end
+
+      def remove_constant_declarations(name)
+        remove_constant_path("#{current_namespace}::#{name}")
+      end
+
+      def replace_constant_declarations(path)
+        remove_constant_path(namespace_parts(path).join("::"))
+      end
+
+      def constant_visibility_for(path)
+        full_path = namespace_parts(path).join("::")
+        declaration = @declarations.reverse_each.find { |item| constant_declaration_path(item) == full_path }
+        declaration ? declaration.visibility : :public
+      end
+
+      def remove_constant_path(path)
+        container_declaration = @declarations[@container_declaration_index] if @container_declaration_index
+        @declarations.reject! do |declaration|
+          constant_declaration_path(declaration) == path ||
+            declaration.namespace == path ||
+            declaration.namespace&.start_with?("#{path}::")
+        end
+        @container_declaration_index = @declarations.index(container_declaration) if container_declaration
+      end
+
+      def self_referential_constant_guard?(node, name)
+        node.is_a?(Prism::OrNode) && constant_reference_name(node.left) == name
+      end
+
+      def constant_declaration_path(declaration)
+        return unless %i[class module constant].include?(declaration.kind)
+
+        [declaration.namespace, declaration.name].compact.join("::")
       end
 
       def class_builder?(node)
@@ -259,13 +374,14 @@ module Zard
         CONTAINER_BUILDERS[container_builder_key(call)]
       end
 
-      def visit_container_builder_write(path, node, call)
+      def visit_container_builder_write(path, node, call, visibility: constant_visibility_for(path))
         descriptor = CONTAINER_BUILDERS.fetch(container_builder_key(call))
         builder, builder_span = container_builder_reference(call)
         declaration_index = collect_path_declaration(
           descriptor.fetch(:kind),
           path,
           node,
+          visibility: visibility,
           container_builder: builder,
           container_builder_span: builder_span
         )
@@ -292,8 +408,14 @@ module Zard
         attribute_kind = descriptor.fetch(:attribute_kind)
         return unless attribute_kind
 
-        arguments = call.arguments&.arguments || []
-        arguments.grep(Prism::SymbolNode).each do |argument|
+        builder_attribute_arguments(call).each do |argument|
+          replace_method_declarations(
+            kind: :instance_method,
+            names: attribute_generated_method_names(argument.unescaped, attribute_kind),
+            namespace: current_namespace,
+            receiver: nil,
+            refinement: @refinement
+          )
           append_declaration(
             kind: :"instance_#{attribute_kind}",
             name: argument.unescaped,
@@ -305,6 +427,12 @@ module Zard
             parsed: {documentation: [].freeze, contracts: [].freeze}
           )
         end
+      end
+
+      def builder_attribute_arguments(call)
+        arguments = call.arguments&.arguments || []
+        arguments = arguments.drop(1) if container_builder_key(call) == ["Struct", :new] && arguments.first.is_a?(Prism::StringNode)
+        arguments.select { |argument| argument.is_a?(Prism::SymbolNode) || argument.is_a?(Prism::StringNode) }
       end
 
       def attribute_builder_call(call)
@@ -374,7 +502,8 @@ module Zard
         return false unless METHOD_DEFINITION_NAMES.include?(node.name)
         return true if node.name == :define_singleton_method
 
-        node.receiver.nil? && (!@namespace.empty? || @refinement)
+        (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
+          (!@namespace.empty? || @refinement)
       end
 
       def visit_method_definition_call(node)
@@ -413,7 +542,7 @@ module Zard
 
       def refinement_call?(node)
         node.name == :refine &&
-          node.receiver.nil? &&
+          (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
           node.block &&
           @container_kind == :module &&
           @singleton_depth.zero? &&
@@ -438,7 +567,7 @@ module Zard
 
       def mixin_call?(node)
         MIXIN_NAMES.include?(node.name) &&
-          node.receiver.nil? &&
+          (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
           %i[class module].include?(@container_kind) &&
           @container_declaration_index &&
           @singleton_depth.zero?
@@ -474,14 +603,80 @@ module Zard
         collect_method_alias(new_name, old_name, node) if new_name && old_name
       end
 
+      def method_removal_call?(node)
+        METHOD_REMOVAL_NAMES.include?(node.name) &&
+          (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
+          node.block.nil? &&
+          node.arguments
+      end
+
+      def remove_method_declarations(names)
+        return if names.empty?
+
+        transform_method_declarations do |declaration|
+          if removable_method_declaration?(declaration)
+            declaration_after_method_removal(declaration, names)
+          else
+            declaration
+          end
+        end
+      end
+
+      def removable_method_declaration?(declaration)
+        declaration.namespace == current_namespace &&
+          declaration_scope_matches?(declaration, current_singleton_receiver) &&
+          (declaration.kind == current_method_kind || attribute_in_scope?(declaration, current_attribute_scope))
+      end
+
+      def declaration_after_method_removal(declaration, names)
+        unless declaration.kind.to_s.include?("attribute")
+          return if names.include?(declaration.name)
+
+          return declaration
+        end
+
+        remaining = attribute_method_names(declaration) - names
+        return if remaining.empty?
+        return declaration unless declaration.kind.to_s.end_with?("_attribute_accessor")
+
+        attribute_scope = declaration.kind.to_s.delete_suffix("accessor")
+        kind = if remaining == [declaration.name]
+          :"#{attribute_scope}reader"
+        elsif remaining == ["#{declaration.name}="]
+          :"#{attribute_scope}writer"
+        else
+          declaration.kind
+        end
+        declaration_with_kind_and_visibility(declaration, kind, declaration.visibility)
+      end
+
+      def replace_method_declarations(kind:, names:, namespace:, receiver:, refinement:)
+        attribute_scope = (kind == :singleton_method) ? "singleton_attribute_" : "instance_attribute_"
+        transform_method_declarations do |declaration|
+          matches = declaration.namespace == namespace &&
+            declaration_scope_matches_values?(declaration, receiver, refinement) &&
+            (declaration.kind == kind || attribute_in_scope?(declaration, attribute_scope))
+          matches ? declaration_after_method_removal(declaration, names) : declaration
+        end
+      end
+
+      def transform_method_declarations
+        container_declaration = @declarations[@container_declaration_index] if @container_declaration_index
+        @declarations = @declarations.filter_map { |declaration| yield declaration }
+        @container_declaration_index = @declarations.index(container_declaration) if container_declaration
+      end
+
+      def inline_alias_method_name(node)
+        return unless node.is_a?(Prism::CallNode) && node.name == :alias_method
+        return unless node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)
+
+        arguments = node.arguments&.arguments || []
+        attribute_name(arguments.first) if arguments.length == 2
+      end
+
       def collect_method_alias(name, target, node)
         kind = current_method_kind
-        original = @declarations.reverse_each.find do |declaration|
-          declaration.kind == kind &&
-            declaration.namespace == current_namespace &&
-            declaration_scope_matches?(declaration, current_singleton_receiver) &&
-            declaration.name == target
-        end
+        original = alias_target_declaration(kind, target)
         unless original
           @diagnostics << Model::V1::Diagnostic.new(
             code: "alias.unresolved-target",
@@ -491,13 +686,20 @@ module Zard
           )
         end
 
+        replace_method_declarations(
+          kind: kind,
+          names: [name],
+          namespace: current_namespace,
+          receiver: current_singleton_receiver,
+          refinement: @refinement
+        )
         comments, parsed = parse_comments(node)
         append_declaration(
           kind: kind,
           name: name,
           namespace: current_namespace,
           visibility: original&.visibility || current_visibility,
-          parameters: original&.parameters || [].freeze,
+          parameters: alias_target_parameters(original, target),
           receiver: current_singleton_receiver,
           receiver_span: current_singleton_receiver_span,
           refinement: @refinement,
@@ -509,18 +711,41 @@ module Zard
         )
       end
 
+      def alias_target_declaration(kind, target)
+        attribute_scope = (kind == :singleton_method) ? "singleton_attribute_" : "instance_attribute_"
+        @declarations.reverse_each.find do |declaration|
+          next unless declaration.namespace == current_namespace
+          next unless declaration_scope_matches?(declaration, current_singleton_receiver)
+
+          (declaration.kind == kind && declaration.name == target) ||
+            (attribute_in_scope?(declaration, attribute_scope) && attribute_method_names(declaration).include?(target))
+        end
+      end
+
+      def alias_target_parameters(declaration, target)
+        return [].freeze unless declaration
+        return declaration.parameters unless declaration.kind.to_s.include?("attribute")
+
+        target.end_with?("=") ? ["value"].freeze : [].freeze
+      end
+
       def collect_method_declarations(node)
-        kind = singleton_method?(node) ? :singleton_method : :instance_method
+        instance_evaluation_method = instance_evaluation_method?(node)
+        kind = (singleton_method?(node) || instance_evaluation_method) ? :singleton_method : :instance_method
         name = node.name.to_s
         namespace = current_namespace
         parameters = parameter_names(node.parameters).freeze
-        receiver = node.receiver&.location&.slice || current_singleton_receiver
-        receiver_span = node.receiver ? span(node.receiver.location) : current_singleton_receiver_span
+        receiver = node.receiver&.location&.slice || current_singleton_receiver || @instance_evaluation_receiver
+        receiver_span = if node.receiver
+          span(node.receiver.location)
+        else
+          current_singleton_receiver_span || @instance_evaluation_receiver_span
+        end
         collect_method_entries(
           kind: kind,
           name: name,
           namespace: namespace,
-          visibility: method_visibility(node),
+          visibility: instance_evaluation_method ? :public : method_visibility(node),
           parameters: parameters,
           receiver: receiver,
           receiver_span: receiver_span,
@@ -528,8 +753,20 @@ module Zard
         )
       end
 
+      def instance_evaluation_method?(node)
+        @instance_evaluation_receiver && @singleton_depth.zero? && node.receiver.nil?
+      end
+
       def collect_method_entries(kind:, name:, namespace:, visibility:, parameters:, receiver:, receiver_span:, node:)
-        unless kind == :instance_method && module_function_definition?(node)
+        module_function = kind == :instance_method && module_function_definition?(node)
+        replace_method_declarations(
+          kind: kind,
+          names: [name],
+          namespace: namespace,
+          receiver: receiver,
+          refinement: @refinement
+        )
+        unless module_function
           return collect_declaration(
             kind: kind,
             name: name,
@@ -544,6 +781,13 @@ module Zard
           )
         end
 
+        replace_method_declarations(
+          kind: :singleton_method,
+          names: [name],
+          namespace: namespace,
+          receiver: receiver,
+          refinement: @refinement
+        )
         comments, parsed = parse_comments(node)
         append_declaration(
           kind: :instance_method,
@@ -576,16 +820,25 @@ module Zard
       end
 
       def collect_attribute_declarations(node)
-        attribute_kind = ATTRIBUTE_KINDS[node.name]
-        return unless attribute_kind && node.receiver.nil? && !@namespace.empty?
+        attribute_kind = attribute_kind(node)
+        current_owner = node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)
+        return unless attribute_kind && current_owner && !@namespace.empty?
 
-        names = node.arguments&.arguments&.filter_map { |argument| attribute_name(argument) } || []
+        arguments = node.arguments&.arguments || []
+        names = arguments.filter_map { |argument| attribute_name(argument) }
         return if names.empty?
 
         comments, parsed = parse_comments(node)
         scope = @singleton_depth.positive? ? :singleton : :instance
         kind = :"#{scope}_#{attribute_kind}"
         names.each do |name|
+          replace_method_declarations(
+            kind: :"#{scope}_method",
+            names: attribute_generated_method_names(name, attribute_kind),
+            namespace: current_namespace,
+            receiver: current_singleton_receiver,
+            refinement: @refinement
+          )
           append_declaration(
             kind: kind,
             name: name,
@@ -607,13 +860,32 @@ module Zard
         argument.unescaped if argument.is_a?(Prism::SymbolNode) || argument.is_a?(Prism::StringNode)
       end
 
-      def collect_path_declaration(kind, path, node, superclass: nil, superclass_span: nil, container_builder: nil, container_builder_span: nil)
+      def attribute_kind(node)
+        kind = ATTRIBUTE_KINDS[node.name]
+        arguments = node.arguments&.arguments || []
+        return :attribute_accessor if node.name == :attr && arguments.length == 2 && arguments.last.is_a?(Prism::TrueNode)
+
+        kind
+      end
+
+      def attribute_generated_method_names(name, attribute_kind)
+        case attribute_kind
+        when :attribute_reader
+          [name]
+        when :attribute_writer
+          ["#{name}="]
+        else
+          [name, "#{name}="]
+        end
+      end
+
+      def collect_path_declaration(kind, path, node, visibility: constant_visibility_for(path), superclass: nil, superclass_span: nil, container_builder: nil, container_builder_span: nil)
         parts = namespace_parts(path)
         collect_declaration(
           kind: kind,
           name: parts.last,
           namespace: (parts.length > 1) ? parts[0...-1].join("::") : nil,
-          visibility: :public,
+          visibility: visibility,
           parameters: [].freeze,
           superclass: superclass,
           superclass_span: superclass_span,
@@ -681,9 +953,11 @@ module Zard
         previous_singleton_visibility = @singleton_visibility
         previous_container_kind = @container_kind
         previous_module_function_mode = @module_function_mode
-        previous_container_declaration_index = @container_declaration_index
+        previous_container_span = @declarations.fetch(@container_declaration_index).span if @container_declaration_index
         previous_refinement = @refinement
         previous_refinement_span = @refinement_span
+        previous_instance_evaluation_receiver = @instance_evaluation_receiver
+        previous_instance_evaluation_receiver_span = @instance_evaluation_receiver_span
         @namespace = namespace_parts(name)
         @instance_visibility = :public
         @singleton_visibility = :public
@@ -692,6 +966,8 @@ module Zard
         @container_declaration_index = declaration_index
         @refinement = nil
         @refinement_span = nil
+        @instance_evaluation_receiver = nil
+        @instance_evaluation_receiver_span = nil
         yield
       ensure
         @namespace = previous_namespace
@@ -699,9 +975,11 @@ module Zard
         @singleton_visibility = previous_singleton_visibility
         @container_kind = previous_container_kind
         @module_function_mode = previous_module_function_mode
-        @container_declaration_index = previous_container_declaration_index
+        @container_declaration_index = @declarations.index { |declaration| declaration.span.equal?(previous_container_span) }
         @refinement = previous_refinement
         @refinement_span = previous_refinement_span
+        @instance_evaluation_receiver = previous_instance_evaluation_receiver
+        @instance_evaluation_receiver_span = previous_instance_evaluation_receiver_span
       end
 
       def within_refinement(target, target_span)
@@ -709,9 +987,11 @@ module Zard
         previous_singleton_visibility = @singleton_visibility
         previous_container_kind = @container_kind
         previous_module_function_mode = @module_function_mode
-        previous_container_declaration_index = @container_declaration_index
+        previous_container_span = @declarations.fetch(@container_declaration_index).span if @container_declaration_index
         previous_refinement = @refinement
         previous_refinement_span = @refinement_span
+        previous_instance_evaluation_receiver = @instance_evaluation_receiver
+        previous_instance_evaluation_receiver_span = @instance_evaluation_receiver_span
         @instance_visibility = :public
         @singleton_visibility = :public
         @container_kind = :refinement
@@ -719,15 +999,19 @@ module Zard
         @container_declaration_index = nil
         @refinement = target
         @refinement_span = target_span
+        @instance_evaluation_receiver = nil
+        @instance_evaluation_receiver_span = nil
         yield
       ensure
         @instance_visibility = previous_instance_visibility
         @singleton_visibility = previous_singleton_visibility
         @container_kind = previous_container_kind
         @module_function_mode = previous_module_function_mode
-        @container_declaration_index = previous_container_declaration_index
+        @container_declaration_index = @declarations.index { |declaration| declaration.span.equal?(previous_container_span) }
         @refinement = previous_refinement
         @refinement_span = previous_refinement_span
+        @instance_evaluation_receiver = previous_instance_evaluation_receiver
+        @instance_evaluation_receiver_span = previous_instance_evaluation_receiver_span
       end
 
       def namespace_parts(name)
@@ -761,7 +1045,8 @@ module Zard
           return with_visibility(visibility) { yield }
         end
 
-        names = arguments.filter_map { |argument| attribute_name(argument) }
+        names = arguments.filter_map { |argument| attribute_name(argument) || inline_alias_method_name(argument) }
+        yield
         unless names.empty?
           apply_named_visibility(
             names,
@@ -772,7 +1057,6 @@ module Zard
             receiver: current_singleton_receiver
           )
         end
-        yield
       end
 
       def visit_module_function_call(node)
@@ -783,13 +1067,27 @@ module Zard
           return yield
         end
 
-        if arguments.any? { |argument| argument.is_a?(Prism::DefNode) }
+        if arguments.any? { |argument| module_function_declaration?(argument) }
           return with_module_function_mode { yield }
         end
 
         yield
-        names = arguments.filter_map { |argument| attribute_name(argument) }
+        names = arguments.flat_map { |argument| module_function_argument_names(argument) }
         names.each { |name| apply_named_module_function(name) }
+      end
+
+      def module_function_argument_names(argument)
+        name = attribute_name(argument) || inline_alias_method_name(argument)
+        return [name] if name
+        return [] unless argument.is_a?(Prism::SplatNode)
+
+        call = argument.expression
+        return [] unless call.is_a?(Prism::CallNode) && ATTRIBUTE_KINDS.key?(call.name)
+        return [] unless call.receiver.nil? || call.receiver.is_a?(Prism::SelfNode)
+
+        kind = attribute_kind(call)
+        (call.arguments&.arguments || []).filter_map { |item| attribute_name(item) }
+          .flat_map { |item| attribute_generated_method_names(item, kind) }
       end
 
       def module_function_context?
@@ -797,7 +1095,15 @@ module Zard
       end
 
       def module_function_definition?(node)
-        @module_function_mode && module_function_context? && node.receiver.nil?
+        @module_function_mode &&
+          module_function_context? &&
+          (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode))
+      end
+
+      def module_function_declaration?(node)
+        node.is_a?(Prism::DefNode) ||
+          (node.is_a?(Prism::CallNode) && node.name == :define_method &&
+            (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)))
       end
 
       def with_module_function_mode
@@ -812,16 +1118,47 @@ module Zard
       end
 
       def apply_named_module_function(name)
-        index = @declarations.rindex do |declaration|
-          declaration.kind == :instance_method &&
-            declaration.namespace == current_namespace &&
-            declaration.name == name
-        end
+        declaration = alias_target_declaration(:instance_method, name)
+        return unless declaration
+
+        apply_module_function_instance_visibility(declaration, name)
+        replace_method_declarations(
+          kind: :singleton_method,
+          names: [name],
+          namespace: declaration.namespace,
+          receiver: declaration.receiver,
+          refinement: declaration.refinement
+        )
+        @declarations << declaration_with_kind_and_visibility(
+          declaration,
+          :singleton_method,
+          :public,
+          name: name,
+          parameters: alias_target_parameters(declaration, name)
+        )
+      end
+
+      def apply_module_function_instance_visibility(declaration, name)
+        index = @declarations.index(declaration)
         return unless index
 
-        declaration = @declarations.fetch(index)
-        @declarations[index] = declaration_with_visibility(declaration, :private)
-        @declarations << declaration_with_kind_and_visibility(declaration, :singleton_method, :public)
+        replacements = if declaration.kind.to_s.end_with?("_attribute_accessor")
+          target_kind, retained_kind = if name.end_with?("=")
+            %i[instance_attribute_writer instance_attribute_reader]
+          else
+            %i[instance_attribute_reader instance_attribute_writer]
+          end
+          [
+            declaration_with_kind_and_visibility(declaration, target_kind, :private),
+            declaration_with_kind_and_visibility(declaration, retained_kind, declaration.visibility)
+          ]
+        else
+          [declaration_with_visibility(declaration, :private)]
+        end
+
+        container_declaration = @declarations[@container_declaration_index] if @container_declaration_index
+        @declarations[index, 1] = replacements
+        @container_declaration_index = @declarations.index(container_declaration) if container_declaration
       end
 
       def visit_class_method_visibility_call(node, visibility)
@@ -830,6 +1167,9 @@ module Zard
         names = arguments.filter_map do |argument|
           if argument.is_a?(Prism::DefNode) && argument.receiver
             argument.name.to_s
+          elsif argument.is_a?(Prism::CallNode) && argument.name == :define_singleton_method &&
+              (argument.receiver.nil? || argument.receiver.is_a?(Prism::SelfNode))
+            attribute_name(argument.arguments&.arguments&.first)
           else
             attribute_name(argument)
           end
@@ -864,7 +1204,10 @@ module Zard
       end
 
       def visibility_declaration?(node)
-        node.is_a?(Prism::DefNode) || (node.is_a?(Prism::CallNode) && ATTRIBUTE_KINDS.key?(node.name))
+        node.is_a?(Prism::DefNode) ||
+          (node.is_a?(Prism::CallNode) && (ATTRIBUTE_KINDS.key?(node.name) ||
+            (node.name == :define_method &&
+              (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)))))
       end
 
       def set_current_visibility(visibility)
@@ -910,12 +1253,16 @@ module Zard
       end
 
       def declaration_scope_matches?(declaration, receiver)
+        declaration_scope_matches_values?(declaration, receiver, @refinement)
+      end
+
+      def declaration_scope_matches_values?(declaration, receiver, refinement)
         receiver_matches = if receiver.nil? || receiver == "self"
           declaration.receiver.nil? || declaration.receiver == "self"
         else
           declaration.receiver == receiver
         end
-        receiver_matches && declaration.refinement == @refinement
+        receiver_matches && declaration.refinement == refinement
       end
 
       def current_namespace
@@ -961,13 +1308,13 @@ module Zard
         declaration_with_kind_and_visibility(declaration, declaration.kind, declaration.visibility, mixins: mixins.freeze)
       end
 
-      def declaration_with_kind_and_visibility(declaration, kind, visibility, mixins: declaration.mixins)
+      def declaration_with_kind_and_visibility(declaration, kind, visibility, name: declaration.name, parameters: declaration.parameters, mixins: declaration.mixins)
         Model::V1::Declaration.new(
           kind: kind,
-          name: declaration.name,
+          name: name,
           namespace: declaration.namespace,
           visibility: visibility,
-          parameters: declaration.parameters,
+          parameters: parameters,
           receiver: declaration.receiver,
           receiver_span: declaration.receiver_span,
           refinement: declaration.refinement,

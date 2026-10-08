@@ -4,6 +4,22 @@ require "test_helper"
 require "zard/doc"
 
 class ZardDocTest < Minitest::Test
+  def test_hides_private_constant_replacements
+    ["VALUE = 2", "const_set :VALUE, 2", "VALUE = Class.new"].each do |replacement|
+      source = "module Demo\n  VALUE = 1\n  private_constant :VALUE\n  # Internal value.\n  #{replacement}\nend\n"
+      document = Zard.parse(source, path: "example.rb")
+
+      assert_equal "", Zard::Doc.render(document), replacement
+    end
+  end
+
+  def test_renders_mixins_on_the_enclosing_module_after_nested_reassignment
+    source = "OLD = 1\n# Public outer.\nmodule Outer\n  module Inner\n    ::OLD = 2\n  end\n  include Enumerable\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+
+    assert_includes Zard::Doc.render(document), "## Module `Outer`\n\n### Includes\n\n- `Enumerable`"
+  end
+
   def test_renders_the_first_vertical_slice_as_markdown
     ruby_path = File.expand_path("fixtures/read_name.rb", __dir__)
     markdown_path = File.expand_path("fixtures/read_name.md", __dir__)
@@ -46,8 +62,20 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_only_the_latest_unconditional_constant_assignment
+    source = "module Demo\n  # Old limit.\n  LIMIT = 1\n  # Current limit.\n  LIMIT = 2\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Constant `Demo::LIMIT`
+
+      Current limit.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_a_documented_autoload_constant
-    source = "module Models\n  # Loaded widget API.\n  autoload :Widget, \"models/widget\"\nend\n"
+    source = "module Models\n  # Loaded widget API.\n  self.autoload :Widget, \"models/widget\"\nend\n"
     document = Zard.parse(source, path: "example.rb")
     expected = <<~MARKDOWN
       ## Constant `Models::Widget`
@@ -89,6 +117,20 @@ class ZardDocTest < Minitest::Test
       ## `Pair#values()`
 
       Returns both values.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_renders_a_data_builder_with_string_members
+    source = "# Pair values.\nPair = Data.define(\"left\", :right)\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Class `Pair`
+
+      Class builder: `Data.define("left", :right)`.
+
+      Pair values.
     MARKDOWN
 
     assert_equal expected, Zard::Doc.render(document)
@@ -257,6 +299,58 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_an_attribute_with_an_explicit_current_owner
+    source = "class Reader\n  # Stored name.\n  self.attr_reader :name\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Attribute reader `Reader#name`
+
+      Stored name.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_renders_attr_readers_and_legacy_writable_attributes
+    source = "class Reader\n  # Stored name.\n  attr :name\n  # Mutable token.\n  attr(:token, true)\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Attribute reader `Reader#name`
+
+      Stored name.
+
+      ## Attribute accessor `Reader#token`
+
+      Mutable token.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_honors_visibility_with_an_explicit_current_owner
+    source = "class Reader\n  # Internal reader.\n  self.private def hidden = nil\n  self.public\n  # Public reader.\n  def shown = nil\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Reader#shown()`
+
+      Public reader.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_honors_class_method_visibility_with_an_explicit_current_owner
+    source = "class Reader\n  # Internal constructor.\n  def self.hidden = new\n  self.private_class_method :hidden\n  # Inline internal constructor.\n  self.private_class_method def self.inline = new\n  # Public constructor.\n  def self.build = new\n  self.private_class_method :build\n  self.public_class_method :build\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Reader.build()`
+
+      Public constructor.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_explicit_singleton_receivers
     source = "# Builds a reader.\ndef Registry.build = nil\nclass Reader\n  class << Registry\n    # Current version.\n    attr_reader :version\n  end\nend\n"
     document = Zard.parse(source, path: "example.rb")
@@ -289,6 +383,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_a_refinement_with_an_explicit_current_owner
+    source = "module TextExtensions\n  # String helpers.\n  self.refine String do\n    # Returns a tagged copy.\n    def tagged = self\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Refinement `TextExtensions[String]`
+
+      String helpers.
+
+      ## `TextExtensions[String]#tagged()`
+
+      Returns a tagged copy.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_methods_declared_by_method_definition_calls
     source = "class Reader\n  # Reads a value.\n  define_method(:read) { |path| path }\nend\n# Builds a reader.\nRegistry.define_singleton_method(:build) { |path| path }\n"
     document = Zard.parse(source, path: "example.rb")
@@ -300,6 +410,66 @@ class ZardDocTest < Minitest::Test
       ## `Registry.build(path)`
 
       Builds a reader.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_renders_define_method_with_an_explicit_current_owner
+    source = "class Reader\n  # Reads a path.\n  self.define_method(:read) { |path| path }\n  # Internal reader.\n  private self.define_method(:hidden) { nil }\nend\nmodule Helpers\n  # Normalizes a value.\n  self.module_function self.define_method(:normalize) { |value| value }\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Reader#read(path)`
+
+      Reads a path.
+
+      ## `Helpers.normalize(value)`
+
+      Normalizes a value.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_renders_methods_from_current_owner_evaluation_blocks
+    source = "class Reader\n  self.class_eval do\n    # Reads a value.\n    def read = nil\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Reader#read()`
+
+      Reads a value.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_renders_mixed_method_owners_from_current_instance_evaluation
+    source = "class Reader\n  self.instance_eval do\n    # Builds a reader.\n    def build = new\n    # Reads a value.\n    define_method(:read) { nil }\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Reader.build()`
+
+      Builds a reader.
+
+      ## `Reader#read()`
+
+      Reads a value.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_renders_an_inline_module_function_definition_call
+    source = "module Helpers\n  # Normalizes a value.\n  # @param value — Value to normalize.\n  module_function define_method(:normalize) { |value| value }\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Helpers.normalize(value)`
+
+      Normalizes a value.
+
+      ### Parameters
+
+      - `value` — Value to normalize.
     MARKDOWN
 
     assert_equal expected, Zard::Doc.render(document)
@@ -347,6 +517,68 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_a_named_attribute_module_function
+    source = "module Helpers\n  # Stored name.\n  attr_accessor :name\n  module_function :name\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Attribute writer `Helpers#name`
+
+      Stored name.
+
+      ## `Helpers.name()`
+
+      Stored name.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_renders_a_splatted_inline_attribute_module_function
+    source = "module Helpers\n  # Stored name.\n  module_function(*attr_accessor(:name))\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Helpers.name()`
+
+      Stored name.
+
+      ## `Helpers.name=(value)`
+
+      Stored name.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_renders_an_inline_module_function_alias
+    source = "module Helpers\n  def original(value) = value\n  # Calls the original helper.\n  module_function alias_method(:call, :original)\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Alias `Helpers.call`
+
+      Alias of `Helpers.original`.
+
+      Calls the original helper.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_renders_module_functions_with_an_explicit_current_owner
+    source = "module Helpers\n  # First helper.\n  def first(value) = value\n  self.module_function :first\n  # Second helper.\n  self.module_function def second(value) = value\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Helpers.first(value)`
+
+      First helper.
+
+      ## `Helpers.second(value)`
+
+      Second helper.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_a_documented_method_alias_without_copying_target_documentation
     source = "class Reader\n  # Reads a path.\n  def read(path) = path\n  # Compatibility name.\n  alias fetch read\nend\n"
     document = Zard.parse(source, path: "example.rb")
@@ -355,6 +587,82 @@ class ZardDocTest < Minitest::Test
 
       Reads a path.
 
+      ## Alias `Reader#fetch`
+
+      Alias of `Reader#read`.
+
+      Compatibility name.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_renders_an_attribute_method_alias
+    source = "class Reader\n  # Stored name.\n  attr_writer :name\n  # Compatibility writer.\n  alias assign name=\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Attribute writer `Reader#name`
+
+      Stored name.
+
+      ## Alias `Reader#assign`
+
+      Alias of `Reader#name=`.
+
+      Compatibility writer.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_omits_removed_methods_and_renders_the_remaining_attribute_side
+    source = "class Reader\n  # Reads a value.\n  def read = nil\n  # Fetches a value.\n  alias fetch read\n  # Stored name.\n  attr_accessor :name\n  # Stored token.\n  attr_accessor :token\n  undef read, name, token=\n  self.remove_method :fetch, :name=\n  class << self\n    # Builds a reader.\n    def build = new\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Attribute reader `Reader#token`
+
+      Stored token.
+
+      ## `Reader.build()`
+
+      Builds a reader.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_renders_only_the_latest_method_definition
+    source = "class Reader\n  # Old read API.\n  def read(old) = old\n  # Current read API.\n  define_method(:read) { |value| value }\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Reader#read(value)`
+
+      Current read API.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_omits_a_removed_constant_subtree_and_renders_its_replacement
+    source = "module Demo\n  # Old service API.\n  class Service\n    # Old operation.\n    def old = nil\n  end\n  remove_const :Service\n  # Current service API.\n  class Service\n    # Current operation.\n    def call = nil\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Class `Demo::Service`
+
+      Current service API.
+
+      ## `Demo::Service#call()`
+
+      Current operation.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_renders_an_alias_method_with_an_explicit_current_owner
+    source = "class Reader\n  def read(path) = path\n  # Compatibility name.\n  self.alias_method :fetch, :read\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
       ## Alias `Reader#fetch`
 
       Alias of `Reader#read`.
@@ -422,11 +730,47 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_mixin_references_with_an_explicit_current_owner
+    source = "# Reads values.\nclass Reader\n  self.include Enumerable\n  self.prepend Instrumentation\n  self.extend FactoryMethods\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Class `Reader`
+
+      ### Includes
+
+      - `Enumerable`
+
+      ### Prepends
+
+      - `Instrumentation`
+
+      ### Extends
+
+      - `FactoryMethods`
+
+      Reads values.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_hides_private_constants_and_classes
     source = "module Demo\n  # Internal value.\n  VALUE = 1\n  # Internal implementation.\n  class Internal\n  end\n  private_constant :VALUE, :Internal\nend\n"
     document = Zard.parse(source, path: "example.rb")
 
     assert_equal "", Zard::Doc.render(document)
+  end
+
+  def test_honors_constant_visibility_with_an_explicit_current_owner
+    source = "module Demo\n  # Public value.\n  VALUE = 1\n  # Internal implementation.\n  class Internal\n  end\n  self.private_constant :VALUE, :Internal\n  self.public_constant :VALUE\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Constant `Demo::VALUE`
+
+      Public value.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
   end
 
   def test_renders_yield_parameters_and_return_value

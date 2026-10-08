@@ -23,6 +23,8 @@ See [CONTEXT.md](CONTEXT.md) and [docs/adr](docs/adr) for the current language a
 
 ## Usage
 
+For installation, Ruby API and model access, CLI behavior, and current limits, see the [usage guide](docs/usage.md).
+
 The core gem parses Ruby source without interpreting `@extrbs` type payloads:
 
 ```ruby
@@ -51,16 +53,32 @@ InlineRBS trailing prose after `--` is stored as a contract note. It is not copi
 Documentation descriptions continue across plain comment lines until the next annotation or contract. No continuation marker is required.
 
 Declarations record `public`, `protected`, or `private` visibility. Markdown output includes public declarations only. Bare visibility calls, inline forms such as `private def` and `private attr_reader`, named method modifiers such as `private :read`, and `private_class_method` / `public_class_method` are supported. Named attribute modifiers are diagnosed because one attribute declaration may represent two generated methods; use lexical or inline visibility for attributes.
+Instance visibility calls received by `self` belong to the current method scope, like their bare forms.
+Class method visibility calls received by `self` belong to the current singleton method scope, like their bare forms.
+Ruby's `attr` declarations are readers by default. The legacy `attr :name, true` form is preserved as an accessor.
+Attribute declarations received by `self` belong to the current owner, like their bare forms.
 
 `module_function` records its private instance method and public singleton copy as separate declarations with shared source provenance. Bare, named, and inline forms are supported.
+`module_function` received by `self` belongs to the current module, like its bare form.
+Named `module_function` calls may target generated attribute methods. Applying one side of an accessor preserves the other side with its original visibility.
+Splatted inline forms such as `module_function(*attr_accessor(:name))` apply every generated attribute method. The non-splatted `module_function attr_accessor :name` form raises `TypeError` in Ruby and is not a ZARD module-function form.
 
-Method aliases preserve their target name and inherit visibility and parameters when the target is declared in the same source scope. Alias documentation remains separate from target documentation.
+Method aliases preserve their target name and inherit visibility and parameters when the target is declared in the same source scope. Generated attribute readers and writers are valid alias targets; writer aliases use the conventional `value` parameter. Alias documentation remains separate from target documentation.
+Inline visibility and `module_function` modifiers around `alias_method` apply to the resulting alias.
+`alias_method` received by `self` belongs to the current method scope, like its bare form.
+`undef`, `undef_method`, and `remove_method` remove declarations from the current method scope. Removing one side of an attribute accessor preserves the other side.
+Later method, alias, and attribute definitions replace the generated method names in the same source scope. Replacing one side of an attribute accessor preserves the other side.
 
 Literal `define_method` and `define_singleton_method` calls produce method declarations. Their block parameters, visibility, receiver, refinement scope, and documentation provenance are preserved.
+`define_method` received by `self` belongs to the current method scope, like its bare form.
+Inline `private define_method`, `module_function define_method`, and class-method visibility modifiers around `define_singleton_method` preserve the visibility produced by Ruby.
+Declarations in bare or `self` evaluation blocks remain in the current owner. Blocks evaluated by another receiver are not attributed to the lexical owner.
+In bare or `self.instance_eval` blocks, a bare `def` is a singleton method while method-definition calls, attributes, and constants retain their lexical owner. Foreign instance-evaluation blocks are not resolved.
 
 Class declarations preserve the explicit superclass expression and its source span without resolving ancestry.
 
 Classes assigned from `Data.define` and `Struct.new` preserve the builder call, generated attributes, and block members as one class scope.
+Literal Symbol and String member names produce generated attributes; the leading String class name accepted by `Struct.new` is not a member.
 Named subclasses such as `class Point < Data.define(:x)` also preserve the generated attributes while retaining the explicit superclass expression.
 `Class.new` assignments are also class builders, so their optional superclass, mixins, constants, and block members stay inside the generated class scope.
 `Module.new` assignments are module builders, so their mixins, constants, and block members stay inside the generated module scope.
@@ -71,23 +89,37 @@ Self-referential guards such as `Registry = Registry || Module.new` are treated 
 `Class.new(Struct.new(...))` and `Class.new(Data.define(...))` chains preserve inherited generated attributes when no intermediate factory block can override them.
 
 Class and module declarations preserve explicit `include`, `prepend`, and `extend` targets with source spans without resolving ancestry. Documented containers list these mixin references in Markdown.
+Mixin calls received by `self` belong to the current container, like their bare forms.
 
 Singleton methods and attributes preserve an explicit receiver or `class <<` expression with source provenance. Documentation renders that source receiver without resolving its runtime object.
 
 Ruby refinements and their members remain separate from ordinary members of the enclosing module. The refinement target is preserved as a source expression with its span.
+`refine` received by `self` belongs to the current module, like its bare form.
 
 `private_constant` and `public_constant` update the visibility of class, module, and constant declarations in the same namespace.
-Bare `autoload` calls with literal Symbol or String names produce constant declarations without guessing the loaded value's class or module kind.
+Constant visibility calls received by `self` belong to the current namespace, like their bare forms.
+Bare or `self.autoload` calls with literal Symbol or String names produce constant declarations for the current ordinary owner without guessing the loaded value's class or module kind.
 Bare or `self.const_set` calls with literal names produce declarations in the current ordinary class or module body; container-builder values retain their generated scope.
+Bare or `self.remove_const` calls with literal names remove the matching declaration and its nested API from the current namespace. A later declaration of the same name remains in the model.
+Unconditional constant assignments and literal `const_set` calls replace an earlier declaration and its nested API. Conditional initialization remains non-destructive.
 
 ## Installation
 
-Until the first RubyGems release, add the repository to your Gemfile:
+The `0.0.1` candidate is not yet published. Until it is available on RubyGems, add the repository to your Gemfile:
 
 ```ruby
 gem "zard", github: "rigortype/zard"
 gem "zard-doc", github: "rigortype/zard"
 ```
+
+After publication, use the released pair:
+
+```ruby
+gem "zard", "~> 0.0.1"
+gem "zard-doc", "~> 0.0.1"
+```
+
+The project is pre-1.0. Its public API and model are versioned, but compatibility guarantees for future releases have not yet been established; expect changes between pre-1.0 releases.
 
 ## Development
 

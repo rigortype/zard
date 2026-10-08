@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.metadata["rubygems_mfa_required"] = "true"
   spec.metadata["source_code_uri"] = spec.homepage
 
-  spec.files = Dir["{lib,sig}/**/*", "CHANGELOG.md", "LICENSE", "README.md"].select { |path| File.file?(path) }.sort
+  spec.files = Dir["{lib,sig,docs,examples}/**/*", "CONTEXT.md", "CHANGELOG.md", "LICENSE", "README.md"].select { |path| File.file?(path) }.sort
   spec.require_paths = ["lib"]
 
   spec.add_dependency "prism", "~> 1.9"

@@ -6,47 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.0.1] - 2026-10-08
+
+The first ZARD release separates Ruby API documentation from RBS and Rigor contracts. Parse Ruby source into a versioned model, generate public API Markdown, and lint documentation from files, directories, or standard input without installing Rigor.
+
 ### Added
 
-- Add the initial Ruby gem package, test, lint, signature, and CI skeleton.
-- Add the versioned ZARD document model and Ruby source parser.
-- Add the separate `zard-doc` gem with Markdown rendering for method parameters and returns.
-- Add parsing and Markdown rendering for `@yieldparam` and `@yieldreturn` block documentation.
-- Add structured option ownership plus parsing and Markdown rendering for `@option` and `@raise`.
-- Add parsing and Markdown rendering for description-only documentation tags.
-- Add the `zard-doc lint` command with configurable warning failure behavior.
-- Add the `zard-doc render` command for generating Markdown from Ruby source files.
-- Diagnose ZARD documentation in non-UTF-8 source while preserving contract channels.
-- Preserve InlineRBS trailing prose separately from contract payloads.
-- Support multiline descriptions with exact source provenance and Markdown list continuation.
-- Discover Ruby source files recursively from `zard-doc` CLI directory inputs.
-- Report all unreadable CLI inputs without emitting partial Markdown.
-- Read `zard-doc` CLI source from standard input when the input path is `-`.
-- Preserve class and module declarations in the ZARD model and render their documentation.
-- Preserve simple constant declarations in the ZARD model and render their documentation.
-- Preserve instance and singleton attribute declarations in the ZARD model and render their documentation.
-- Track lexical declaration visibility and render public API documentation only.
-- Apply named method visibility and diagnose ambiguous named attribute visibility.
-- Apply named and inline class method visibility.
-- Model bare, named, and inline module functions as private instance methods with public singleton copies.
-- Preserve `alias` and `alias_method` declarations with their target metadata.
-- Preserve explicit class superclass expressions with source provenance.
-- Apply private and public constant visibility to class, module, and constant declarations.
-- Ignore declaration DSL calls inside method bodies.
-- Preserve `include`, `prepend`, and `extend` targets with source provenance.
-- Preserve explicit singleton declaration receivers with source provenance.
-- Preserve Ruby refinements and keep their members in a separate scope.
-- Preserve methods declared by literal `define_method` and `define_singleton_method` calls.
-- Model classes assigned from `Data.define` and `Struct.new` builders.
-- Preserve generated attributes on named `Data.define` and `Struct.new` subclasses.
-- Model classes assigned from `Class.new` builders.
-- Model modules assigned from `Module.new` builders.
-- Model container builders used in conditional constant initialization with `||=`.
-- Model classes assigned from standard library `DelegateClass` builders.
-- Recognize container builders behind value-preserving `.freeze` tails.
-- Model self-referential `CONST = CONST || builder` initialization.
-- Preserve generated attributes inherited through `Class.new` builder chains.
-- Preserve constants declared by bare `autoload` calls with literal names.
-- Preserve literal `const_set` declarations owned by the current class or module.
+- Parse Ruby source into `Zard::Model::V1` declarations with documentation, contracts, diagnostics, and source provenance.
+- Preserve plain RBS and `@extrbs` contract payloads and InlineRBS contract notes separately from API documentation.
+- Support class, module, constant, attribute, and method documentation, including aliases, module functions, literal method-definition calls, and Ruby refinements.
+- Model literal container builders such as `Data.define`, `Struct.new`, `Class.new`, `Module.new`, and `DelegateClass`, with generated attributes and block members.
+- Preserve explicit superclass, mixin, singleton receiver, and refinement target expressions without resolving runtime ancestry or object identity.
+- Apply supported visibility, removal, reassignment, and redefinition operations within the modeled source scope.
+- Render documented public declarations as Markdown with parameter, return, block, option, exception, note, reference, deprecation, and example tags, including multiline descriptions.
+- Lint noncanonical or YARD-like documentation syntax, empty descriptions, UTF-8 requirements, and Ruby syntax errors, with an option to fail on warnings.
+- Provide `zard-doc render` and `zard-doc lint` for files, recursive directories, and standard input, with deterministic path ordering and no partial Markdown on input errors.
+- Distribute `zard` and `zard-doc` as separate gems for Ruby 3.2 and newer, with a usage guide and a complete multi-file example.
 
-[Unreleased]: https://github.com/rigortype/zard/commits/master
+[Unreleased]: https://github.com/rigortype/zard/compare/v0.0.1...HEAD
+[0.0.1]: https://github.com/rigortype/zard/tree/v0.0.1

@@ -3,6 +3,45 @@
 require "test_helper"
 
 class ParserTest < Minitest::Test
+  def test_preserves_private_constant_visibility_when_replacing_its_value
+    ["VALUE = 2", "const_set :VALUE, 2", "self.const_set :VALUE, Class.new", "::Demo::VALUE = Module.new"].each do |replacement|
+      source = "module Demo\n  VALUE = 1\n  private_constant :VALUE\n  #{replacement}\nend\n"
+      document = Zard.parse(source, path: "example.rb")
+      declaration = document.declarations.find { |item| item.name == "VALUE" }
+
+      assert_empty document.diagnostics
+      assert_equal :private, declaration.visibility, replacement
+    end
+  end
+
+  def test_constant_removal_resets_visibility_for_a_later_assignment
+    source = "module Demo\n  VALUE = 1\n  private_constant :VALUE\n  remove_const :VALUE\n  VALUE = 2\nend\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.name == "VALUE" }
+
+    assert_equal :public, declaration.visibility
+  end
+
+  def test_restores_the_enclosing_container_after_nested_absolute_reassignment
+    ["OLD = 1", "module OLD\n  A = 1\n  B = 2\nend"].each do |previous|
+      source = "#{previous}\nmodule Outer\n  module Inner\n    ::OLD = 0\n  end\n  include Enumerable\nend\n"
+      document = Zard.parse(source, path: "example.rb")
+      outer = document.declarations.find { |item| item.name == "Outer" }
+      inner = document.declarations.find { |item| item.name == "Inner" }
+
+      assert_empty document.diagnostics
+      assert_equal ["Enumerable"], outer.mixins.map(&:target)
+      assert_empty inner.mixins
+    end
+  end
+
+  def test_ignores_dynamic_undef_names_while_removing_literal_names
+    source = "class Demo\n  def old = nil\n  def dynamic = nil\n  undef :old, :\"\#{:dynamic}\"\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+
+    assert_empty document.diagnostics
+    assert_equal ["Demo", "dynamic"], document.declarations.map(&:name)
+  end
+
   def test_parses_the_first_vertical_slice
     path = File.expand_path("fixtures/read_name.rb", __dir__)
     document = Zard.parse(File.read(path), path: path)
@@ -109,6 +148,25 @@ class ParserTest < Minitest::Test
     assert_equal [], declarations.fetch(0).parameters
   end
 
+  def test_replaces_constants_and_their_members_on_unconditional_assignment
+    source = "module Demo\n  class Service\n    OLD = 1\n    def old = nil\n  end\n  Service = Class.new do\n    def current = nil\n  end\n  VALUE = 1\n  self.const_set :VALUE, 2\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [
+      [:module, nil, "Demo"],
+      [:class, "Demo", "Service"],
+      [:instance_method, "Demo::Service", "current"],
+      [:constant, "Demo", "VALUE"]
+    ], declarations.map { |declaration| [declaration.kind, declaration.namespace, declaration.name] }
+  end
+
+  def test_preserves_existing_declarations_for_self_referential_constant_guards
+    source = "module Demo\n  class Service\n    OLD = 1\n  end\n  Service = Service || Class.new\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_includes declarations.map(&:name), "OLD"
+  end
+
   def test_does_not_collect_constant_reassignments_as_declarations
     source = "VALUE ||= 1\nVALUE &&= 2\nVALUE += 3\n"
     declarations = Zard.parse(source, path: "example.rb").declarations
@@ -117,7 +175,7 @@ class ParserTest < Minitest::Test
   end
 
   def test_collects_literal_autoload_declarations
-    source = "# Lazy root API.\nautoload \"RootApi\", \"root_api\"\nmodule Models\n  # Lazy widget API.\n  autoload :Widget, \"models/widget\"\n  autoload :Hidden, path_for(:hidden)\n  private_constant :Hidden\nend\n"
+    source = "# Lazy root API.\nself.autoload \"RootApi\", \"root_api\"\nmodule Models\n  # Lazy widget API.\n  self.autoload :Widget, \"models/widget\"\n  autoload :Hidden, path_for(:hidden)\n  private_constant :Hidden\nend\n"
     root, models, widget, hidden = Zard.parse(source, path: "example.rb").declarations
 
     assert_equal [:constant, :module, :constant, :constant], [root, models, widget, hidden].map(&:kind)
@@ -127,10 +185,10 @@ class ParserTest < Minitest::Test
   end
 
   def test_ignores_dynamic_received_and_method_body_autoload_calls
-    source = "autoload NAME, \"dynamic\"\nRegistry.autoload :Remote, \"remote\"\ndef configure\n  autoload :Nested, \"nested\"\nend\n"
+    source = "autoload NAME, \"dynamic\"\nRegistry.autoload :Remote, \"remote\"\nmodule Models\n  class << self\n    autoload :SingletonOwned, \"singleton_owned\"\n  end\n  refine String do\n    self.autoload :Refined, \"refined\"\n  end\nend\ndef configure\n  autoload :Nested, \"nested\"\nend\n"
     declarations = Zard.parse(source, path: "example.rb").declarations
 
-    assert_equal [[:instance_method, "configure"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+    assert_equal [[:module, "Models"], [:refinement, "String"], [:instance_method, "configure"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
   end
 
   def test_collects_literal_const_set_declarations_in_the_current_container
@@ -192,6 +250,18 @@ class ParserTest < Minitest::Test
     assert_equal [:module, :class, :instance_attribute_accessor, :instance_attribute_accessor], [mod, klass, x, y].map(&:kind)
     assert_equal [nil, "Models", "Models::Point", "Models::Point"], [mod, klass, x, y].map(&:namespace)
     assert_equal "Struct.new(:x, :y, keyword_init: true)", klass.container_builder
+  end
+
+  def test_models_literal_string_builder_members
+    source = "Pair = Data.define(\"left\", :right)\nCustomer = Struct.new(\"Customer\", \"name\", :age)\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+    pair, left, right, customer, name, age = declarations
+
+    assert_equal [:class, :instance_attribute_reader, :instance_attribute_reader, :class, :instance_attribute_accessor, :instance_attribute_accessor], declarations.map(&:kind)
+    assert_equal ["left", "right", "name", "age"], [left, right, name, age].map(&:name)
+    assert_equal ["Pair", "Pair", "Customer", "Customer"], [left, right, name, age].map(&:namespace)
+    assert_equal "Data.define(\"left\", :right)", pair.container_builder
+    assert_equal "Struct.new(\"Customer\", \"name\", :age)", customer.container_builder
   end
 
   def test_does_not_invent_attributes_for_dynamic_class_builder_members
@@ -354,6 +424,29 @@ class ParserTest < Minitest::Test
     assert_equal attributes.fetch(0).comment_span.end_offset, attributes.fetch(1).comment_span.end_offset
   end
 
+  def test_collects_attributes_with_an_explicit_current_owner
+    source = "class Reader\n  # Stored name.\n  self.attr_reader :name\n  self.attr_writer :token\n  self.attr_accessor :enabled\nend\n"
+    attributes = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.include?("attribute") }
+
+    assert_equal %i[instance_attribute_reader instance_attribute_writer instance_attribute_accessor], attributes.map(&:kind)
+    assert_equal ["name", "token", "enabled"], attributes.map(&:name)
+    assert_equal ["Reader"] * 3, attributes.map(&:namespace)
+    assert attributes.all? { |declaration| declaration.receiver.nil? }
+    assert_equal "Stored name.", attributes.fetch(0).documentation.fetch(0).description
+  end
+
+  def test_collects_attr_readers_and_legacy_writable_attributes
+    source = "class Reader\n  # Stored values.\n  attr :name, :format\n  attr(:token, true)\n  private attr(:secret, false)\n  class << self\n    attr :version\n  end\nend\n"
+    attributes = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.include?("attribute") }
+
+    assert_equal %i[instance_attribute_reader instance_attribute_reader instance_attribute_accessor instance_attribute_reader singleton_attribute_reader], attributes.map(&:kind)
+    assert_equal ["name", "format", "token", "secret", "version"], attributes.map(&:name)
+    assert_equal %i[public public public private public], attributes.map(&:visibility)
+    assert_equal ["Stored values.", "Stored values."], attributes.first(2).map { |declaration| declaration.documentation.fetch(0).description }
+  end
+
   def test_reports_a_shared_attribute_comment_diagnostic_once
     source = "class Reader\n  #  @note Shared description.\n  attr_reader :name, :age\nend\n"
     document = Zard.parse(source, path: "example.rb")
@@ -411,6 +504,16 @@ class ParserTest < Minitest::Test
     assert_equal "String", source.byteslice(tagged.refinement_span.start_offset...tagged.refinement_span.end_offset)
   end
 
+  def test_preserves_a_refinement_with_an_explicit_current_owner
+    source = "module TextExtensions\n  self.refine String do\n    # Returns a tagged copy.\n    def tagged = self\n  end\nend\n"
+    mod, refinement, tagged = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:module, :refinement, :instance_method], [mod, refinement, tagged].map(&:kind)
+    assert_equal [nil, "TextExtensions", "TextExtensions"], [mod, refinement, tagged].map(&:namespace)
+    assert_equal [nil, nil, "String"], [mod, refinement, tagged].map(&:refinement)
+    assert_equal "Returns a tagged copy.", tagged.documentation.fetch(0).description
+  end
+
   def test_keeps_alias_resolution_inside_the_refinement_scope
     source = "module Extensions\n  refine String do\n    def call = nil\n  end\n  refine Array do\n    alias invoke call\n  end\nend\n"
     document = Zard.parse(source, path: "example.rb")
@@ -436,6 +539,19 @@ class ParserTest < Minitest::Test
     assert_equal ["path", "mode:", "**options", "&block"], methods.fetch(0).parameters
     assert_equal "Reads a value.", methods.fetch(0).documentation.fetch(0).description
     assert_equal "self", methods.fetch(1).receiver
+  end
+
+  def test_collects_define_method_with_an_explicit_current_owner
+    source = "class Reader\n  self.define_method(:read) { |path| path }\n  private self.define_method(:hidden) { nil }\nend\nmodule Helpers\n  self.module_function self.define_method(:normalize) { |value| value }\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [
+      [:instance_method, "read", "Reader", :public, ["path"]],
+      [:instance_method, "hidden", "Reader", :private, []],
+      [:instance_method, "normalize", "Helpers", :private, ["value"]],
+      [:singleton_method, "normalize", "Helpers", :public, ["value"]]
+    ], methods.map { |declaration| [declaration.kind, declaration.name, declaration.namespace, declaration.visibility, declaration.parameters] }
   end
 
   def test_preserves_destructured_define_method_parameters
@@ -487,6 +603,16 @@ class ParserTest < Minitest::Test
     declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.name == "tagged" }
 
     assert_equal "String", declaration.refinement
+  end
+
+  def test_applies_inline_modifiers_to_method_definition_calls
+    source = "module Helpers\n  # Internal helper.\n  private define_method(:hidden) { |value| value }\n  # Public helper.\n  module_function define_method(:call) { |value| value }\n  # Internal singleton helper.\n  private_class_method define_singleton_method(:secret) { nil }\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [[:instance_method, "hidden", :private], [:instance_method, "call", :private], [:singleton_method, "call", :public], [:singleton_method, "secret", :private]], methods.map { |declaration| [declaration.kind, declaration.name, declaration.visibility] }
+    assert_equal [["value"], ["value"], ["value"], []], methods.map(&:parameters)
+    assert_equal ["Internal helper.", "Public helper.", "Public helper.", "Internal singleton helper."], methods.map { |declaration| declaration.documentation.fetch(0).description }
   end
 
   def test_ignores_dynamic_received_and_top_level_attribute_calls
@@ -548,6 +674,19 @@ class ParserTest < Minitest::Test
     ], methods.map { |declaration| [declaration.name, declaration.visibility] }
   end
 
+  def test_tracks_visibility_with_an_explicit_current_owner
+    source = "class Reader\n  def old = nil\n  self.private :old\n  self.protected\n  def inherited = nil\n  self.public\n  def shown = nil\n  self.private def inline = nil\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind == :instance_method }
+
+    assert_equal [
+      ["old", :private],
+      ["inherited", :protected],
+      ["shown", :public],
+      ["inline", :private]
+    ], methods.map { |declaration| [declaration.name, declaration.visibility] }
+  end
+
   def test_conservatively_applies_named_nonpublic_visibility_to_attributes
     source = "class Reader\n  attr_accessor :name\n  private :name\nend\n"
     document = Zard.parse(source, path: "example.rb")
@@ -568,6 +707,18 @@ class ParserTest < Minitest::Test
 
   def test_applies_named_and_inline_class_method_visibility
     source = "class Reader\n  def self.hidden = nil\n  private_class_method :hidden\n  private_class_method def self.inline = nil\n  def self.shown = nil\n  private_class_method :shown\n  public_class_method \"shown\"\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind == :singleton_method }
+
+    assert_equal [
+      ["hidden", :private],
+      ["inline", :private],
+      ["shown", :public]
+    ], methods.map { |declaration| [declaration.name, declaration.visibility] }
+  end
+
+  def test_applies_class_method_visibility_with_an_explicit_current_owner
+    source = "class Reader\n  def self.hidden = nil\n  self.private_class_method :hidden\n  self.private_class_method def self.inline = nil\n  def self.shown = nil\n  self.private_class_method :shown\n  self.public_class_method :shown\nend\n"
     methods = Zard.parse(source, path: "example.rb").declarations
       .select { |declaration| declaration.kind == :singleton_method }
 
@@ -601,6 +752,63 @@ class ParserTest < Minitest::Test
     ], methods.map { |declaration| [declaration.kind, declaration.name, declaration.visibility] }
   end
 
+  def test_models_module_functions_with_an_explicit_current_owner
+    source = "module Helpers\n  def first(value) = value\n  self.module_function :first\n  self.module_function def second(value) = value\n  self.module_function\n  def third(value) = value\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [
+      [:instance_method, "first", :private],
+      [:singleton_method, "first", :public],
+      [:instance_method, "second", :private],
+      [:singleton_method, "second", :public],
+      [:instance_method, "third", :private],
+      [:singleton_method, "third", :public]
+    ], methods.map { |declaration| [declaration.kind, declaration.name, declaration.visibility] }
+    assert methods.all? { |declaration| declaration.parameters == ["value"] }
+  end
+
+  def test_module_function_replaces_an_existing_singleton_method
+    source = "module Helpers\n  def self.call(old) = old\n  def call(value) = value\n  module_function :call\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [
+      [:instance_method, "call", ["value"], :private],
+      [:singleton_method, "call", ["value"], :public]
+    ], methods.map { |declaration| [declaration.kind, declaration.name, declaration.parameters, declaration.visibility] }
+  end
+
+  def test_applies_named_module_function_to_attribute_methods
+    source = "module Helpers\n  attr_accessor :name\n  module_function :name\n  protected attr_accessor :token\n  module_function :token=\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [
+      [:module, "Helpers", [], :public],
+      [:instance_attribute_reader, "name", [], :private],
+      [:instance_attribute_writer, "name", [], :public],
+      [:singleton_method, "name", [], :public],
+      [:instance_attribute_writer, "token", [], :private],
+      [:instance_attribute_reader, "token", [], :protected],
+      [:singleton_method, "token=", ["value"], :public]
+    ], declarations.map { |declaration| [declaration.kind, declaration.name, declaration.parameters, declaration.visibility] }
+  end
+
+  def test_applies_splatted_inline_attribute_module_functions
+    source = "module Helpers\n  module_function(*attr_accessor(:name))\n  self.module_function(*self.attr_reader(\"token\"))\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [
+      [:module, "Helpers", [], :public],
+      [:instance_attribute_reader, "name", [], :private],
+      [:instance_attribute_writer, "name", [], :private],
+      [:singleton_method, "name", [], :public],
+      [:singleton_method, "name=", ["value"], :public],
+      [:instance_attribute_reader, "token", [], :private],
+      [:singleton_method, "token", [], :public]
+    ], declarations.map { |declaration| [declaration.kind, declaration.name, declaration.parameters, declaration.visibility] }
+  end
+
   def test_bare_visibility_ends_module_function_mode
     source = "module Helpers\n  module_function\n  def copied = nil\n  protected\n  def inherited = nil\nend\n"
     methods = Zard.parse(source, path: "example.rb").declarations
@@ -632,6 +840,40 @@ class ParserTest < Minitest::Test
     assert_equal [[:private, ["path"]], [:private, ["path"]]], aliases.map { |declaration| [declaration.visibility, declaration.parameters] }
   end
 
+  def test_resolves_attribute_methods_as_alias_targets
+    source = "class Reader\n  private attr_reader :token\n  public attr_accessor :name\n  alias secret token\n  alias label name\n  alias assign name=\n  class << self\n    private attr_writer :current\n    alias store current=\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    aliases = document.declarations.select(&:alias_target)
+
+    assert_empty document.diagnostics
+    assert_equal [
+      [:instance_method, "secret", "token", [], :private],
+      [:instance_method, "label", "name", [], :public],
+      [:instance_method, "assign", "name=", ["value"], :public],
+      [:singleton_method, "store", "current=", ["value"], :private]
+    ], aliases.map { |declaration| [declaration.kind, declaration.name, declaration.alias_target, declaration.parameters, declaration.visibility] }
+  end
+
+  def test_applies_inline_modifiers_to_alias_method_calls
+    source = "module Helpers\n  def original(value) = value\n  # Internal alias.\n  private alias_method(:hidden, :original)\n  # Public module alias.\n  module_function alias_method(:call, :original)\nend\n"
+    aliases = Zard.parse(source, path: "example.rb").declarations.select(&:alias_target)
+
+    assert_equal [[:instance_method, "hidden", :private], [:instance_method, "call", :private], [:singleton_method, "call", :public]], aliases.map { |declaration| [declaration.kind, declaration.name, declaration.visibility] }
+    assert_equal ["original", "original", "original"], aliases.map(&:alias_target)
+    assert_equal [["value"], ["value"], ["value"]], aliases.map(&:parameters)
+    assert_equal ["Internal alias.", "Public module alias.", "Public module alias."], aliases.map { |declaration| declaration.documentation.fetch(0).description }
+  end
+
+  def test_collects_alias_method_with_an_explicit_current_owner
+    source = "class Reader\n  def read(value) = value\n  # Compatibility alias.\n  self.alias_method :fetch, :read\n  # Internal alias.\n  private self.alias_method(:hidden, :read)\nend\n"
+    aliases = Zard.parse(source, path: "example.rb").declarations.select(&:alias_target)
+
+    assert_equal ["fetch", "hidden"], aliases.map(&:name)
+    assert_equal ["read", "read"], aliases.map(&:alias_target)
+    assert_equal [[:public, ["value"]], [:private, ["value"]]], aliases.map { |declaration| [declaration.visibility, declaration.parameters] }
+    assert_equal ["Compatibility alias.", "Internal alias."], aliases.map { |declaration| declaration.documentation.fetch(0).description }
+  end
+
   def test_collects_singleton_method_aliases
     source = "class Reader\n  class << self\n    def build = new\n    alias create build\n    alias_method \"make\", \"build\"\n  end\nend\n"
     aliases = Zard.parse(source, path: "example.rb").declarations.select(&:alias_target)
@@ -648,6 +890,86 @@ class ParserTest < Minitest::Test
     assert_equal "inherited_read", declaration.alias_target
     assert_equal :public, declaration.visibility
     assert_equal ["alias.unresolved-target"], document.diagnostics.map(&:code)
+  end
+
+  def test_removes_methods_and_reduces_accessors_in_the_current_scope
+    source = "class Reader\n  def read = nil\n  alias fetch read\n  def obsolete = nil\n  attr_accessor :name, :token\n  undef read, name, token=\n  self.remove_method :fetch, :name=\n  self.undef_method :obsolete\n  class << self\n    def read = nil\n  end\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [
+      [:class, "Reader"],
+      [:instance_attribute_reader, "token"],
+      [:singleton_method, "read"]
+    ], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
+  def test_replaces_redefined_methods_and_preserves_unaffected_attribute_sides
+    source = "class Reader\n  attr_accessor :name\n  def name(prefix) = prefix\n  def read(old) = old\n  def read(current, format:) = current\n  def self.build(old) = old\n  class << self\n    def build(current) = current\n  end\n  alias fetch read\n  def fetch(id) = id\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [
+      [:class, "Reader", [], nil],
+      [:instance_attribute_writer, "name", [], nil],
+      [:instance_method, "name", ["prefix"], nil],
+      [:instance_method, "read", ["current", "format:"], nil],
+      [:singleton_method, "build", ["current"], nil],
+      [:instance_method, "fetch", ["id"], nil]
+    ], declarations.map { |declaration| [declaration.kind, declaration.name, declaration.parameters, declaration.alias_target] }
+  end
+
+  def test_replaces_methods_with_attributes_by_generated_method_name
+    source = "class Reader\n  def name = nil\n  def name=(value) = value\n  attr_reader :name\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [
+      [:class, "Reader"],
+      [:instance_method, "name="],
+      [:instance_attribute_reader, "name"]
+    ], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
+  def test_keeps_the_current_container_after_redefining_a_method_in_a_reopened_namespace
+    source = "class Reader\n  def read = nil\nend\nclass Reader\n  def read(value) = value\n  include CurrentFeature\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:class, "Reader"], [:class, "Reader"], [:instance_method, "read"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+    assert_empty declarations.fetch(0).mixins
+    assert_equal ["CurrentFeature"], declarations.fetch(1).mixins.map(&:target)
+  end
+
+  def test_ignores_method_removal_calls_received_by_another_owner
+    source = "class Reader\n  def read = nil\n  Other.remove_method :read\n  target.undef_method :read\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:class, "Reader"], [:instance_method, "read"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
+  def test_removes_constants_and_their_members_from_the_current_namespace
+    source = "module Demo\n  class Service\n    VALUE = 1\n    def old = nil\n  end\n  self.remove_const :Service\n  class Service\n    def current = nil\n  end\n  class Kept\n  end\n  Other.remove_const :Kept\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [
+      [:module, nil, "Demo"],
+      [:class, "Demo", "Service"],
+      [:instance_method, "Demo::Service", "current"],
+      [:class, "Demo", "Kept"]
+    ], declarations.map { |declaration| [declaration.kind, declaration.namespace, declaration.name] }
+  end
+
+  def test_ignores_dynamic_constant_removal_names
+    source = "module Demo\n  class Service\n  end\n  remove_const constant_name\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:module, "Demo"], [:class, "Service"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
+  def test_keeps_the_current_container_after_removing_from_a_reopened_namespace
+    source = "module Demo\n  class Service\n  end\nend\nmodule Demo\n  remove_const :Service\n  include CurrentFeature\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:module, "Demo"], [:module, "Demo"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+    assert_empty declarations.fetch(0).mixins
+    assert_equal ["CurrentFeature"], declarations.fetch(1).mixins.map(&:target)
   end
 
   def test_preserves_the_class_superclass_expression_and_span
@@ -686,7 +1008,18 @@ class ParserTest < Minitest::Test
     assert_equal [[:prepend, "ReaderFeature"]], reader.mixins.map { |mixin| [mixin.kind, mixin.target] }
   end
 
-  def test_ignores_received_and_singleton_class_mixin_calls
+  def test_preserves_mixin_references_with_an_explicit_current_owner
+    source = "class Reader\n  self.include Enumerable\n  self.prepend Instrumentation\n  self.extend FactoryMethods\nend\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
+
+    assert_equal %i[include prepend extend], declaration.mixins.map(&:kind)
+    assert_equal ["Enumerable", "Instrumentation", "FactoryMethods"], declaration.mixins.map(&:target)
+    declaration.mixins.each do |mixin|
+      assert_equal mixin.target, source.byteslice(mixin.span.start_offset...mixin.span.end_offset)
+    end
+  end
+
+  def test_ignores_foreign_received_and_singleton_class_mixin_calls
     source = "class Reader\n  helper.include Feature\n  class << self\n    include SingletonFeature\n  end\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)
 
@@ -695,6 +1028,16 @@ class ParserTest < Minitest::Test
 
   def test_applies_private_and_public_constant_visibility
     source = "module Demo\n  VALUE = 1\n  class Internal\n  end\n  private_constant :VALUE, :Internal\n  public_constant \"VALUE\"\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    value = declarations.find { |declaration| declaration.kind == :constant }
+    internal = declarations.find { |declaration| declaration.kind == :class }
+    assert_equal :public, value.visibility
+    assert_equal :private, internal.visibility
+  end
+
+  def test_applies_constant_visibility_with_an_explicit_current_owner
+    source = "module Demo\n  VALUE = 1\n  class Internal\n  end\n  self.private_constant :VALUE, :Internal\n  self.public_constant :VALUE\nend\n"
     declarations = Zard.parse(source, path: "example.rb").declarations
 
     value = declarations.find { |declaration| declaration.kind == :constant }
@@ -723,6 +1066,39 @@ class ParserTest < Minitest::Test
     assert_empty attributes
     assert_empty reader.mixins
     assert_empty document.diagnostics
+  end
+
+  def test_collects_declarations_in_current_owner_evaluation_blocks
+    source = "class Reader\n  class_eval do\n    # Reads a value.\n    def read = nil\n  end\n  self.class_exec do\n    # Writes a value.\n    define_method(:write) { |value| value }\n  end\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind == :instance_method }
+
+    assert_equal [["read", []], ["write", ["value"]]], methods.map { |declaration| [declaration.name, declaration.parameters] }
+    assert_equal ["Reads a value.", "Writes a value."], methods.map { |declaration| declaration.documentation.fetch(0).description }
+  end
+
+  def test_ignores_declarations_in_foreign_owner_evaluation_blocks
+    source = "module Host\n  Other.class_eval do\n    def from_class_eval = nil\n  end\n  Other.module_eval do\n    VALUE = 1\n  end\n  target.class_exec do\n    attr_reader :from_class_exec\n  end\n  target.module_exec do\n    define_method(:from_module_exec) { nil }\n  end\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:module, "Host"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
+  def test_models_mixed_owners_in_current_instance_evaluation_blocks
+    source = "class Reader\n  self.instance_eval do\n    # Builds a reader.\n    def build = new\n    # Reads a value.\n    define_method(:read) { |key| key }\n    attr_reader :name\n    VALUE = 1\n  end\nend\n"
+    reader, build, read, name, value = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [:class, :singleton_method, :instance_method, :instance_attribute_reader, :constant], [reader, build, read, name, value].map(&:kind)
+    assert_equal ["self", nil, nil, nil], [build.receiver, read.receiver, name.receiver, value.receiver]
+    assert_equal [[], ["key"]], [build.parameters, read.parameters]
+    assert_equal ["Builds a reader.", "Reads a value."], [build, read].map { |declaration| declaration.documentation.fetch(0).description }
+  end
+
+  def test_ignores_declarations_in_foreign_instance_evaluation_blocks
+    source = "module Host\n  Other.instance_eval do\n    def remote = nil\n    define_method(:member) { nil }\n    attr_reader :name\n  end\n  target.instance_exec do\n    VALUE = 1\n  end\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:module, "Host"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
   end
 
   def test_resets_the_namespace_for_an_absolute_constant_path

@@ -26,5 +26,5 @@ Gem::Specification.new do |spec|
   spec.executables = ["zard-doc"]
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "zard", "~> 0.1.0"
+  spec.add_dependency "zard", "~> 0.0.1"
 end

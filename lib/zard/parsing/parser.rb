@@ -205,6 +205,7 @@ module Zard
         return visit_refinement_call(node) if refinement_call?(node)
         return visit_method_definition_call(node) if method_definition_call?(node)
         return visit_const_set_call(node) if const_set_call?(node)
+        return visit_remove_const_call(node) if remove_const_call?(node)
 
         collect_autoload_declaration(node) if autoload_call?(node)
         collect_mixin_references(node) if mixin_call?(node)
@@ -305,6 +306,35 @@ module Zard
         return visit_container_builder_write(name, node, call) if call
 
         collect_path_declaration(:constant, name, node)
+      end
+
+      def remove_const_call?(node)
+        return false unless node.name == :remove_const && node.block.nil? && node.arguments&.arguments&.one?
+        return false if @namespace.empty? || @singleton_depth.positive? || @refinement
+
+        (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
+          attribute_name(node.arguments.arguments.first)
+      end
+
+      def visit_remove_const_call(node)
+        remove_constant_declarations(attribute_name(node.arguments.arguments.first))
+      end
+
+      def remove_constant_declarations(name)
+        path = "#{current_namespace}::#{name}"
+        container_declaration = @declarations[@container_declaration_index] if @container_declaration_index
+        @declarations.reject! do |declaration|
+          constant_declaration_path(declaration) == path ||
+            declaration.namespace == path ||
+            declaration.namespace&.start_with?("#{path}::")
+        end
+        @container_declaration_index = @declarations.index(container_declaration) if container_declaration
+      end
+
+      def constant_declaration_path(declaration)
+        return unless %i[class module constant].include?(declaration.kind)
+
+        [declaration.namespace, declaration.name].compact.join("::")
       end
 
       def class_builder?(node)

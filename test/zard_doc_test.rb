@@ -553,6 +553,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_omits_a_removed_constant_subtree_and_renders_its_replacement
+    source = "module Demo\n  # Old service API.\n  class Service\n    # Old operation.\n    def old = nil\n  end\n  remove_const :Service\n  # Current service API.\n  class Service\n    # Current operation.\n    def call = nil\n  end\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Class `Demo::Service`
+
+      Current service API.
+
+      ## `Demo::Service#call()`
+
+      Current operation.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_an_alias_method_with_an_explicit_current_owner
     source = "class Reader\n  def read(path) = path\n  # Compatibility name.\n  self.alias_method :fetch, :read\nend\n"
     document = Zard.parse(source, path: "example.rb")

@@ -797,6 +797,34 @@ class ParserTest < Minitest::Test
     assert_equal [[:class, "Reader"], [:instance_method, "read"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
   end
 
+  def test_removes_constants_and_their_members_from_the_current_namespace
+    source = "module Demo\n  class Service\n    VALUE = 1\n    def old = nil\n  end\n  self.remove_const :Service\n  class Service\n    def current = nil\n  end\n  class Kept\n  end\n  Other.remove_const :Kept\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [
+      [:module, nil, "Demo"],
+      [:class, "Demo", "Service"],
+      [:instance_method, "Demo::Service", "current"],
+      [:class, "Demo", "Kept"]
+    ], declarations.map { |declaration| [declaration.kind, declaration.namespace, declaration.name] }
+  end
+
+  def test_ignores_dynamic_constant_removal_names
+    source = "module Demo\n  class Service\n  end\n  remove_const constant_name\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:module, "Demo"], [:class, "Service"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
+  def test_keeps_the_current_container_after_removing_from_a_reopened_namespace
+    source = "module Demo\n  class Service\n  end\nend\nmodule Demo\n  remove_const :Service\n  include CurrentFeature\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:module, "Demo"], [:module, "Demo"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+    assert_empty declarations.fetch(0).mixins
+    assert_equal ["CurrentFeature"], declarations.fetch(1).mixins.map(&:target)
+  end
+
   def test_preserves_the_class_superclass_expression_and_span
     source = "# Reads values.\nclass Demo::Reader < ::Base\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.fetch(0)

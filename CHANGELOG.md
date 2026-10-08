@@ -65,5 +65,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Model `define_method` calls explicitly received by the current owner.
 - Preserve refinements explicitly received by the current owner.
 - Apply method removal operations to declarations in the current scope.
+- Apply constant removal operations to declarations in the current namespace.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

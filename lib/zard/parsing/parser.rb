@@ -666,12 +666,7 @@ module Zard
 
       def collect_method_alias(name, target, node)
         kind = current_method_kind
-        original = @declarations.reverse_each.find do |declaration|
-          declaration.kind == kind &&
-            declaration.namespace == current_namespace &&
-            declaration_scope_matches?(declaration, current_singleton_receiver) &&
-            declaration.name == target
-        end
+        original = alias_target_declaration(kind, target)
         unless original
           @diagnostics << Model::V1::Diagnostic.new(
             code: "alias.unresolved-target",
@@ -694,7 +689,7 @@ module Zard
           name: name,
           namespace: current_namespace,
           visibility: original&.visibility || current_visibility,
-          parameters: original&.parameters || [].freeze,
+          parameters: alias_target_parameters(original, target),
           receiver: current_singleton_receiver,
           receiver_span: current_singleton_receiver_span,
           refinement: @refinement,
@@ -704,6 +699,24 @@ module Zard
           comments: comments,
           parsed: parsed
         )
+      end
+
+      def alias_target_declaration(kind, target)
+        attribute_scope = (kind == :singleton_method) ? "singleton_attribute_" : "instance_attribute_"
+        @declarations.reverse_each.find do |declaration|
+          next unless declaration.namespace == current_namespace
+          next unless declaration_scope_matches?(declaration, current_singleton_receiver)
+
+          (declaration.kind == kind && declaration.name == target) ||
+            (attribute_in_scope?(declaration, attribute_scope) && attribute_method_names(declaration).include?(target))
+        end
+      end
+
+      def alias_target_parameters(declaration, target)
+        return [].freeze unless declaration
+        return declaration.parameters unless declaration.kind.to_s.include?("attribute")
+
+        target.end_with?("=") ? ["value"].freeze : [].freeze
       end
 
       def collect_method_declarations(node)

@@ -549,6 +549,24 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_an_attribute_method_alias
+    source = "class Reader\n  # Stored name.\n  attr_writer :name\n  # Compatibility writer.\n  alias assign name=\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Attribute writer `Reader#name`
+
+      Stored name.
+
+      ## Alias `Reader#assign`
+
+      Alias of `Reader#name=`.
+
+      Compatibility writer.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_omits_removed_methods_and_renders_the_remaining_attribute_side
     source = "class Reader\n  # Reads a value.\n  def read = nil\n  # Fetches a value.\n  alias fetch read\n  # Stored name.\n  attr_accessor :name\n  # Stored token.\n  attr_accessor :token\n  undef read, name, token=\n  self.remove_method :fetch, :name=\n  class << self\n    # Builds a reader.\n    def build = new\n  end\nend\n"
     document = Zard.parse(source, path: "example.rb")

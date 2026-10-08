@@ -69,5 +69,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Apply unconditional constant reassignments to the final declaration model.
 - Apply method redefinitions to the final declaration model.
 - Resolve generated attribute methods as alias targets.
+- Apply named module functions to generated attribute methods.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

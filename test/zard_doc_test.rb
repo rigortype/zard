@@ -501,6 +501,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_a_named_attribute_module_function
+    source = "module Helpers\n  # Stored name.\n  attr_accessor :name\n  module_function :name\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Attribute writer `Helpers#name`
+
+      Stored name.
+
+      ## `Helpers.name()`
+
+      Stored name.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_an_inline_module_function_alias
     source = "module Helpers\n  def original(value) = value\n  # Calls the original helper.\n  module_function alias_method(:call, :original)\nend\n"
     document = Zard.parse(source, path: "example.rb")

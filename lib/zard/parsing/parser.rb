@@ -1089,15 +1089,10 @@ module Zard
       end
 
       def apply_named_module_function(name)
-        index = @declarations.rindex do |declaration|
-          declaration.kind == :instance_method &&
-            declaration.namespace == current_namespace &&
-            declaration.name == name
-        end
-        return unless index
+        declaration = alias_target_declaration(:instance_method, name)
+        return unless declaration
 
-        declaration = @declarations.fetch(index)
-        @declarations[index] = declaration_with_visibility(declaration, :private)
+        apply_module_function_instance_visibility(declaration, name)
         replace_method_declarations(
           kind: :singleton_method,
           names: [name],
@@ -1105,7 +1100,36 @@ module Zard
           receiver: declaration.receiver,
           refinement: declaration.refinement
         )
-        @declarations << declaration_with_kind_and_visibility(declaration, :singleton_method, :public)
+        @declarations << declaration_with_kind_and_visibility(
+          declaration,
+          :singleton_method,
+          :public,
+          name: name,
+          parameters: alias_target_parameters(declaration, name)
+        )
+      end
+
+      def apply_module_function_instance_visibility(declaration, name)
+        index = @declarations.index(declaration)
+        return unless index
+
+        replacements = if declaration.kind.to_s.end_with?("_attribute_accessor")
+          target_kind, retained_kind = if name.end_with?("=")
+            %i[instance_attribute_writer instance_attribute_reader]
+          else
+            %i[instance_attribute_reader instance_attribute_writer]
+          end
+          [
+            declaration_with_kind_and_visibility(declaration, target_kind, :private),
+            declaration_with_kind_and_visibility(declaration, retained_kind, declaration.visibility)
+          ]
+        else
+          [declaration_with_visibility(declaration, :private)]
+        end
+
+        container_declaration = @declarations[@container_declaration_index] if @container_declaration_index
+        @declarations[index, 1] = replacements
+        @container_declaration_index = @declarations.index(container_declaration) if container_declaration
       end
 
       def visit_class_method_visibility_call(node, visibility)
@@ -1255,13 +1279,13 @@ module Zard
         declaration_with_kind_and_visibility(declaration, declaration.kind, declaration.visibility, mixins: mixins.freeze)
       end
 
-      def declaration_with_kind_and_visibility(declaration, kind, visibility, mixins: declaration.mixins)
+      def declaration_with_kind_and_visibility(declaration, kind, visibility, name: declaration.name, parameters: declaration.parameters, mixins: declaration.mixins)
         Model::V1::Declaration.new(
           kind: kind,
-          name: declaration.name,
+          name: name,
           namespace: declaration.namespace,
           visibility: visibility,
-          parameters: declaration.parameters,
+          parameters: parameters,
           receiver: declaration.receiver,
           receiver_span: declaration.receiver_span,
           refinement: declaration.refinement,

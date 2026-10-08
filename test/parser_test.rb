@@ -740,6 +740,21 @@ class ParserTest < Minitest::Test
     ], methods.map { |declaration| [declaration.kind, declaration.name, declaration.parameters, declaration.visibility] }
   end
 
+  def test_applies_named_module_function_to_attribute_methods
+    source = "module Helpers\n  attr_accessor :name\n  module_function :name\n  protected attr_accessor :token\n  module_function :token=\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [
+      [:module, "Helpers", [], :public],
+      [:instance_attribute_reader, "name", [], :private],
+      [:instance_attribute_writer, "name", [], :public],
+      [:singleton_method, "name", [], :public],
+      [:instance_attribute_writer, "token", [], :private],
+      [:instance_attribute_reader, "token", [], :protected],
+      [:singleton_method, "token=", ["value"], :public]
+    ], declarations.map { |declaration| [declaration.kind, declaration.name, declaration.parameters, declaration.visibility] }
+  end
+
   def test_bare_visibility_ends_module_function_mode
     source = "module Helpers\n  module_function\n  def copied = nil\n  protected\n  def inherited = nil\nend\n"
     methods = Zard.parse(source, path: "example.rb").declarations

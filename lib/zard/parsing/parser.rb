@@ -135,22 +135,24 @@ module Zard
 
       def visit_constant_write_node(node)
         path = node.name.to_s
+        visibility = constant_visibility_for(path)
         replace_constant_declarations(path) unless self_referential_constant_guard?(node.value, path)
         call = container_builder_call(node.value, guarded_name: path)
-        return visit_container_builder_write(path, node, call) if call
+        return visit_container_builder_write(path, node, call, visibility: visibility) if call
 
-        collect_path_declaration(:constant, path, node)
+        collect_path_declaration(:constant, path, node, visibility: visibility)
         super
       end
 
       def visit_constant_path_write_node(node)
         path = node.target.location.slice
+        visibility = constant_visibility_for(path)
         guarded_name = constant_reference_name(node.target)
         replace_constant_declarations(path) unless self_referential_constant_guard?(node.value, guarded_name)
         call = container_builder_call(node.value, guarded_name: guarded_name)
-        return visit_container_builder_write(path, node, call) if call
+        return visit_container_builder_write(path, node, call, visibility: visibility) if call
 
-        collect_path_declaration(:constant, path, node)
+        collect_path_declaration(:constant, path, node, visibility: visibility)
         super
       end
 
@@ -197,7 +199,7 @@ module Zard
       def visit_undef_node(node)
         return super if @method_depth.positive?
 
-        remove_method_declarations(node.names.map(&:unescaped))
+        remove_method_declarations(node.names.filter_map { |name| attribute_name(name) })
       end
 
       def visit_call_node(node)
@@ -306,11 +308,12 @@ module Zard
         name = attribute_name(name_node)
         return unless name
 
+        visibility = constant_visibility_for(name)
         replace_constant_declarations(name)
         call = container_builder_call(value)
-        return visit_container_builder_write(name, node, call) if call
+        return visit_container_builder_write(name, node, call, visibility: visibility) if call
 
-        collect_path_declaration(:constant, name, node)
+        collect_path_declaration(:constant, name, node, visibility: visibility)
       end
 
       def remove_const_call?(node)
@@ -331,6 +334,12 @@ module Zard
 
       def replace_constant_declarations(path)
         remove_constant_path(namespace_parts(path).join("::"))
+      end
+
+      def constant_visibility_for(path)
+        full_path = namespace_parts(path).join("::")
+        declaration = @declarations.reverse_each.find { |item| constant_declaration_path(item) == full_path }
+        declaration ? declaration.visibility : :public
       end
 
       def remove_constant_path(path)
@@ -365,13 +374,14 @@ module Zard
         CONTAINER_BUILDERS[container_builder_key(call)]
       end
 
-      def visit_container_builder_write(path, node, call)
+      def visit_container_builder_write(path, node, call, visibility: constant_visibility_for(path))
         descriptor = CONTAINER_BUILDERS.fetch(container_builder_key(call))
         builder, builder_span = container_builder_reference(call)
         declaration_index = collect_path_declaration(
           descriptor.fetch(:kind),
           path,
           node,
+          visibility: visibility,
           container_builder: builder,
           container_builder_span: builder_span
         )
@@ -869,13 +879,13 @@ module Zard
         end
       end
 
-      def collect_path_declaration(kind, path, node, superclass: nil, superclass_span: nil, container_builder: nil, container_builder_span: nil)
+      def collect_path_declaration(kind, path, node, visibility: constant_visibility_for(path), superclass: nil, superclass_span: nil, container_builder: nil, container_builder_span: nil)
         parts = namespace_parts(path)
         collect_declaration(
           kind: kind,
           name: parts.last,
           namespace: (parts.length > 1) ? parts[0...-1].join("::") : nil,
-          visibility: :public,
+          visibility: visibility,
           parameters: [].freeze,
           superclass: superclass,
           superclass_span: superclass_span,
@@ -943,7 +953,7 @@ module Zard
         previous_singleton_visibility = @singleton_visibility
         previous_container_kind = @container_kind
         previous_module_function_mode = @module_function_mode
-        previous_container_declaration_index = @container_declaration_index
+        previous_container_span = @declarations.fetch(@container_declaration_index).span if @container_declaration_index
         previous_refinement = @refinement
         previous_refinement_span = @refinement_span
         previous_instance_evaluation_receiver = @instance_evaluation_receiver
@@ -965,7 +975,7 @@ module Zard
         @singleton_visibility = previous_singleton_visibility
         @container_kind = previous_container_kind
         @module_function_mode = previous_module_function_mode
-        @container_declaration_index = previous_container_declaration_index
+        @container_declaration_index = @declarations.index { |declaration| declaration.span.equal?(previous_container_span) }
         @refinement = previous_refinement
         @refinement_span = previous_refinement_span
         @instance_evaluation_receiver = previous_instance_evaluation_receiver
@@ -977,7 +987,7 @@ module Zard
         previous_singleton_visibility = @singleton_visibility
         previous_container_kind = @container_kind
         previous_module_function_mode = @module_function_mode
-        previous_container_declaration_index = @container_declaration_index
+        previous_container_span = @declarations.fetch(@container_declaration_index).span if @container_declaration_index
         previous_refinement = @refinement
         previous_refinement_span = @refinement_span
         previous_instance_evaluation_receiver = @instance_evaluation_receiver
@@ -997,7 +1007,7 @@ module Zard
         @singleton_visibility = previous_singleton_visibility
         @container_kind = previous_container_kind
         @module_function_mode = previous_module_function_mode
-        @container_declaration_index = previous_container_declaration_index
+        @container_declaration_index = @declarations.index { |declaration| declaration.span.equal?(previous_container_span) }
         @refinement = previous_refinement
         @refinement_span = previous_refinement_span
         @instance_evaluation_receiver = previous_instance_evaluation_receiver

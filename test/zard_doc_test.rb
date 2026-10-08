@@ -4,6 +4,22 @@ require "test_helper"
 require "zard/doc"
 
 class ZardDocTest < Minitest::Test
+  def test_hides_private_constant_replacements
+    ["VALUE = 2", "const_set :VALUE, 2", "VALUE = Class.new"].each do |replacement|
+      source = "module Demo\n  VALUE = 1\n  private_constant :VALUE\n  # Internal value.\n  #{replacement}\nend\n"
+      document = Zard.parse(source, path: "example.rb")
+
+      assert_equal "", Zard::Doc.render(document), replacement
+    end
+  end
+
+  def test_renders_mixins_on_the_enclosing_module_after_nested_reassignment
+    source = "OLD = 1\n# Public outer.\nmodule Outer\n  module Inner\n    ::OLD = 2\n  end\n  include Enumerable\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+
+    assert_includes Zard::Doc.render(document), "## Module `Outer`\n\n### Includes\n\n- `Enumerable`"
+  end
+
   def test_renders_the_first_vertical_slice_as_markdown
     ruby_path = File.expand_path("fixtures/read_name.rb", __dir__)
     markdown_path = File.expand_path("fixtures/read_name.md", __dir__)

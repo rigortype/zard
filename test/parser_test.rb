@@ -3,6 +3,45 @@
 require "test_helper"
 
 class ParserTest < Minitest::Test
+  def test_preserves_private_constant_visibility_when_replacing_its_value
+    ["VALUE = 2", "const_set :VALUE, 2", "self.const_set :VALUE, Class.new", "::Demo::VALUE = Module.new"].each do |replacement|
+      source = "module Demo\n  VALUE = 1\n  private_constant :VALUE\n  #{replacement}\nend\n"
+      document = Zard.parse(source, path: "example.rb")
+      declaration = document.declarations.find { |item| item.name == "VALUE" }
+
+      assert_empty document.diagnostics
+      assert_equal :private, declaration.visibility, replacement
+    end
+  end
+
+  def test_constant_removal_resets_visibility_for_a_later_assignment
+    source = "module Demo\n  VALUE = 1\n  private_constant :VALUE\n  remove_const :VALUE\n  VALUE = 2\nend\n"
+    declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.name == "VALUE" }
+
+    assert_equal :public, declaration.visibility
+  end
+
+  def test_restores_the_enclosing_container_after_nested_absolute_reassignment
+    ["OLD = 1", "module OLD\n  A = 1\n  B = 2\nend"].each do |previous|
+      source = "#{previous}\nmodule Outer\n  module Inner\n    ::OLD = 0\n  end\n  include Enumerable\nend\n"
+      document = Zard.parse(source, path: "example.rb")
+      outer = document.declarations.find { |item| item.name == "Outer" }
+      inner = document.declarations.find { |item| item.name == "Inner" }
+
+      assert_empty document.diagnostics
+      assert_equal ["Enumerable"], outer.mixins.map(&:target)
+      assert_empty inner.mixins
+    end
+  end
+
+  def test_ignores_dynamic_undef_names_while_removing_literal_names
+    source = "class Demo\n  def old = nil\n  def dynamic = nil\n  undef :old, :\"\#{:dynamic}\"\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+
+    assert_empty document.diagnostics
+    assert_equal ["Demo", "dynamic"], document.declarations.map(&:name)
+  end
+
   def test_parses_the_first_vertical_slice
     path = File.expand_path("fixtures/read_name.rb", __dir__)
     document = Zard.parse(File.read(path), path: path)

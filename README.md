@@ -23,6 +23,8 @@ See [CONTEXT.md](CONTEXT.md) and [docs/adr](docs/adr) for the current language a
 
 ## Usage
 
+For installation, Ruby API and model access, CLI behavior, and current limits, see the [usage guide](docs/usage.md).
+
 The core gem parses Ruby source without interpreting `@extrbs` type payloads:
 
 ```ruby
@@ -103,12 +105,21 @@ Unconditional constant assignments and literal `const_set` calls replace an earl
 
 ## Installation
 
-Until the first RubyGems release, add the repository to your Gemfile:
+The `0.0.1` candidate is not yet published. Until it is available on RubyGems, add the repository to your Gemfile:
 
 ```ruby
 gem "zard", github: "rigortype/zard"
 gem "zard-doc", github: "rigortype/zard"
 ```
+
+After publication, use the released pair:
+
+```ruby
+gem "zard", "~> 0.0.1"
+gem "zard-doc", "~> 0.0.1"
+```
+
+The project is pre-1.0. Its public API and model are versioned, but compatibility guarantees for future releases have not yet been established; expect changes between pre-1.0 releases.
 
 ## Development
 

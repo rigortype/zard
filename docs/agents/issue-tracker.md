@@ -2,6 +2,10 @@
 
 Issues and specs for this repo live in GitHub Issues. Use the `gh` CLI.
 
+## Writing style
+
+Write issue and PR titles, descriptions, and comments in concise English. Lead with the requested behavior or final change. Retain acceptance criteria, dependencies, and relevant validation; link to shared evidence instead of repeating it.
+
 ## Conventions
 
 - Create: `gh issue create --title "..." --body "..."`

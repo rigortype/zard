@@ -2,7 +2,7 @@
 
 ### Issue tracker
 
-Issues and specs live in GitHub Issues. Use the `gh` CLI. See `docs/agents/issue-tracker.md`.
+Issues and specs live in GitHub Issues. Use the `gh` CLI. Read `docs/agents/issue-tracker.md` for tracker commands and the issue/PR writing style.
 
 ### Triage labels
 

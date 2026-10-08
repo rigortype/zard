@@ -810,14 +810,11 @@ module Zard
       end
 
       def collect_attribute_declarations(node)
-        attribute_kind = ATTRIBUTE_KINDS[node.name]
+        attribute_kind = attribute_kind(node)
         current_owner = node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)
         return unless attribute_kind && current_owner && !@namespace.empty?
 
         arguments = node.arguments&.arguments || []
-        if node.name == :attr && arguments.length == 2 && arguments.last.is_a?(Prism::TrueNode)
-          attribute_kind = :attribute_accessor
-        end
         names = arguments.filter_map { |argument| attribute_name(argument) }
         return if names.empty?
 
@@ -851,6 +848,14 @@ module Zard
 
       def attribute_name(argument)
         argument.unescaped if argument.is_a?(Prism::SymbolNode) || argument.is_a?(Prism::StringNode)
+      end
+
+      def attribute_kind(node)
+        kind = ATTRIBUTE_KINDS[node.name]
+        arguments = node.arguments&.arguments || []
+        return :attribute_accessor if node.name == :attr && arguments.length == 2 && arguments.last.is_a?(Prism::TrueNode)
+
+        kind
       end
 
       def attribute_generated_method_names(name, attribute_kind)
@@ -1057,8 +1062,22 @@ module Zard
         end
 
         yield
-        names = arguments.filter_map { |argument| attribute_name(argument) || inline_alias_method_name(argument) }
+        names = arguments.flat_map { |argument| module_function_argument_names(argument) }
         names.each { |name| apply_named_module_function(name) }
+      end
+
+      def module_function_argument_names(argument)
+        name = attribute_name(argument) || inline_alias_method_name(argument)
+        return [name] if name
+        return [] unless argument.is_a?(Prism::SplatNode)
+
+        call = argument.expression
+        return [] unless call.is_a?(Prism::CallNode) && ATTRIBUTE_KINDS.key?(call.name)
+        return [] unless call.receiver.nil? || call.receiver.is_a?(Prism::SelfNode)
+
+        kind = attribute_kind(call)
+        (call.arguments&.arguments || []).filter_map { |item| attribute_name(item) }
+          .flat_map { |item| attribute_generated_method_names(item, kind) }
       end
 
       def module_function_context?

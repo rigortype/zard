@@ -59,6 +59,7 @@ Attribute declarations received by `self` belong to the current owner, like thei
 `module_function` records its private instance method and public singleton copy as separate declarations with shared source provenance. Bare, named, and inline forms are supported.
 `module_function` received by `self` belongs to the current module, like its bare form.
 Named `module_function` calls may target generated attribute methods. Applying one side of an accessor preserves the other side with its original visibility.
+Splatted inline forms such as `module_function(*attr_accessor(:name))` apply every generated attribute method. The non-splatted `module_function attr_accessor :name` form raises `TypeError` in Ruby and is not a ZARD module-function form.
 
 Method aliases preserve their target name and inherit visibility and parameters when the target is declared in the same source scope. Generated attribute readers and writers are valid alias targets; writer aliases use the conventional `value` parameter. Alias documentation remains separate from target documentation.
 Inline visibility and `module_function` modifiers around `alias_method` apply to the resulting alias.

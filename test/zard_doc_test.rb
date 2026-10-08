@@ -371,6 +371,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_define_method_with_an_explicit_current_owner
+    source = "class Reader\n  # Reads a path.\n  self.define_method(:read) { |path| path }\n  # Internal reader.\n  private self.define_method(:hidden) { nil }\nend\nmodule Helpers\n  # Normalizes a value.\n  self.module_function self.define_method(:normalize) { |value| value }\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Reader#read(path)`
+
+      Reads a path.
+
+      ## `Helpers.normalize(value)`
+
+      Normalizes a value.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_methods_from_current_owner_evaluation_blocks
     source = "class Reader\n  self.class_eval do\n    # Reads a value.\n    def read = nil\n  end\nend\n"
     document = Zard.parse(source, path: "example.rb")

@@ -426,7 +426,8 @@ module Zard
         return false unless METHOD_DEFINITION_NAMES.include?(node.name)
         return true if node.name == :define_singleton_method
 
-        node.receiver.nil? && (!@namespace.empty? || @refinement)
+        (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
+          (!@namespace.empty? || @refinement)
       end
 
       def visit_method_definition_call(node)
@@ -883,12 +884,15 @@ module Zard
       end
 
       def module_function_definition?(node)
-        @module_function_mode && module_function_context? && node.receiver.nil?
+        @module_function_mode &&
+          module_function_context? &&
+          (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode))
       end
 
       def module_function_declaration?(node)
         node.is_a?(Prism::DefNode) ||
-          (node.is_a?(Prism::CallNode) && node.name == :define_method && node.receiver.nil?)
+          (node.is_a?(Prism::CallNode) && node.name == :define_method &&
+            (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)))
       end
 
       def with_module_function_mode
@@ -960,7 +964,8 @@ module Zard
       def visibility_declaration?(node)
         node.is_a?(Prism::DefNode) ||
           (node.is_a?(Prism::CallNode) && (ATTRIBUTE_KINDS.key?(node.name) ||
-            (node.name == :define_method && node.receiver.nil?)))
+            (node.name == :define_method &&
+              (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)))))
       end
 
       def set_current_visibility(visibility)

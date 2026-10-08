@@ -62,5 +62,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Apply class method visibility calls explicitly received by the current owner.
 - Apply constant visibility calls explicitly received by the current owner.
 - Model `module_function` calls explicitly received by the current owner.
+- Model `define_method` calls explicitly received by the current owner.
 
 [Unreleased]: https://github.com/rigortype/zard/commits/master

@@ -473,6 +473,19 @@ class ParserTest < Minitest::Test
     assert_equal "self", methods.fetch(1).receiver
   end
 
+  def test_collects_define_method_with_an_explicit_current_owner
+    source = "class Reader\n  self.define_method(:read) { |path| path }\n  private self.define_method(:hidden) { nil }\nend\nmodule Helpers\n  self.module_function self.define_method(:normalize) { |value| value }\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [
+      [:instance_method, "read", "Reader", :public, ["path"]],
+      [:instance_method, "hidden", "Reader", :private, []],
+      [:instance_method, "normalize", "Helpers", :private, ["value"]],
+      [:singleton_method, "normalize", "Helpers", :public, ["value"]]
+    ], methods.map { |declaration| [declaration.kind, declaration.name, declaration.namespace, declaration.visibility, declaration.parameters] }
+  end
+
   def test_preserves_destructured_define_method_parameters
     source = "class Pair\n  define_method(:each_pair) { |(left, right)| [left, right] }\nend\n"
     declaration = Zard.parse(source, path: "example.rb").declarations.find { |item| item.name == "each_pair" }

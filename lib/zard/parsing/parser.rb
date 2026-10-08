@@ -134,16 +134,20 @@ module Zard
       end
 
       def visit_constant_write_node(node)
-        call = container_builder_call(node.value, guarded_name: node.name.to_s)
-        return visit_container_builder_write(node.name.to_s, node, call) if call
+        path = node.name.to_s
+        replace_constant_declarations(path) unless self_referential_constant_guard?(node.value, path)
+        call = container_builder_call(node.value, guarded_name: path)
+        return visit_container_builder_write(path, node, call) if call
 
-        collect_path_declaration(:constant, node.name.to_s, node)
+        collect_path_declaration(:constant, path, node)
         super
       end
 
       def visit_constant_path_write_node(node)
         path = node.target.location.slice
-        call = container_builder_call(node.value, guarded_name: constant_reference_name(node.target))
+        guarded_name = constant_reference_name(node.target)
+        replace_constant_declarations(path) unless self_referential_constant_guard?(node.value, guarded_name)
+        call = container_builder_call(node.value, guarded_name: guarded_name)
         return visit_container_builder_write(path, node, call) if call
 
         collect_path_declaration(:constant, path, node)
@@ -302,6 +306,7 @@ module Zard
         name = attribute_name(name_node)
         return unless name
 
+        replace_constant_declarations(name)
         call = container_builder_call(value)
         return visit_container_builder_write(name, node, call) if call
 
@@ -321,7 +326,14 @@ module Zard
       end
 
       def remove_constant_declarations(name)
-        path = "#{current_namespace}::#{name}"
+        remove_constant_path("#{current_namespace}::#{name}")
+      end
+
+      def replace_constant_declarations(path)
+        remove_constant_path(namespace_parts(path).join("::"))
+      end
+
+      def remove_constant_path(path)
         container_declaration = @declarations[@container_declaration_index] if @container_declaration_index
         @declarations.reject! do |declaration|
           constant_declaration_path(declaration) == path ||
@@ -329,6 +341,10 @@ module Zard
             declaration.namespace&.start_with?("#{path}::")
         end
         @container_declaration_index = @declarations.index(container_declaration) if container_declaration
+      end
+
+      def self_referential_constant_guard?(node, name)
+        node.is_a?(Prism::OrNode) && constant_reference_name(node.left) == name
       end
 
       def constant_declaration_path(declaration)

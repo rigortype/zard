@@ -96,6 +96,7 @@ Constant visibility calls received by `self` belong to the current namespace, li
 Bare or `self.autoload` calls with literal Symbol or String names produce constant declarations for the current ordinary owner without guessing the loaded value's class or module kind.
 Bare or `self.const_set` calls with literal names produce declarations in the current ordinary class or module body; container-builder values retain their generated scope.
 Bare or `self.remove_const` calls with literal names remove the matching declaration and its nested API from the current namespace. A later declaration of the same name remains in the model.
+Unconditional constant assignments and literal `const_set` calls replace an earlier declaration and its nested API. Conditional initialization remains non-destructive.
 
 ## Installation
 

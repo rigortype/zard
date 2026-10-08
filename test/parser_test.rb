@@ -109,6 +109,25 @@ class ParserTest < Minitest::Test
     assert_equal [], declarations.fetch(0).parameters
   end
 
+  def test_replaces_constants_and_their_members_on_unconditional_assignment
+    source = "module Demo\n  class Service\n    OLD = 1\n    def old = nil\n  end\n  Service = Class.new do\n    def current = nil\n  end\n  VALUE = 1\n  self.const_set :VALUE, 2\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [
+      [:module, nil, "Demo"],
+      [:class, "Demo", "Service"],
+      [:instance_method, "Demo::Service", "current"],
+      [:constant, "Demo", "VALUE"]
+    ], declarations.map { |declaration| [declaration.kind, declaration.namespace, declaration.name] }
+  end
+
+  def test_preserves_existing_declarations_for_self_referential_constant_guards
+    source = "module Demo\n  class Service\n    OLD = 1\n  end\n  Service = Service || Class.new\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_includes declarations.map(&:name), "OLD"
+  end
+
   def test_does_not_collect_constant_reassignments_as_declarations
     source = "VALUE ||= 1\nVALUE &&= 2\nVALUE += 3\n"
     declarations = Zard.parse(source, path: "example.rb").declarations

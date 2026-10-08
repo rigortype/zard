@@ -46,6 +46,18 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_only_the_latest_unconditional_constant_assignment
+    source = "module Demo\n  # Old limit.\n  LIMIT = 1\n  # Current limit.\n  LIMIT = 2\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## Constant `Demo::LIMIT`
+
+      Current limit.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_a_documented_autoload_constant
     source = "module Models\n  # Loaded widget API.\n  self.autoload :Widget, \"models/widget\"\nend\n"
     document = Zard.parse(source, path: "example.rb")

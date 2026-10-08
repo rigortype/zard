@@ -80,7 +80,7 @@ ZARD documentation requires UTF-8 source text. Ruby source encoding declarations
 
 Declarations carry `:public`, `:protected`, or `:private` visibility. `zard-doc` renders only public declarations. The parser statically models supported Ruby declaration forms; it does not execute the program. Runtime-generated declarations, dynamic names, and effects that cannot be determined from supported syntax are not resolved. Superclass, mixin, receiver, and refinement expressions are retained as source references; runtime ancestry and object identity are not inferred.
 
-Visibility forms supported by the parser include bare visibility calls, inline forms such as `private def` and `private attr_reader`, named method modifiers such as `private :read`, and `private_class_method` / `public_class_method`. Named attribute modifiers produce a diagnostic because an attribute declaration can generate more than one method. See the repository README for the detailed supported syntax coverage.
+Visibility forms supported by the parser include bare visibility calls, inline forms such as `private def` and `private attr_reader`, named method modifiers such as `private :read`, and `private_class_method` / `public_class_method`. Named attribute modifiers produce a diagnostic because an attribute declaration can generate more than one method. See the [supported Ruby syntax guide](supported-ruby-syntax.md) for detailed coverage.
 
 ## Command line
 

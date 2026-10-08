@@ -671,6 +671,22 @@ class ParserTest < Minitest::Test
     ], methods.map { |declaration| [declaration.kind, declaration.name, declaration.visibility] }
   end
 
+  def test_models_module_functions_with_an_explicit_current_owner
+    source = "module Helpers\n  def first(value) = value\n  self.module_function :first\n  self.module_function def second(value) = value\n  self.module_function\n  def third(value) = value\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [
+      [:instance_method, "first", :private],
+      [:singleton_method, "first", :public],
+      [:instance_method, "second", :private],
+      [:singleton_method, "second", :public],
+      [:instance_method, "third", :private],
+      [:singleton_method, "third", :public]
+    ], methods.map { |declaration| [declaration.kind, declaration.name, declaration.visibility] }
+    assert methods.all? { |declaration| declaration.parameters == ["value"] }
+  end
+
   def test_bare_visibility_ends_module_function_mode
     source = "module Helpers\n  module_function\n  def copied = nil\n  protected\n  def inherited = nil\nend\n"
     methods = Zard.parse(source, path: "example.rb").declarations

@@ -202,7 +202,9 @@ module Zard
         collect_autoload_declaration(node) if autoload_call?(node)
         collect_mixin_references(node) if mixin_call?(node)
 
-        if node.name == :module_function && node.receiver.nil? && module_function_context?
+        if node.name == :module_function &&
+            (node.receiver.nil? || node.receiver.is_a?(Prism::SelfNode)) &&
+            module_function_context?
           return visit_module_function_call(node) { super }
         end
 

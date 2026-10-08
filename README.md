@@ -57,6 +57,7 @@ Ruby's `attr` declarations are readers by default. The legacy `attr :name, true`
 Attribute declarations received by `self` belong to the current owner, like their bare forms.
 
 `module_function` records its private instance method and public singleton copy as separate declarations with shared source provenance. Bare, named, and inline forms are supported.
+`module_function` received by `self` belongs to the current module, like its bare form.
 
 Method aliases preserve their target name and inherit visibility and parameters when the target is declared in the same source scope. Alias documentation remains separate from target documentation.
 Inline visibility and `module_function` modifiers around `alias_method` apply to the resulting alias.

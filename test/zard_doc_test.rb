@@ -471,6 +471,22 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_module_functions_with_an_explicit_current_owner
+    source = "module Helpers\n  # First helper.\n  def first(value) = value\n  self.module_function :first\n  # Second helper.\n  self.module_function def second(value) = value\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Helpers.first(value)`
+
+      First helper.
+
+      ## `Helpers.second(value)`
+
+      Second helper.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_renders_a_documented_method_alias_without_copying_target_documentation
     source = "class Reader\n  # Reads a path.\n  def read(path) = path\n  # Compatibility name.\n  alias fetch read\nend\n"
     document = Zard.parse(source, path: "example.rb")

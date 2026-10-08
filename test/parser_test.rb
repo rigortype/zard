@@ -729,6 +729,17 @@ class ParserTest < Minitest::Test
     assert methods.all? { |declaration| declaration.parameters == ["value"] }
   end
 
+  def test_module_function_replaces_an_existing_singleton_method
+    source = "module Helpers\n  def self.call(old) = old\n  def call(value) = value\n  module_function :call\nend\n"
+    methods = Zard.parse(source, path: "example.rb").declarations
+      .select { |declaration| declaration.kind.to_s.end_with?("method") }
+
+    assert_equal [
+      [:instance_method, "call", ["value"], :private],
+      [:singleton_method, "call", ["value"], :public]
+    ], methods.map { |declaration| [declaration.kind, declaration.name, declaration.parameters, declaration.visibility] }
+  end
+
   def test_bare_visibility_ends_module_function_mode
     source = "module Helpers\n  module_function\n  def copied = nil\n  protected\n  def inherited = nil\nend\n"
     methods = Zard.parse(source, path: "example.rb").declarations
@@ -807,6 +818,40 @@ class ParserTest < Minitest::Test
       [:instance_attribute_reader, "token"],
       [:singleton_method, "read"]
     ], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
+  def test_replaces_redefined_methods_and_preserves_unaffected_attribute_sides
+    source = "class Reader\n  attr_accessor :name\n  def name(prefix) = prefix\n  def read(old) = old\n  def read(current, format:) = current\n  def self.build(old) = old\n  class << self\n    def build(current) = current\n  end\n  alias fetch read\n  def fetch(id) = id\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [
+      [:class, "Reader", [], nil],
+      [:instance_attribute_writer, "name", [], nil],
+      [:instance_method, "name", ["prefix"], nil],
+      [:instance_method, "read", ["current", "format:"], nil],
+      [:singleton_method, "build", ["current"], nil],
+      [:instance_method, "fetch", ["id"], nil]
+    ], declarations.map { |declaration| [declaration.kind, declaration.name, declaration.parameters, declaration.alias_target] }
+  end
+
+  def test_replaces_methods_with_attributes_by_generated_method_name
+    source = "class Reader\n  def name = nil\n  def name=(value) = value\n  attr_reader :name\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [
+      [:class, "Reader"],
+      [:instance_method, "name="],
+      [:instance_attribute_reader, "name"]
+    ], declarations.map { |declaration| [declaration.kind, declaration.name] }
+  end
+
+  def test_keeps_the_current_container_after_redefining_a_method_in_a_reopened_namespace
+    source = "class Reader\n  def read = nil\nend\nclass Reader\n  def read(value) = value\n  include CurrentFeature\nend\n"
+    declarations = Zard.parse(source, path: "example.rb").declarations
+
+    assert_equal [[:class, "Reader"], [:class, "Reader"], [:instance_method, "read"]], declarations.map { |declaration| [declaration.kind, declaration.name] }
+    assert_empty declarations.fetch(0).mixins
+    assert_equal ["CurrentFeature"], declarations.fetch(1).mixins.map(&:target)
   end
 
   def test_ignores_method_removal_calls_received_by_another_owner

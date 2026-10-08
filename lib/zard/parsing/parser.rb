@@ -399,6 +399,13 @@ module Zard
         return unless attribute_kind
 
         builder_attribute_arguments(call).each do |argument|
+          replace_method_declarations(
+            kind: :instance_method,
+            names: attribute_generated_method_names(argument.unescaped, attribute_kind),
+            namespace: current_namespace,
+            receiver: nil,
+            refinement: @refinement
+          )
           append_declaration(
             kind: :"instance_#{attribute_kind}",
             name: argument.unescaped,
@@ -596,7 +603,7 @@ module Zard
       def remove_method_declarations(names)
         return if names.empty?
 
-        @declarations = @declarations.filter_map do |declaration|
+        transform_method_declarations do |declaration|
           if removable_method_declaration?(declaration)
             declaration_after_method_removal(declaration, names)
           else
@@ -622,14 +629,31 @@ module Zard
         return if remaining.empty?
         return declaration unless declaration.kind.to_s.end_with?("_attribute_accessor")
 
+        attribute_scope = declaration.kind.to_s.delete_suffix("accessor")
         kind = if remaining == [declaration.name]
-          :"#{current_attribute_scope}reader"
+          :"#{attribute_scope}reader"
         elsif remaining == ["#{declaration.name}="]
-          :"#{current_attribute_scope}writer"
+          :"#{attribute_scope}writer"
         else
           declaration.kind
         end
         declaration_with_kind_and_visibility(declaration, kind, declaration.visibility)
+      end
+
+      def replace_method_declarations(kind:, names:, namespace:, receiver:, refinement:)
+        attribute_scope = (kind == :singleton_method) ? "singleton_attribute_" : "instance_attribute_"
+        transform_method_declarations do |declaration|
+          matches = declaration.namespace == namespace &&
+            declaration_scope_matches_values?(declaration, receiver, refinement) &&
+            (declaration.kind == kind || attribute_in_scope?(declaration, attribute_scope))
+          matches ? declaration_after_method_removal(declaration, names) : declaration
+        end
+      end
+
+      def transform_method_declarations
+        container_declaration = @declarations[@container_declaration_index] if @container_declaration_index
+        @declarations = @declarations.filter_map { |declaration| yield declaration }
+        @container_declaration_index = @declarations.index(container_declaration) if container_declaration
       end
 
       def inline_alias_method_name(node)
@@ -657,6 +681,13 @@ module Zard
           )
         end
 
+        replace_method_declarations(
+          kind: kind,
+          names: [name],
+          namespace: current_namespace,
+          receiver: current_singleton_receiver,
+          refinement: @refinement
+        )
         comments, parsed = parse_comments(node)
         append_declaration(
           kind: kind,
@@ -704,7 +735,15 @@ module Zard
       end
 
       def collect_method_entries(kind:, name:, namespace:, visibility:, parameters:, receiver:, receiver_span:, node:)
-        unless kind == :instance_method && module_function_definition?(node)
+        module_function = kind == :instance_method && module_function_definition?(node)
+        replace_method_declarations(
+          kind: kind,
+          names: [name],
+          namespace: namespace,
+          receiver: receiver,
+          refinement: @refinement
+        )
+        unless module_function
           return collect_declaration(
             kind: kind,
             name: name,
@@ -719,6 +758,13 @@ module Zard
           )
         end
 
+        replace_method_declarations(
+          kind: :singleton_method,
+          names: [name],
+          namespace: namespace,
+          receiver: receiver,
+          refinement: @refinement
+        )
         comments, parsed = parse_comments(node)
         append_declaration(
           kind: :instance_method,
@@ -766,6 +812,13 @@ module Zard
         scope = @singleton_depth.positive? ? :singleton : :instance
         kind = :"#{scope}_#{attribute_kind}"
         names.each do |name|
+          replace_method_declarations(
+            kind: :"#{scope}_method",
+            names: attribute_generated_method_names(name, attribute_kind),
+            namespace: current_namespace,
+            receiver: current_singleton_receiver,
+            refinement: @refinement
+          )
           append_declaration(
             kind: kind,
             name: name,
@@ -785,6 +838,17 @@ module Zard
 
       def attribute_name(argument)
         argument.unescaped if argument.is_a?(Prism::SymbolNode) || argument.is_a?(Prism::StringNode)
+      end
+
+      def attribute_generated_method_names(name, attribute_kind)
+        case attribute_kind
+        when :attribute_reader
+          [name]
+        when :attribute_writer
+          ["#{name}="]
+        else
+          [name, "#{name}="]
+        end
       end
 
       def collect_path_declaration(kind, path, node, superclass: nil, superclass_span: nil, container_builder: nil, container_builder_span: nil)
@@ -1021,6 +1085,13 @@ module Zard
 
         declaration = @declarations.fetch(index)
         @declarations[index] = declaration_with_visibility(declaration, :private)
+        replace_method_declarations(
+          kind: :singleton_method,
+          names: [name],
+          namespace: declaration.namespace,
+          receiver: declaration.receiver,
+          refinement: declaration.refinement
+        )
         @declarations << declaration_with_kind_and_visibility(declaration, :singleton_method, :public)
       end
 
@@ -1116,12 +1187,16 @@ module Zard
       end
 
       def declaration_scope_matches?(declaration, receiver)
+        declaration_scope_matches_values?(declaration, receiver, @refinement)
+      end
+
+      def declaration_scope_matches_values?(declaration, receiver, refinement)
         receiver_matches = if receiver.nil? || receiver == "self"
           declaration.receiver.nil? || declaration.receiver == "self"
         else
           declaration.receiver == receiver
         end
-        receiver_matches && declaration.refinement == @refinement
+        receiver_matches && declaration.refinement == refinement
       end
 
       def current_namespace

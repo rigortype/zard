@@ -565,6 +565,18 @@ class ZardDocTest < Minitest::Test
     assert_equal expected, Zard::Doc.render(document)
   end
 
+  def test_renders_only_the_latest_method_definition
+    source = "class Reader\n  # Old read API.\n  def read(old) = old\n  # Current read API.\n  define_method(:read) { |value| value }\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    expected = <<~MARKDOWN
+      ## `Reader#read(value)`
+
+      Current read API.
+    MARKDOWN
+
+    assert_equal expected, Zard::Doc.render(document)
+  end
+
   def test_omits_a_removed_constant_subtree_and_renders_its_replacement
     source = "module Demo\n  # Old service API.\n  class Service\n    # Old operation.\n    def old = nil\n  end\n  remove_const :Service\n  # Current service API.\n  class Service\n    # Current operation.\n    def call = nil\n  end\nend\n"
     document = Zard.parse(source, path: "example.rb")

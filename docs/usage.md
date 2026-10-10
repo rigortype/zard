@@ -1,13 +1,6 @@
 # ZARD 0.0.1 usage
 
-ZARD parses Ruby source into a versioned model. The separate `zard-doc` gem renders the model's human-facing API documentation as Markdown. Both `0.0.1` gems are release candidates and are not yet published on RubyGems. Until publication, use the repository as the Gem source:
-
-```ruby
-gem "zard", github: "rigortype/zard"
-gem "zard-doc", github: "rigortype/zard"
-```
-
-After `0.0.1` is published, install the released pair with Bundler:
+ZARD parses Ruby source into a versioned model. The separate `zard-doc` gem renders the model's human-facing API documentation as Markdown. Both `0.0.1` gems are available on RubyGems. Install the released pair with Bundler:
 
 ```ruby
 gem "zard", "~> 0.0.1"

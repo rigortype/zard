@@ -2,14 +2,7 @@
 
 `zard-doc` renders API documentation from the versioned model produced by `zard`.
 
-See the [ZARD usage guide](https://github.com/rigortype/zard/blob/master/docs/usage.md) for installation, canonical tag syntax, model access, limitations, and exit codes. The `0.0.1` candidate is not yet published on RubyGems. Until then, install both gems from the repository:
-
-```ruby
-gem "zard", github: "rigortype/zard"
-gem "zard-doc", github: "rigortype/zard"
-```
-
-After publication, use the released pair:
+See the [ZARD usage guide](https://github.com/rigortype/zard/blob/master/docs/usage.md) for installation, canonical tag syntax, model access, limitations, and exit codes. Both `0.0.1` gems are available on RubyGems. Install the released pair with Bundler:
 
 ```ruby
 gem "zard", "~> 0.0.1"

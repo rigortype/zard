@@ -135,6 +135,36 @@ class ZardDocCLITest < Minitest::Test
     assert_empty stderr
   end
 
+  def test_render_links_see_references_across_files
+    Dir.mktmpdir("zard-doc") do |directory|
+      File.write(File.join(directory, "a.rb"), "class Foo\n  # Target.\n  def bar = nil\nend\n")
+      File.write(File.join(directory, "b.rb"), "# @see Foo#bar Target\ndef call = nil\n")
+
+      status, stdout, stderr = run_cli("render", directory)
+
+      assert_equal 0, status
+      assert_includes stdout, "- [Target](#zard-466f6f23626172)"
+      assert_equal 1, stdout.scan('<a id="zard-466f6f23626172"></a>').length
+      assert_empty stderr
+    end
+  end
+
+  def test_render_keeps_ambiguous_see_references_as_text
+    Dir.mktmpdir("zard-doc") do |directory|
+      %w[a b].each do |name|
+        File.write(File.join(directory, "#{name}.rb"), "class Foo\n  # Target.\n  def bar = nil\nend\n")
+      end
+      File.write(File.join(directory, "c.rb"), "# @see Foo#bar Target\ndef call = nil\n")
+
+      status, stdout, stderr = run_cli("render", directory)
+
+      assert_equal 0, status
+      assert_includes stdout, "- Foo#bar Target"
+      refute_includes stdout, "<a id="
+      assert_empty stderr
+    end
+  end
+
   private
 
   def run_cli(*arguments, stdin: "")

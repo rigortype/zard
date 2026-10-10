@@ -65,6 +65,26 @@ For example, `@param path [String] — The file path.` carries an optional docum
 
 Tags without a name or type write their description directly: `@return Normalized value.`, `@note Keep this in mind.`, and `@example Call the method.` Named tags such as `@param`, `@yieldparam`, `@raise`, and `@option` require the marker. `@option options :format — Output format.` documents an option. `@yieldreturn yielded value.` describes a yielded result. Supported tags include `@param`, `@return`, `@yieldparam`, `@yieldreturn`, `@option`, `@raise`, `@note`, `@see`, `@deprecated`, and `@example`.
 
+### See also references
+
+The complete syntax decision, including planned BitClust and RD compatibility forms, is recorded in [ADR 0004](adr/0004-documentation-reference-syntax.md).
+
+`@see` accepts YARD-style references followed by an optional display label, without an em dash:
+
+```ruby
+# @see Foo#bar
+# @see Foo.build Build a Foo
+# @see #bar Related instance method
+# @see .build Related class method
+# @see Kernel.#puts Legacy module-function spelling
+# @see Kernel?.puts Modern module-function spelling
+# @see https://example.com/reference Reference guide
+```
+
+`#` selects an instance method and `.` selects a class method. `.#` and `?.` are equivalent module-function spellings and link to the public singleton copy. Relative references use the current class or module; qualified references search namespace prefixes as YARD does, and a leading `::` starts at the root. This lookup also applies to qualified class openings such as `class Outer::Caller`; it does not reproduce Ruby's lexical constant lookup. A nearer declared owner prevents fallback to an unrelated outer owner when its member is missing. The first whitespace-separated token is the target and the remaining text is the display label. HTTP, HTTPS, and mailto targets become external links.
+
+`zard-doc` links references to uniquely identified public declarations with documentation in the generated output. The CLI resolves references across all input files. Unresolved, undocumented, private, ambiguous, and refinement references remain plain text. Lookup uses explicit declarations, without following inheritance or mixins or evaluating dynamic receivers. The document model retains the original description, raw comment, and source span.
+
 Plain comment lines continue the preceding canonical documentation tag until another annotation or contract begins. No continuation marker is needed. Contract notes use ` -- ` after the contract payload and remain contract notes, not API prose. Familiar YARD-like tags without the em dash can be retained as raw text, but are not treated as documentation claims.
 
 ZARD documentation requires UTF-8 source text. Ruby source encoding declarations are respected; non-UTF-8 source can still contain contracts, but documentation text in it receives a diagnostic.

@@ -106,7 +106,7 @@ module Zard
         diagnostics.each { |diagnostic| @stderr.puts format_diagnostic(diagnostic) }
         return 1 if diagnostics.any? { |diagnostic| diagnostic.severity == :error }
 
-        markdown = documents.map { |document| Zard::Doc.render(document) }.reject(&:empty?).join("\n")
+        markdown = Renderer.render_documents(documents)
         @stdout.print markdown
         0
       end

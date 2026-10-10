@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email = ["tadsan@zonu.me"]
 
   spec.summary = "AI-friendly Ruby documentation built on RBS and Rigor extensions"
-  spec.description = "ZARD keeps Ruby API documentation separate from checked RBS contracts and Rigor extensions."
+  spec.description = "ZARD models Ruby declarations, API documentation, and RBS or Rigor contract text with source provenance."
   spec.homepage = "https://github.com/rigortype/zard"
   spec.license = "MPL-2.0"
   spec.required_ruby_version = ">= 3.2.0"

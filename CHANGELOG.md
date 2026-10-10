@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [0.0.1] - 2026-10-08
+## [0.0.1] - 2026-10-11
 
 The first ZARD release separates Ruby API documentation from RBS and Rigor contracts. Parse Ruby source into a versioned model, generate public API Markdown, and lint documentation from files, directories, or standard input without installing Rigor.
 

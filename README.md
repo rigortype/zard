@@ -57,15 +57,7 @@ This repository provides two coordinated gems:
 
 ## Installation
 
-The `0.0.1` release candidate is not yet published on RubyGems. Use the repository as the Gem source:
-
-```ruby
-# Gemfile
-gem "zard", github: "rigortype/zard"
-gem "zard-doc", github: "rigortype/zard"
-```
-
-Once published, install with:
+Both gems are available on RubyGems: [zard](https://rubygems.org/gems/zard) and [zard-doc](https://rubygems.org/gems/zard-doc). Add the released pair to your Gemfile:
 
 ```ruby
 # Gemfile

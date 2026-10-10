@@ -830,7 +830,7 @@ class ZardDocTest < Minitest::Test
 
       ### See also
 
-      - https://example.test/reference
+      - [https://example.test/reference](https://example.test/reference)
     MARKDOWN
 
     assert_equal expected, Zard::Doc.render(document)
@@ -863,5 +863,206 @@ class ZardDocTest < Minitest::Test
     MARKDOWN
 
     assert_equal expected, Zard::Doc.render(document)
+  end
+
+  def test_links_see_references_with_yard_shorthand_and_labels
+    source = <<~RUBY
+      class Foo
+        # Target.
+        def bar = nil
+        # Class target.
+        def self.build = nil
+        # @see Foo#bar
+        # @see #bar Instance target
+        # @see Foo.build
+        # @see .build Class target
+        def call = nil
+      end
+    RUBY
+    document = Zard.parse(source, path: "example.rb")
+    markdown = Zard::Doc.render(document)
+
+    assert_includes markdown, '<a id="zard-466f6f23626172"></a>'
+    assert_includes markdown, "- [Foo#bar](#zard-466f6f23626172)"
+    assert_includes markdown, "- [Instance target](#zard-466f6f23626172)"
+    assert_includes markdown, "- [Foo.build](#zard-466f6f2e6275696c64)"
+    assert_includes markdown, "- [Class target](#zard-466f6f2e6275696c64)"
+    tag = document.declarations.find { |item| item.name == "call" }.documentation.first
+    assert_equal "Foo#bar", tag.description
+    assert_equal "# @see Foo#bar", tag.raw
+  end
+
+  def test_links_both_module_function_spellings_to_the_public_copy
+    source = <<~RUBY
+      module Kernel
+        # Writes a value.
+        module_function def puts(value) = nil
+        # @see Kernel.#puts Legacy
+        # @see Kernel?.puts Modern
+        # @see .#puts Relative legacy
+        # @see ?.puts Relative modern
+        module_function def call = nil
+      end
+    RUBY
+    markdown = Zard::Doc.render(Zard.parse(source, path: "example.rb"))
+
+    %w[Legacy Modern].each { |label| assert_includes markdown, "- [#{label}](#zard-4b65726e656c2e70757473)" }
+    ["Relative legacy", "Relative modern"].each { |label| assert_includes markdown, "- [#{label}](#zard-4b65726e656c2e70757473)" }
+    assert_equal 1, markdown.scan('<a id="zard-4b65726e656c2e70757473"></a>').length
+    refute_includes markdown, "Kernel#puts(value)"
+  end
+
+  def test_see_references_search_lexical_namespaces_and_accept_absolute_paths
+    source = <<~RUBY
+      # Root target.
+      class Foo
+        # Root method.
+        def bar = nil
+      end
+      module Outer
+        class Foo
+          # Inner method.
+          def bar = nil
+        end
+        class Caller
+          # @see Foo#bar Inner
+          # @see ::Foo#bar Root
+          def call = nil
+        end
+      end
+    RUBY
+    markdown = Zard::Doc.render(Zard.parse(source, path: "example.rb"))
+
+    assert_includes markdown, "- [Inner](#zard-4f757465723a3a466f6f23626172)"
+    assert_includes markdown, "- [Root](#zard-466f6f23626172)"
+  end
+
+  def test_preserves_unresolved_private_and_undocumented_see_targets
+    source = <<~RUBY
+      class Foo
+        def undocumented = nil
+        # Internal method.
+        private def hidden = nil
+        # @see #missing Missing
+        # @see #hidden Hidden
+        # @see #undocumented Undocumented
+        def call = nil
+      end
+    RUBY
+    markdown = Zard::Doc.render(Zard.parse(source, path: "example.rb"))
+
+    ["#missing Missing", "#hidden Hidden", "#undocumented Undocumented"].each do |text|
+      assert_includes markdown, "- #{text}"
+    end
+    refute_includes markdown, "<a id="
+  end
+
+  def test_links_urls_and_escapes_brackets_in_labels
+    source = "# @see https://example.test/a(b) Docs [here]\n# @see mailto:help@example.test Support\ndef call = nil\n"
+    markdown = Zard::Doc.render(Zard.parse(source, path: "example.rb"))
+
+    assert_includes markdown, '- [Docs \\[here\\]](https://example.test/a%28b%29)'
+    assert_includes markdown, "- [Support](mailto:help@example.test)"
+  end
+
+  def test_an_undocumented_local_target_does_not_link_to_an_outer_target
+    source = "class Foo\n  # Root target.\n  def bar = nil\nend\nmodule Outer\n  class Foo\n    def bar = nil\n  end\n  class Caller\n    # @see Foo#bar\n    def call = nil\n  end\nend\n"
+    markdown = Zard::Doc.render(Zard.parse(source, path: "example.rb"))
+
+    assert_includes markdown, "- Foo#bar"
+    refute_includes markdown, "<a id="
+  end
+
+  def test_accepts_see_target_spacing_without_changing_the_model
+    source = "class Foo\n  # Target.\n  def bar = nil\n  # @see   #bar   Display [label]  \n  def call = nil\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    markdown = Zard::Doc.render(document)
+
+    assert_includes markdown, '- [Display \\[label\\]](#zard-466f6f23626172)'
+    assert_equal "  #bar   Display [label]  ", document.declarations.last.documentation.first.description
+  end
+
+  def test_links_operator_methods_and_accessor_writers
+    source = "class Foo\n  # Index lookup.\n  def [](key) = nil\n  # Value.\n  attr_accessor :value\n  # @see #[]\n  # @see #value= Assign\n  def call = nil\nend\n"
+    markdown = Zard::Doc.render(Zard.parse(source, path: "example.rb"))
+
+    assert_includes markdown, '- [#\\[\\]](#zard-466f6f235b5d)'
+    assert_includes markdown, "- [Assign](#zard-466f6f2376616c7565)"
+  end
+
+  def test_links_attribute_writer_and_replacement_reader_separately
+    source = "class Foo\n  # Accessor.\n  attr_accessor :value\n  # Replacement reader.\n  def value = nil\n  # @see #value Reader\n  # @see #value= Writer\n  def call = nil\nend\n"
+    markdown = Zard::Doc.render(Zard.parse(source, path: "example.rb"))
+
+    assert_includes markdown, "- [Reader](#zard-466f6f2376616c7565)"
+    assert_includes markdown, "- [Writer](#zard-466f6f2376616c75653d)"
+    assert_equal 1, markdown.scan('<a id="zard-466f6f2376616c7565"></a>').length
+    assert_equal 1, markdown.scan('<a id="zard-466f6f2376616c75653d"></a>').length
+  end
+
+  def test_a_local_owner_without_the_member_shadows_an_outer_target
+    source = "class Foo\n  # Root target.\n  def bar = nil\nend\nmodule Outer\n  class Foo; end\n  class Caller\n    # @see Foo#bar\n    def call = nil\n  end\nend\n"
+    markdown = Zard::Doc.render(Zard.parse(source, path: "example.rb"))
+
+    assert_includes markdown, "- Foo#bar"
+    refute_includes markdown, "<a id="
+  end
+
+  def test_see_references_use_yard_namespace_prefix_lookup_for_qualified_openings
+    source = "module Outer\n  class Foo\n    # Target.\n    def bar = nil\n  end\nend\nclass Outer::Caller\n  # @see Foo#bar\n  def call = nil\nend\n"
+    markdown = Zard::Doc.render(Zard.parse(source, path: "example.rb"))
+
+    assert_includes markdown, "- [Foo#bar](#zard-4f757465723a3a466f6f23626172)"
+  end
+
+  def test_resolves_explicit_constant_receivers_in_their_namespace
+    source = "class Foo\n  # Root.\n  def self.bar = nil\nend\nmodule Outer\n  class Foo; end\n  # Local.\n  def Foo.bar = nil\n  # @see ::Foo.bar Root\n  # @see Outer::Foo.bar Local\n  # @see .bar Relative\n  def Foo.call = nil\nend\n"
+    markdown = Zard::Doc.render(Zard.parse(source, path: "example.rb"))
+
+    assert_includes markdown, "- [Root](#zard-466f6f2e626172)"
+    assert_includes markdown, "- [Local](#zard-4f757465723a3a466f6f2e626172)"
+    assert_includes markdown, "- [Relative](#zard-4f757465723a3a466f6f2e626172)"
+  end
+
+  def test_does_not_index_refinement_containers_as_methods
+    source = "module M\n  # Refinement.\n  refine String do\n    # Helper.\n    def helper = nil\n  end\n  # @see #String\n  def call = nil\nend\n"
+    markdown = Zard::Doc.render(Zard.parse(source, path: "example.rb"))
+
+    assert_includes markdown, "- #String"
+    refute_includes markdown, "<a id="
+  end
+
+  def test_escapes_html_in_labels_and_entities_in_url_destinations
+    source = "# @see https://example.test/?x=&copy; <Copy> & paste\ndef call = nil\n"
+    markdown = Zard::Doc.render(Zard.parse(source, path: "example.rb"))
+
+    assert_includes markdown, "- [&lt;Copy&gt; &amp; paste](https://example.test/?x=&amp;copy;)"
+  end
+
+  def test_preserves_empty_and_punctuation_only_references
+    source = "# @see\n# @see #\n# @see .\n# @see ::\n# @see ?.\n# @see .#\ndef call = nil\n"
+    markdown = Zard::Doc.render(Zard.parse(source, path: "example.rb"))
+
+    ["#", ".", "::", "?.", ".#"].each { |reference| assert_includes markdown, "- #{reference}\n" }
+    refute_includes markdown, "<a id="
+  end
+
+  def test_links_unicode_constant_owners_and_module_function_spellings
+    source = "module Étage\n  class Café\n    # Target.\n    def bar = nil\n    # @see #bar Relative\n    # @see Étage::Café#bar Qualified\n    def call = nil\n  end\n  # Target.\n  module_function def écrit = nil\n  # @see Étage.#écrit Legacy\n  # @see Étage?.écrit Modern\n  module_function def call = nil\nend\n"
+    markdown = Zard::Doc.render(Zard.parse(source, path: "example.rb"))
+
+    assert_includes markdown, "- [Relative](#zard-c389746167653a3a436166c3a923626172)"
+    assert_includes markdown, "- [Qualified](#zard-c389746167653a3a436166c3a923626172)"
+    assert_includes markdown, "- [Legacy](#zard-c389746167652ec3a963726974)"
+    assert_includes markdown, "- [Modern](#zard-c389746167652ec3a963726974)"
+  end
+
+  def test_links_unicode_titlecase_owners
+    source = "module ǅemo\n  # Target.\n  module_function def bar = nil\n  # @see ǅemo.#bar Legacy\n  # @see ǅemo?.bar Modern\n  # @see .bar Relative\n  module_function def call = nil\nend\n"
+    document = Zard.parse(source, path: "example.rb")
+    assert_empty document.diagnostics
+    markdown = Zard::Doc.render(document)
+
+    %w[Legacy Modern Relative].each { |label| assert_includes markdown, "- [#{label}](#zard-c785656d6f2e626172)" }
   end
 end

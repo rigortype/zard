@@ -14,6 +14,7 @@ ZARD uses an em dash `—` when a named documentation tag or an optional type mu
 - `@option options :format — Output format.` is ZARD documentation.
 - `@option options :format [Symbol] — Output format.` is ZARD documentation with a claim.
 - Tags with no name and no type, such as `@note`, `@see`, `@deprecated`, and `@example`, write their description directly.
+- For YARD compatibility, `@see` descriptions may contain a reference followed by a whitespace-separated display label; this form does not require `—`.
 - `@param value [String] Input text.` is preserved as raw text, not as a type hint.
 - Named tags such as `@param`, `@option`, `@yieldparam`, and `@raise` require `—` before their description.
 - `zard-doc lint` warns about YARD-like tags and can promote the warning to an error.

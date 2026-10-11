@@ -171,7 +171,7 @@ Each scope has an index. Namespace pages follow Ruby namespace hierarchy, with d
 
 Build reports diagnostics to stderr and does not print generated Markdown to stdout. Source errors return 1; configuration, input, ownership, and publication errors return 2. Warnings permit generation. All selected inputs and destinations are validated before publication. Missing roots or dependencies, empty source selections, conflicting destinations, and paths escaping declared roots are errors.
 
-The output manifest tracks generated pages. Regeneration removes obsolete managed pages, retains unrelated handwritten files, and refuses to overwrite edited managed pages or existing unowned destination files. Partial scope builds retain other scopes' managed pages. Publication prepares output before writing, attempts recovery on filesystem failures, and reports recovery failures; it is not a filesystem-wide atomic transaction.
+The output manifest tracks generated pages and resolved API links. Regeneration removes obsolete managed pages, retains unrelated handwritten files, and refuses to overwrite edited managed pages or existing unowned destination files. Partial scope builds retain other scopes' managed pages and refuse changes that would invalidate their generated links; include the affected scopes or run a full build instead. Publication prepares output before writing, attempts recovery on filesystem failures, and reports recovery failures; it is not a filesystem-wide atomic transaction.
 
 This workflow uses the existing ZARD parse model. External RBS ingestion is separate work; Rigor lens integration is deferred to the `v0.1.0` goal. See [ADR 0006](adr/0006-hierarchical-documentation-output.md).
 

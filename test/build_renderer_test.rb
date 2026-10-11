@@ -63,6 +63,22 @@ class BuildRendererTest < Minitest::Test
     assert_match(/one:.*dep.rb:2.*two:.*dep.rb:2/, build.diagnostics.join)
   end
 
+  def test_absolute_reference_respects_local_owner_shadowing
+    app = document("class Target; end\n# [m:::Target#missing] [m:Target#missing]\nclass App; end", "app.rb")
+    dependency = document("class Target\n # Missing.\n def missing; end\nend", "dependency.rb")
+    page = renderer({"app" => [app], "dep" => [dependency]}, references: {"app" => ["dep"]}).render.fetch("app/App.md")
+    assert_includes page, "[m:::Target#missing] [m:Target#missing]"
+    refute_includes page, "../dep/"
+  end
+
+  def test_repeated_dependency_names_do_not_make_a_target_ambiguous
+    app = document("# [c:Target]\nclass App; end", "app.rb")
+    dependency = document("# Target.\nclass Target; end", "dependency.rb")
+    build = renderer({"app" => [app], "dep" => [dependency]}, references: {"app" => ["dep", "dep"]})
+    assert_includes build.render.fetch("app/App.md"), "[Target](../dep/Target.md#zard-"
+    assert_empty build.diagnostics
+  end
+
   def test_file_layout_prefixes_escaped_paths_and_literal_code
     doc = document("# See [m:Demo#run]; `[m:Demo#run]`.\nclass Demo\n # Runs.\n # @example\n #   [m:Demo#run]\n def run; end\nend", "code.rb")
     empty = document("VALUE = 1", "empty.rb")

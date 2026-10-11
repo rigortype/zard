@@ -73,6 +73,56 @@ class ZardDocBuildCLITest < Minitest::Test
     end
   end
 
+  def test_partial_rebuild_refuses_to_invalidate_retained_links
+    with_project do |root, config|
+      source(root, "core/lib/api.rb", "# Core.\nclass Core\n # Runs.\n def run = nil\nend\n")
+      source(root, "app/lib/app.rb", "# [m:Core#run]\nclass App; end\n")
+      scopes = {"core" => scope("core/lib"), "app" => scope("app/lib", references: ["core"])}
+      write_config(config, scopes)
+      assert_equal 0, run_cli("build", "--config", config).first
+      before = output_snapshot(root)
+
+      status, _, stderr = run_cli("build", "--config", config, "--scope", "core", "--layout", "file")
+
+      assert_equal 2, status, stderr
+      assert_includes stderr, "retained"
+      assert_equal before, output_snapshot(root)
+      scopes["core"]["destination"] = "moved-core"
+      write_config(config, scopes)
+      assert_equal 2, run_cli("build", "--config", config, "--scope", "core").first
+      assert_equal before, output_snapshot(root)
+      scopes["core"]["destination"] = "core"
+      write_config(config, scopes)
+      source(root, "core/lib/api.rb", "# Core.\nclass Core; end\n")
+      assert_equal 2, run_cli("build", "--config", config, "--scope", "core").first
+      assert_equal before, output_snapshot(root)
+      assert_equal 0, run_cli("build", "--config", config).first
+    end
+  end
+
+  def test_retained_literal_example_links_do_not_block_partial_rebuilds
+    with_project do |root, config|
+      source(root, "core/lib/api.rb", "# Core.\nclass Core; end\n")
+      source(root, "app/lib/app.rb", "# App.\n# @example\n#   [Core](../core/Core.md#zard-0000)\nclass App; end\n")
+      write_config(config, {"core" => scope("core/lib"), "app" => scope("app/lib")})
+      assert_equal 0, run_cli("build", "--config", config).first
+      assert_equal 0, run_cli("build", "--config", config, "--scope", "core", "--layout", "file").first
+    end
+  end
+
+  def test_layout_switch_can_change_only_the_output_filename_case
+    with_project do |root, config|
+      source(root, "core/lib/core.rb", "# Core.\nclass Core; end\n")
+      write_config(config, {"core" => scope("core/lib")})
+      assert_equal 0, run_cli("build", "--config", config).first
+      status, _, stderr = run_cli("build", "--config", config, "--layout", "file")
+      assert_equal 0, status, stderr
+      manifest = JSON.parse(File.read(File.join(root, "docs/api/.zard-manifest.json")))
+      assert manifest.fetch("pages").key?("core/core.md")
+      refute manifest.fetch("pages").key?("core/Core.md")
+    end
+  end
+
   def test_modified_pages_and_unowned_collisions_are_not_overwritten
     with_project do |root, config|
       source(root, "app/lib/code.rb", "# App.\nclass App; end\n")

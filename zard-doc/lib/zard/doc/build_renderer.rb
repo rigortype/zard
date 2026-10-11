@@ -5,10 +5,11 @@ require "pathname"
 module Zard
   module Doc
     class BuildRenderer
-      attr_reader :diagnostics
+      attr_reader :diagnostics, :links
 
       def initialize(scope_documents:, scope_files:, scopes:, layout:)
         @diagnostics = []
+        @links = {}
         @scopes = scopes
         @renderers = scope_documents.keys.sort.to_h do |name|
           [name, ScopeRenderer.new(name, scope_documents.fetch(name), scope_files.fetch(name), scopes.fetch(name), layout, self)]
@@ -25,7 +26,13 @@ module Zard
       end
 
       def dependencies(name)
-        @scopes.fetch(name).fetch(:references, []).filter_map { |dependency| @renderers[dependency] }
+        @scopes.fetch(name).fetch(:references, []).uniq.filter_map { |dependency| @renderers[dependency] }
+      end
+
+      def record_link(from, path, anchor)
+        targets = (@links[from] ||= [])
+        target = {"path" => path, "anchor" => anchor}
+        targets << target unless targets.include?(target)
       end
 
       def warn_ambiguity(reference, origin, candidates)
@@ -107,6 +114,7 @@ module Zard
         end
 
         def lookup(candidates, path)
+          path = path.delete_prefix("::")
           candidates.each do |candidate|
             targets = @targets[candidate].uniq
             unless targets.empty?
@@ -199,6 +207,7 @@ module Zard
 
         def link_destination(match, declaration)
           path, anchor = match.first.destination(match.last)
+          @build.record_link(@paths.fetch(declaration), path, anchor)
           "#{relative_url(@paths.fetch(declaration), path)}##{anchor}"
         end
 

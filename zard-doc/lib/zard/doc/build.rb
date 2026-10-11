@@ -59,9 +59,9 @@ module Zard
         publisher = BuildPublisher.new(@configuration.docroot)
         if @partial
           pages["index.md"] = scope_index(publisher.scopes.merge(destinations))
-          publisher.publish(pages, selected_scopes: destinations)
+          publisher.publish(pages, selected_scopes: destinations, links: renderer.links)
         else
-          publisher.publish(pages, scopes: destinations)
+          publisher.publish(pages, scopes: destinations, links: renderer.links)
         end
         0
       end

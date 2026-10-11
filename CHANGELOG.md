@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Build hierarchical Markdown documentation for explicitly configured monorepo scopes, with namespace or file organization, direct dependency links, navigation indexes, and managed output updates.
 - Link YARD-style `@see` references and URLs in generated Markdown, including cross-file CLI references and equivalent `.#` and `?.` module-function spellings.
 - Link BitClust Markdown and RD-compatible references in prose and documentation tags while preserving code regions, existing Markdown links, and source provenance.
 - Format annotation layout through `Zard.format` and `zard-doc format`, with safe contract ordering, redundant-marker removal, check/write modes, and reparsed source provenance.

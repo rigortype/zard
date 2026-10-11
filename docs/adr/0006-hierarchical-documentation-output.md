@@ -43,7 +43,7 @@ scopes:
 
 Reopened classes and modules share one namespace page, retaining descriptions, contracts, and provenance from each definition rather than replacing one description with another. Repeated method definitions remain separately represented; no runtime winner is inferred, and references to multiple competing method definitions are ambiguous. A namespace reference identifies the aggregate namespace page.
 
-The initial implementation covers configuration, declaration aggregation, page organization, and cross-scope links using the existing parse model. External RBS ingestion and Rigor lens integration require separate specifications. Existing contract payloads retain their association with source declarations; this work does not introduce contract text rendering or type inference.
+The initial implementation covers configuration, declaration aggregation, page organization, and cross-scope links using the existing parse model. External RBS ingestion requires a separate specification. Rigor lens integration is deferred to the `v0.1.0` goal and is not required for this workflow. Existing contract payloads retain their association with source declarations; this work does not introduce contract text rendering or type inference.
 
 ## Generated output ownership
 

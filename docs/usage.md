@@ -136,6 +136,47 @@ Visibility forms supported by the parser include bare visibility calls, inline f
 
 ## Command line
 
+### Build a documentation tree
+
+Repository builds provide `zard-doc build` (not included in the published 0.0.1 gems). Define named documentation scopes in a YAML file:
+
+```yaml
+docroot: docs/api
+layout: namespace
+scopes:
+  core:
+    destination: core
+    sources:
+      - root: lib
+        include: ["**/*.rb"]
+        exclude: ["fixtures/**"]
+  playground:
+    destination: playground
+    references: [core]
+    sources:
+      - root: apps/playground/lib
+        include: ["**/*.rb"]
+```
+
+```sh
+zard-doc build --config zard-doc.yml
+zard-doc build --config zard-doc.yml --scope playground --layout file
+```
+
+Paths are relative to the configuration file. The default layout is `namespace`: reopened classes and modules share a page, preserving each definition's description and source location. `file` preserves each source root's relative file hierarchy with `.md` extensions. A source mapping can set `prefix` to distinguish multiple roots in file layout. `include` defaults to `["**/*.rb"]`; `exclude` defaults to `[]`. Source selection uses globs independently of Git and gemspecs.
+
+CLI layout overrides configuration. With no `--scope`, all scopes are built; repeat `--scope` to select several. Selected scopes include their recursive documentation dependencies for generation. References search the current scope first, then only directly declared dependencies. Separate scopes do not merge declarations even when Ruby namespace names match. Ambiguous references remain text with warnings; local shadowing prevents fallback to unrelated dependency declarations.
+
+Each scope has an index. Namespace pages follow Ruby namespace hierarchy, with documented top-level members in `_top-level.md`. Files without publishable declarations produce no API page. The documentation root has an index linking the scopes. Links use relative paths and stable anchors.
+
+Build reports diagnostics to stderr and does not print generated Markdown to stdout. Source errors return 1; configuration, input, ownership, and publication errors return 2. Warnings permit generation. All selected inputs and destinations are validated before publication. Missing roots or dependencies, empty source selections, conflicting destinations, and paths escaping declared roots are errors.
+
+The output manifest tracks generated pages and resolved API links. Regeneration removes obsolete managed pages, retains unrelated handwritten files, and refuses to overwrite edited managed pages or existing unowned destination files. Partial scope builds retain other scopes' managed pages and refuse changes that would invalidate their generated links; include the affected scopes or run a full build instead. Publication prepares output before writing, attempts recovery on filesystem failures, and reports recovery failures; it is not a filesystem-wide atomic transaction.
+
+This workflow uses the existing ZARD parse model. External RBS ingestion is separate work; Rigor lens integration is deferred to the `v0.1.0` goal. See [ADR 0006](adr/0006-hierarchical-documentation-output.md).
+
+### Lint and render to stdout
+
 `zard-doc lint PATH...` checks Ruby files. Directories are searched recursively for `*.rb`; paths are sorted and duplicates removed. Warnings do not fail by default. Use `--fail-on warning` to make warnings fail:
 
 ```sh

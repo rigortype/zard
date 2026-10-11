@@ -2,6 +2,7 @@
 
 require "optparse"
 require "zard/doc"
+require "zard/doc/build"
 
 module Zard
   module Doc
@@ -30,14 +31,36 @@ module Zard
           render_command
         when "format"
           format_command
+        when "build"
+          build_command
         else
-          usage_error("Expected the lint, render, or format command.")
+          usage_error("Expected the lint, render, format, or build command.")
         end
       rescue OptionParser::ParseError => error
         usage_error(error.message)
       end
 
       private
+
+      def build_command
+        config = nil
+        layout = nil
+        scopes = []
+        OptionParser.new do |parser|
+          parser.on("--config FILE", "Read the documentation build configuration") { |value| config = value }
+          parser.on("--layout LAYOUT", %w[namespace file], "Override page organization") { |value| layout = value }
+          parser.on("--scope NAME", "Build a scope and its documentation dependencies (repeatable)") { |value| scopes << value }
+        end.parse!(@argv)
+        return usage_error("Pass --config FILE without positional arguments.") unless config && @argv.empty?
+
+        builder = Build.new(config, layout: layout, scopes: scopes)
+        builder.run
+      rescue BuildError => error
+        @stderr.puts error.message
+        error.status
+      ensure
+        builder&.diagnostics&.each { |diagnostic| @stderr.puts diagnostic }
+      end
 
       def lint_command
         lint_option_parser.parse!(@argv)
@@ -188,6 +211,7 @@ module Zard
             zard-doc lint [--fail-on error|warning] PATH...
             zard-doc render PATH...
             zard-doc format [--check | --write] PATH...
+            zard-doc build --config FILE [--scope NAME ...] [--layout namespace|file]
         USAGE
       end
     end

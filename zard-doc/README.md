@@ -32,6 +32,8 @@ Render Markdown to standard output with:
 zard-doc render lib
 ```
 
+Repository builds provide hierarchical monorepo documentation with `zard-doc build --config zard-doc.yml`. Named scopes separate applications; namespace or file layouts, direct documentation dependencies, and managed output updates are described in the [usage guide](https://github.com/rigortype/zard/blob/master/docs/usage.md#build-a-documentation-tree). Rigor lens integration is deferred to the `v0.1.0` goal.
+
 Repository builds also provide annotation formatting (not included in the published 0.0.1 gems):
 
 ```console

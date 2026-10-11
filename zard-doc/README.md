@@ -32,6 +32,16 @@ Render Markdown to standard output with:
 zard-doc render lib
 ```
 
+Repository builds also provide annotation formatting (not included in the published 0.0.1 gems):
+
+```console
+zard-doc format lib/example.rb
+zard-doc format --check lib
+zard-doc format --write lib
+```
+
+Formatting preserves contract payloads, descriptions, and line endings. Ambiguous documentation and unsafe contract reorderings retain their text with diagnostics. Plain mode prints one input; check mode exits with 1 when changes are needed; write mode validates all inputs before changing files. Source errors exit with 1 and invocation or I/O errors with 2. Formatting diagnostics go to standard error.
+
 Directories are searched recursively for Ruby source files. Files are processed in stable sorted order and duplicate paths are ignored.
 Unreadable inputs are reported together; rendering never emits partial Markdown when any input cannot be read.
 Use `-` as a path to read Ruby source from standard input.

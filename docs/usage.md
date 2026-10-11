@@ -22,6 +22,30 @@ markdown = Zard::Doc.render(document)
 
 `Zard.parse` accepts Ruby source text and a required `path:` used in provenance and diagnostics. The path labels the source; the parser does not read that file. For in-memory input, use a label such as `"example.rb"`. `Zard::Doc.render` accepts the resulting document and returns Markdown. The renderer emits documented public declarations; it does not print contracts as API prose.
 
+## Format annotations
+
+Repository builds provide `Zard.format` and `zard-doc format` (not included in the published 0.0.1 gems):
+
+```ruby
+result = Zard.format(source, path: "lib/example.rb")
+puts result.source if result.changed?
+document = result.document
+diagnostics = result.diagnostics
+```
+
+The result contains formatted source and a freshly parsed document with spans and raw text referring to that source. The input remains unchanged. `diagnostics` includes parser diagnostics and formatting warnings.
+
+```sh
+zard-doc format lib/example.rb
+zard-doc format --check lib
+zard-doc format --write lib
+printf '# @return — Value.\ndef read = nil\n' | zard-doc format -
+```
+
+Plain mode prints one input to stdout. Check mode returns 1 if any input would change; write mode updates changed files after reading and validating all inputs. Both modes accept files and recursive directories. Standard input is supported in plain and check modes. Invocation and I/O errors return 2; source errors return 1. Warnings are printed to stderr and do not fail formatting.
+
+Formatting normalizes standalone `@extrbs` prefixes and moves them before other annotations only when reparsing preserves documentation and contract content. It removes redundant markers from untyped `@return` and `@yieldreturn`. Payloads, notes, multiline descriptions, unrelated bytes, and the original sequence of line endings are retained. YARD-like tags and ambiguous continuation boundaries are diagnosed without conversion. Invalid Ruby and non-UTF-8 source remain unchanged with errors. See [ADR 0005](adr/0005-safe-annotation-formatting.md) for the transformation limits.
+
 ## Inspect the model
 
 The document is available through `document.path`, `document.declarations`, and `document.diagnostics`. A declaration exposes `kind`, `name`, `namespace`, `visibility`, `parameters`, `receiver`, `receiver_span`, `refinement`, `refinement_span`, `alias_target`, `superclass`, `superclass_span`, `container_builder`, `container_builder_span`, `mixins`, `span`, `comment_span`, `documentation`, and `contracts`.

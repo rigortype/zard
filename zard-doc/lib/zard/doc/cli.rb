@@ -28,8 +28,10 @@ module Zard
           lint_command
         when "render"
           render_command
+        when "format"
+          format_command
         else
-          usage_error("Expected the lint or render command.")
+          usage_error("Expected the lint, render, or format command.")
         end
       rescue OptionParser::ParseError => error
         usage_error(error.message)
@@ -70,6 +72,46 @@ module Zard
         inputs.flat_map do |input|
           File.directory?(input) ? Dir.glob(File.join(input, "**", "*.rb")).sort : input
         end.uniq.sort
+      end
+
+      def format_command
+        check = false
+        write = false
+        OptionParser.new do |parser|
+          parser.on("--check", "Check whether formatting would change source") { check = true }
+          parser.on("--write", "Write formatted source to files") { write = true }
+        end.parse!(@argv)
+        return usage_error("Choose either --check or --write.") if check && write
+        return usage_error("Pass at least one Ruby source file.") if @argv.empty?
+
+        paths = source_paths(@argv)
+        return usage_error("No Ruby source files were found.") if paths.empty?
+        return usage_error("Standard input cannot be used with --write.") if write && paths.include?("-")
+        return usage_error("Pass one input for stdout, or use --check or --write.") if !check && !write && paths.length != 1
+
+        results = paths.map do |path|
+          source = read_source(path)
+          return 2 unless source
+
+          [path, Zard.format(source, path: path)]
+        end
+        results.each do |_, result|
+          result.diagnostics.each { |diagnostic| @stderr.puts format_diagnostic(diagnostic) }
+        end
+        return 1 if results.any? { |_, result| result.diagnostics.any? { |diagnostic| diagnostic.severity == :error } }
+        return (results.any? { |_, result| result.changed? }) ? 1 : 0 if check
+
+        if write
+          results.each do |path, result|
+            File.binwrite(path, result.source) if result.changed?
+          rescue SystemCallError => error
+            @stderr.puts "#{path}: #{error.message}"
+            return 2
+          end
+        else
+          @stdout.print results.first[1].source
+        end
+        0
       end
 
       def lint(paths)
@@ -145,6 +187,7 @@ module Zard
           Usage:
             zard-doc lint [--fail-on error|warning] PATH...
             zard-doc render PATH...
+            zard-doc format [--check | --write] PATH...
         USAGE
       end
     end

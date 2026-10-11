@@ -198,6 +198,110 @@ class ZardDocCLITest < Minitest::Test
     end
   end
 
+  def test_format_prints_formatted_source_and_reads_standard_input
+    source = "# @return — Value.\ndef call = nil\r\n"
+    status, stdout, stderr = run_cli("format", "-", stdin: source)
+
+    assert_equal 0, status
+    assert_equal source.sub("@return —", "@return"), stdout
+    assert_empty stderr
+  end
+
+  def test_format_check_reports_changes_without_writing
+    with_source("# @return — Value.\ndef call = nil\n") do |path|
+      original = File.binread(path)
+      status, stdout, stderr = run_cli("format", "--check", path)
+
+      assert_equal 1, status
+      assert_empty stdout
+      assert_empty stderr
+      assert_equal original, File.binread(path)
+    end
+  end
+
+  def test_format_write_discovers_files_and_is_idempotent
+    Dir.mktmpdir("zard-format") do |directory|
+      path = File.join(directory, "call.rb")
+      File.binwrite(path, "# @return — Value.\r\ndef call = nil\r\n")
+      ignored = File.join(directory, "ignored.txt")
+      File.binwrite(ignored, "# @return — Literal.\n")
+      status, stdout, stderr = run_cli("format", "--write", directory)
+
+      assert_equal 0, status
+      assert_empty stdout
+      assert_empty stderr
+      assert_equal "# @return Value.\r\ndef call = nil\r\n", File.binread(path)
+      assert_equal "# @return — Literal.\n", File.binread(ignored).force_encoding(Encoding::UTF_8)
+      assert_equal 0, run_cli("format", "--check", directory).first
+      modified = File.mtime(path)
+      assert_equal 0, run_cli("format", "--write", directory).first
+      assert_equal modified, File.mtime(path)
+    end
+  end
+
+  def test_format_leaves_ambiguous_documentation_and_reports_warnings
+    source = "# @param value Text.\ndef call(value) = value\n"
+    status, stdout, stderr = run_cli("format", "-", stdin: source)
+
+    assert_equal 0, status
+    assert_equal source, stdout
+    assert_includes stderr, "warning documentation.yard-like"
+  end
+
+  def test_format_validates_all_sources_before_writing
+    Dir.mktmpdir("zard-format") do |directory|
+      good = File.join(directory, "a.rb")
+      bad = File.join(directory, "b.rb")
+      original = "# @return — Value.\ndef call = nil\n"
+      File.write(good, original)
+      File.write(bad, "def bad(\n")
+      status, stdout, stderr = run_cli("format", "--write", directory)
+
+      assert_equal 1, status
+      assert_empty stdout
+      assert_includes stderr, "error ruby.syntax"
+      assert_equal original, File.read(good)
+    end
+  end
+
+  def test_format_read_errors_do_not_write_other_files
+    with_source("# @return — Value.\ndef call = nil\n") do |path|
+      original = File.read(path)
+      status, stdout, stderr = run_cli("format", "--write", path, "missing.rb")
+
+      assert_equal 2, status
+      assert_empty stdout
+      assert_includes stderr, "missing.rb:"
+      assert_equal original, File.read(path)
+    end
+  end
+
+  def test_format_rejects_incompatible_modes_and_ambiguous_stdout
+    [["--write", "-"], ["--write", "--check", "-"], ["a.rb", "b.rb"], []].each do |arguments|
+      status, stdout, stderr = run_cli("format", *arguments)
+
+      assert_equal 2, status
+      assert_empty stdout
+      assert_includes stderr, "Usage:"
+    end
+  end
+
+  def test_format_reports_errors_without_printing_partial_output
+    status, stdout, stderr = run_cli("format", "-", stdin: "# @return — Value.\ndef bad(\n")
+
+    assert_equal 1, status
+    assert_empty stdout
+    assert_includes stderr, "error ruby.syntax"
+  end
+
+  def test_format_reports_invalid_encoding_without_raising
+    status, stdout, stderr = run_cli("format", "-", stdin: "# text \xFF\ndef call = nil\n".b)
+
+    assert_equal 1, status
+    assert_empty stdout
+    assert_includes stderr, "error format.invalid-encoding"
+  end
+
   private
 
   def run_cli(*arguments, stdin: "")

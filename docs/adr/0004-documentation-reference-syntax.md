@@ -2,7 +2,7 @@
 
 ZARD adopts BitClust Markdown references, accepts their RD link forms for compatibility, and supports YARD-style shorthand in `@see`. All forms share reference resolution, while original comment text and source provenance remain available. Compatibility makes existing Ruby documentation familiar and avoids a separate ZARD spelling for each kind of method.
 
-Status: Accepted. The current implementation covers shorthand `@see` references and URLs; explicit BitClust and RD forms are specified here for subsequent implementation. This ADR records the language decision, not a claim that every form is already shipped.
+Status: Accepted. The current implementation covers shorthand `@see` references, URLs, and the explicit BitClust and RD forms below. Availability describes repository support rather than a published gem version.
 
 ## Problem Statement
 
@@ -33,15 +33,15 @@ Use explicit BitClust forms in prose and allow concise YARD-compatible targets i
 
 | Form | Meaning | Availability |
 | --- | --- | --- |
-| `[m:Foo#bar]` | Explicit instance-method reference | Planned |
-| `[m:Foo.bar]` | Explicit class-method reference | Planned |
-| `[m:Kernel?.puts]` | Explicit module-function reference | Planned |
-| `[label](m:Foo#bar)` | Explicit reference with a display label | Planned |
-| `[c:Foo]` | Class or module reference | Planned |
-| `[m:Math::PI]` | Constant reference | Planned |
-| `[[m:Foo#bar]]` | RD-compatible method reference | Planned |
-| `[[m:Kernel.#puts]]` | RD-compatible module-function reference | Planned |
-| `[[c:Foo]]` | RD-compatible class or module reference | Planned |
+| `[m:Foo#bar]` | Explicit instance-method reference | Implemented |
+| `[m:Foo.bar]` | Explicit class-method reference | Implemented |
+| `[m:Kernel?.puts]` | Explicit module-function reference | Implemented |
+| `[label](m:Foo#bar)` | Explicit reference with a display label | Implemented |
+| `[c:Foo]` | Class or module reference | Implemented |
+| `[m:Math::PI]` | Constant reference | Implemented |
+| `[[m:Foo#bar]]` | RD-compatible method reference | Implemented |
+| `[[m:Kernel.#puts]]` | RD-compatible module-function reference | Implemented |
+| `[[c:Foo]]` | RD-compatible class or module reference | Implemented |
 | `@see Foo#bar` | Shorthand instance-method reference | Implemented |
 | `@see Foo` / `@see Foo::CONST` | Shorthand class, module, or constant reference | Implemented |
 | `@see Foo.bar Label` | Shorthand class-method reference with a label | Implemented |
@@ -49,7 +49,7 @@ Use explicit BitClust forms in prose and allow concise YARD-compatible targets i
 | `@see Kernel.#puts` / `@see Kernel?.puts` | Equivalent module-function references | Implemented |
 | `@see https://example.com Label` | External URL with an optional label | Implemented |
 
-The `@see` examples are comment payloads, written as `# @see ...` in Ruby source. Explicit forms also belong in `@see` descriptions once implemented; they are not shorthand target tokens and must be recognized before shorthand parsing.
+The `@see` examples are comment payloads, written as `# @see ...` in Ruby source. Explicit forms also belong in `@see` descriptions; they are not shorthand target tokens and must be recognized before shorthand parsing.
 
 ### Targets and normalization
 
@@ -92,7 +92,7 @@ Use the existing parse API, Markdown generation API, and CLI as the acceptance s
 - Verify labels, continuation lines, spacing, URL escaping, empty descriptions, and punctuation-only unresolved targets.
 - Verify private, undocumented, missing, ambiguous, dynamic-receiver, and refinement cases retain text rather than linking to an unrelated declaration.
 - Exercise multiple CLI input files, deterministic output, and cross-file ambiguity through the existing CLI.
-- When explicit forms are implemented, verify BitClust/RD equivalence, bracket escaping, custom labels, literal code regions, and unchanged raw comments and source spans through the same seams.
+- Verify BitClust/RD equivalence, bracket escaping, custom labels, literal code regions, and unchanged raw comments and source spans through the same seams.
 
 ## Out of Scope
 

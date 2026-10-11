@@ -67,7 +67,7 @@ Tags without a name or type write their description directly: `@return Normalize
 
 ### See also references
 
-The complete syntax decision, including planned BitClust and RD compatibility forms, is recorded in [ADR 0004](adr/0004-documentation-reference-syntax.md).
+The complete syntax decision, including BitClust and RD compatibility forms, is recorded in [ADR 0004](adr/0004-documentation-reference-syntax.md).
 
 `@see` accepts YARD-style references followed by an optional display label, without an em dash:
 
@@ -84,6 +84,21 @@ The complete syntax decision, including planned BitClust and RD compatibility fo
 `#` selects an instance method and `.` selects a class method. `.#` and `?.` are equivalent module-function spellings and link to the public singleton copy. Relative references use the current class or module; qualified references search namespace prefixes as YARD does, and a leading `::` starts at the root. This lookup also applies to qualified class openings such as `class Outer::Caller`; it does not reproduce Ruby's lexical constant lookup. A nearer declared owner prevents fallback to an unrelated outer owner when its member is missing. The first whitespace-separated token is the target and the remaining text is the display label. HTTP, HTTPS, and mailto targets become external links.
 
 `zard-doc` links references to uniquely identified public declarations with documentation in the generated output. The CLI resolves references across all input files. Unresolved, undocumented, private, ambiguous, and refinement references remain plain text. Lookup uses explicit declarations, without following inheritance or mixins or evaluating dynamic receivers. The document model retains the original description, raw comment, and source span.
+
+Explicit references work in prose and documentation tag descriptions, including `@see`:
+
+```ruby
+# Read [m:Foo#bar] or [[m:Foo#bar]].
+# @note See [c:Foo] and [m:Foo::LIMIT].
+# @see [Read a value](m:Foo#bar)
+# @see [`Foo#bar()`](m:Foo#bar)
+# @see [m:Kernel?.puts]
+# @see [[m:Kernel.#puts]]
+```
+
+`m:` selects methods or constants; `c:` selects classes or modules. BitClust's single brackets and RD's double brackets resolve to the same destinations. `[label](m:target)` supplies a display label; a label consisting entirely of a backtick code span keeps its code presentation. Escape operator brackets as `[m:Foo#\[\]]`, or use the historical RD form `[[m:Foo#[] ]]` with its delimiter-separating space.
+
+Inline code, fenced and indented code blocks, and `@example` content retain literal reference syntax. Existing Markdown links and images are preserved. Explicit forms in `@see` take precedence over shorthand parsing; unresolved forms retain their original text.
 
 Plain comment lines continue the preceding canonical documentation tag until another annotation or contract begins. No continuation marker is needed. Contract notes use ` -- ` after the contract payload and remain contract notes, not API prose. Familiar YARD-like tags without the em dash can be retained as raw text, but are not treated as documentation claims.
 

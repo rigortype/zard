@@ -128,4 +128,23 @@ class BuildStorageTest < Minitest::Test
       assert_equal "alias", File.read(File.join(directory, "docs/page.md"))
     end
   end
+
+  def test_case_collisions_are_detected_with_a_numeric_existing_parent
+    numeric = File.join(@directory, "123")
+    FileUtils.mkdir_p(numeric)
+    target = File.join(numeric, "docs/api")
+    publisher = Zard::Doc.const_get(:BuildPublisher).new(target)
+    parent = File.realpath(@directory)
+    alternate = File.join(File.dirname(parent), File.basename(parent).swapcase)
+    pages = {"app/Foo.md" => "one", "app/foo.md" => "two"}
+    if File.exist?(alternate) && File.identical?(parent, alternate)
+      error = assert_raises(Zard::Doc.const_get(:BuildError)) { publisher.publish(pages, scopes: {"app" => "app"}) }
+      assert_includes error.message, "collide"
+      refute File.exist?(target)
+    else
+      publisher.publish(pages, scopes: {"app" => "app"})
+      assert_equal "one", File.read(File.join(target, "app/Foo.md"))
+      assert_equal "two", File.read(File.join(target, "app/foo.md"))
+    end
+  end
 end

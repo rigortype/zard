@@ -79,6 +79,14 @@ class BuildRendererTest < Minitest::Test
     assert_empty build.diagnostics
   end
 
+  def test_relative_member_references_respect_the_local_owner
+    app = document("# [m:#missing] [m:.missing]\nclass Target; end", "app.rb")
+    dependency = document("class Target\n # Missing instance member.\n def missing; end\n # Missing singleton member.\n def self.missing; end\nend", "dependency.rb")
+    page = renderer({"app" => [app], "dep" => [dependency]}, references: {"app" => ["dep"]}).render.fetch("app/Target.md")
+    assert_includes page, "[m:#missing] [m:.missing]"
+    refute_includes page, "../dep/"
+  end
+
   def test_file_layout_prefixes_escaped_paths_and_literal_code
     doc = document("# See [m:Demo#run]; `[m:Demo#run]`.\nclass Demo\n # Runs.\n # @example\n #   [m:Demo#run]\n def run; end\nend", "code.rb")
     empty = document("VALUE = 1", "empty.rb")

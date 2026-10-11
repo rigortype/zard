@@ -124,6 +124,9 @@ module Zard
               end
               return [:found, targets]
             end
+            if path.start_with?("#", ".") && @container_names.include?(candidate.split(/[.#]/, 2).first)
+              return [:shadowed, []]
+            end
             first_constant = path.split(/::|[.#]/).first.to_s
             local_constant = "#{candidate.delete_suffix(path)}#{first_constant}"
             return [:shadowed, []] if !first_constant.empty? && @container_names.include?(local_constant)

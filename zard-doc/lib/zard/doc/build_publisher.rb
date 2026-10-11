@@ -21,8 +21,10 @@ module Zard
           ancestor = File.dirname(ancestor)
         end
         @docroot = File.join(File.realpath(ancestor), *suffix)
-        alternate = File.join(File.dirname(ancestor), File.basename(ancestor).swapcase)
-        @case_insensitive = alternate != ancestor && File.exist?(alternate) && File.identical?(ancestor, alternate)
+        @case_insensitive = Dir.mktmpdir(".zard-case-", File.realpath(ancestor)) do |probe|
+          alternate = File.join(File.dirname(probe), File.basename(probe).swapcase)
+          File.exist?(alternate) && File.identical?(probe, alternate)
+        end
       rescue SystemCallError => error
         fail_build("cannot resolve documentation root: #{error.message}")
       end

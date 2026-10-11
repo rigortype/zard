@@ -165,6 +165,39 @@ class ZardDocCLITest < Minitest::Test
     end
   end
 
+  def test_render_links_explicit_bitclust_and_rd_forms_across_files
+    Dir.mktmpdir("zard-doc") do |directory|
+      File.write(File.join(directory, "a.rb"), "class Foo\n  # Target.\n  def bar = nil\nend\n")
+      File.write(File.join(directory, "b.rb"), "# Read [m:Foo#bar].\n# @see [[m:Foo#bar]]\n# @see [Read a value](m:Foo#bar)\ndef call = nil\n")
+
+      status, stdout, stderr = run_cli("render", directory)
+
+      assert_equal 0, status
+      assert_includes stdout, "Read [Foo#bar](#zard-466f6f23626172)."
+      assert_includes stdout, "- [Foo#bar](#zard-466f6f23626172)"
+      assert_includes stdout, "- [Read a value](#zard-466f6f23626172)"
+      assert_equal 1, stdout.scan('<a id="zard-466f6f23626172"></a>').length
+      assert_empty stderr
+    end
+  end
+
+  def test_render_preserves_ambiguous_explicit_forms_across_files
+    Dir.mktmpdir("zard-doc") do |directory|
+      %w[a b].each do |name|
+        File.write(File.join(directory, "#{name}.rb"), "class Foo\n  # Target.\n  def bar = nil\nend\n")
+      end
+      File.write(File.join(directory, "c.rb"), "# [m:Foo#bar] [[m:Foo#bar]]\n# @see [Read](m:Foo#bar)\ndef call = nil\n")
+
+      status, stdout, stderr = run_cli("render", directory)
+
+      assert_equal 0, status
+      assert_includes stdout, "[m:Foo#bar] [[m:Foo#bar]]"
+      assert_includes stdout, "- [Read](m:Foo#bar)"
+      refute_includes stdout, "<a id="
+      assert_empty stderr
+    end
+  end
+
   private
 
   def run_cli(*arguments, stdin: "")

@@ -19,13 +19,23 @@ module Zard
           reference_names(declaration).each { |name| @targets[name] << declaration }
         end
         @anchors = {}
+        @descriptions = {}
+        @text = {}
         documents.flat_map(&:declarations).each do |declaration|
           next unless renderable?(declaration)
 
-          declaration.documentation.select { |tag| tag.name == :see }.each do |tag|
-            reference = tag.description.strip.split(/\s+/, 2).first
-            target = resolve_reference(reference, declaration)
-            @anchors[target] = anchor(target) if target
+          text = declaration.documentation.select { |tag| tag.name == :text }.map(&:description).join("\n")
+          @text[declaration] = render_prose(text, declaration)
+          @descriptions[declaration] = declaration.documentation.to_h do |tag|
+            description = case tag.name
+            when :example, :raw, :text
+              tag.description
+            when :see
+              render_reference(tag.description, declaration)
+            else
+              render_prose(tag.description, declaration)
+            end
+            [tag, description]
           end
         end
       end
@@ -43,6 +53,7 @@ module Zard
         return unless renderable?(declaration)
 
         documentation = declaration.documentation.reject { |tag| tag.name == :raw }
+        description = ->(tag) { @descriptions.fetch(declaration).fetch(tag) }
 
         parts = [heading(declaration)]
         parts.unshift("<a id=\"#{@anchors[declaration]}\"></a>") if @anchors.key?(declaration)
@@ -50,50 +61,50 @@ module Zard
         parts << render_container_builder(declaration) if declaration.container_builder
         append_mixins(parts, declaration)
         parts << "Alias of `#{display_alias_target(declaration)}`." if declaration.alias_target
-        text = documentation.select { |tag| tag.name == :text }.map(&:description)
-        parts << text.join("\n") unless text.empty?
+        text = @text.fetch(declaration)
+        parts << text unless text.empty?
 
         deprecated = documentation.select { |tag| tag.name == :deprecated }
-        parts << "### Deprecated\n\n#{deprecated.map(&:description).join("\n\n")}" unless deprecated.empty?
+        parts << "### Deprecated\n\n#{deprecated.map(&description).join("\n\n")}" unless deprecated.empty?
 
         notes = documentation.select { |tag| tag.name == :note }
-        parts << "### Notes\n\n#{notes.map(&:description).join("\n\n")}" unless notes.empty?
+        parts << "### Notes\n\n#{notes.map(&description).join("\n\n")}" unless notes.empty?
 
         examples = documentation.select { |tag| tag.name == :example }
-        parts << "### Examples\n\n#{examples.map(&:description).join("\n\n")}" unless examples.empty?
+        parts << "### Examples\n\n#{examples.map(&description).join("\n\n")}" unless examples.empty?
 
         parameters = documentation.select { |tag| tag.name == :param }
         unless parameters.empty?
-          items = parameters.map { |tag| list_item("`#{tag.subject}` — ", tag.description) }
+          items = parameters.map { |tag| list_item("`#{tag.subject}` — ", description.call(tag)) }
           parts << "### Parameters\n\n#{items.join("\n")}"
         end
 
         returns = documentation.select { |tag| tag.name == :return }
-        parts << "### Returns\n\n#{returns.map(&:description).join("\n\n")}" unless returns.empty?
+        parts << "### Returns\n\n#{returns.map(&description).join("\n\n")}" unless returns.empty?
 
         documentation.select { |tag| tag.name == :option }.group_by(&:owner).each do |owner, options|
-          items = options.map { |tag| list_item("`#{tag.subject}` — ", tag.description) }
+          items = options.map { |tag| list_item("`#{tag.subject}` — ", description.call(tag)) }
           parts << "### Options for `#{owner}`\n\n#{items.join("\n")}"
         end
 
         raises = documentation.select { |tag| tag.name == :raise }
         unless raises.empty?
-          items = raises.map { |tag| list_item("`#{tag.subject}` — ", tag.description) }
+          items = raises.map { |tag| list_item("`#{tag.subject}` — ", description.call(tag)) }
           parts << "### Raises\n\n#{items.join("\n")}"
         end
 
         yield_parameters = documentation.select { |tag| tag.name == :yieldparam }
         unless yield_parameters.empty?
-          items = yield_parameters.map { |tag| list_item("`#{tag.subject}` — ", tag.description) }
+          items = yield_parameters.map { |tag| list_item("`#{tag.subject}` — ", description.call(tag)) }
           parts << "### Yield parameters\n\n#{items.join("\n")}"
         end
 
         yield_returns = documentation.select { |tag| tag.name == :yieldreturn }
-        parts << "### Yields\n\n#{yield_returns.map(&:description).join("\n\n")}" unless yield_returns.empty?
+        parts << "### Yields\n\n#{yield_returns.map(&description).join("\n\n")}" unless yield_returns.empty?
 
         see_also = documentation.select { |tag| tag.name == :see }
         unless see_also.empty?
-          items = see_also.map { |tag| list_item("", render_reference(tag.description, declaration)) }
+          items = see_also.map { |tag| list_item("", description.call(tag)) }
           parts << "### See also\n\n#{items.join("\n")}"
         end
         parts.join("\n\n")
@@ -221,18 +232,44 @@ module Zard
       end
 
       def render_reference(description, declaration)
+        explicit = false
+        prose = render_prose(description, declaration) { explicit = true }
+        return prose if explicit
+
         reference, label = description.strip.split(/\s+/, 2)
         return description unless reference
 
         destination = if reference.match?(/\A(?:https?:\/\/|mailto:)/)
           reference.gsub(/[\\()< >]/) { |character| "%%%02X" % character.ord }.gsub("&", "&amp;")
         elsif (target = resolve_reference(reference, declaration))
-          "##{@anchors.fetch(target)}"
+          "##{@anchors[target] ||= anchor(target)}"
         end
         return description unless destination
 
-        title = (label || reference).gsub(/[&<>]/, "&" => "&amp;", "<" => "&lt;", ">" => "&gt;").gsub(/[\\\[\]]/) { |character| "\\#{character}" }
+        title = escape_label(label || reference)
         "[#{title}](#{destination})"
+      end
+
+      def render_prose(description, declaration)
+        ReferenceMarkup.rewrite(description) do |scheme, reference, label|
+          yield if block_given?
+          target = resolve_reference(reference, declaration)
+          next unless target
+          container = %i[class module].include?(target.kind)
+          next if (scheme == "c") != container
+
+          destination = @anchors[target] ||= anchor(target)
+          title = label || reference
+          unless label && ReferenceMarkup.code_label?(label)
+            title = title.gsub(/\\([\\\[\]])/, '\1') if label
+            title = escape_label(title)
+          end
+          "[#{title}](##{destination})"
+        end
+      end
+
+      def escape_label(label)
+        label.gsub(/[&<>]/, "&" => "&amp;", "<" => "&lt;", ">" => "&gt;").gsub(/[\\\[\]`*_~]/) { |character| "\\#{character}" }
       end
 
       def display_name(declaration)

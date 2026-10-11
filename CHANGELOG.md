@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Link YARD-style `@see` references and URLs in generated Markdown, including cross-file CLI references and equivalent `.#` and `?.` module-function spellings.
+- Link BitClust Markdown and RD-compatible references in prose and documentation tags while preserving code regions, existing Markdown links, and source provenance.
 
 ## [0.0.1] - 2026-10-11
 

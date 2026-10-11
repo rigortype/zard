@@ -4,6 +4,22 @@ ZARD is a Ruby self-documentation notation for people and AI agents. It uses pla
 
 ## Language
 
+**Source mapping**:
+A correspondence between a source tree and a destination within the API documentation tree.
+_Avoid_: Ruby module, gem boundary
+
+**Documentation scope**:
+A named, explicitly defined API documentation context containing one or more source trees and their declarations, contracts, and facts. Applications have separate documentation scopes by default, even when they share Ruby namespace names.
+_Avoid_: Ruby namespace, source mapping, automatically detected application
+
+**Documentation dependency**:
+An explicitly declared documentation scope whose API declarations may be referenced from another scope.
+_Avoid_: runtime dependency, implicit global lookup
+
+**Documentation root**:
+The common destination for API documentation trees produced by source mappings.
+_Avoid_: source root, repository root
+
 **ZARD**:
 The self-documentation language defined by this project.
 _Avoid_: YARD, RDoc

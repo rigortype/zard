@@ -19,10 +19,13 @@ function indexEntries(rows, basePath) {
   }).join('');
 }
 
-function entry(row, model, basePath) {
+function entry(row, model, basePath, sourceLinks) {
   const kind = declarationKind(row.kind);
-  const signature = kind.includes('method') ? `${row.displayName}(${row.parameters.join(', ')})` : row.displayName;
-  let result = `<section class="api-declaration" aria-labelledby="${row.anchor}">\n\n<h3 id="${row.anchor}" class="api-signature">${code(signature)}</h3>\n\n<p class="api-meta">${escapeHtml(kind)} · ${code(`${row.source.path}:${row.source.line}`)}</p>\n\n`;
+  const parameters = row.parameterDetails?.map((parameter) => parameter.source) ?? row.parameters;
+  const signature = kind.includes('method') ? `${row.displayName}(${parameters.join(', ')})` : row.displayName;
+  const location = `${row.source.path}:${row.source.line}`;
+  const source = Object.hasOwn(sourceLinks, row.id) ? link(location, sourceLinks[row.id]) : code(location);
+  let result = `<section class="api-declaration" aria-labelledby="${row.anchor}">\n\n<h3 id="${row.anchor}" class="api-signature">${code(signature)}</h3>\n\n<p class="api-meta">${escapeHtml(kind)} · ${source}</p>\n\n`;
   const texts = row.tags.filter((tag) => tag.name === 'text');
   const description = texts.map((tag, i) => {
     const previous = texts[i - 1];
@@ -42,9 +45,15 @@ function entry(row, model, basePath) {
 
 export function renderReference(model, options = {}) {
   const { basePath = 'api', title = 'API Reference', description = 'Public API declarations.',
-    introduction = '', provenance = [] } = options;
+    introduction = '', provenance = [], sourceLinks = {} } = options;
   if (!/^[a-z0-9_-]+(?:\/[a-z0-9_-]+)*$/.test(basePath)) throw new Error('Invalid API basePath');
   routePages(model, basePath);
+  const ids = new Set(model.scopes.flatMap((scope) => scope.declarations.map((row) => row.id)));
+  for (const [id, url] of Object.entries(sourceLinks)) {
+    if (!ids.has(id) || typeof url !== 'string' || !/^https?:\/\//i.test(url)) throw new Error('Invalid declaration source link');
+    const target = new URL(url);
+    if (target.username || target.password) throw new Error('Invalid declaration source link credentials');
+  }
   const pages = [];
   const add = (slug, title, description, body) => pages.push({ slug, title, description, body });
   const provenanceHtml = provenance.length
@@ -69,7 +78,7 @@ export function renderReference(model, options = {}) {
       let content = crumbs([[title, `/${basePath}/`], [scope.name, scopeUrl(scope, basePath)], ...ancestors, [segments.at(-1)]]) + provenanceHtml;
       for (const [category, kind] of categories) {
         const rows = page.declarations.filter((row) => declarationKind(row.kind) === kind);
-        if (rows.length) content += `## ${category}\n\n${rows.map((row) => entry(row, model, basePath)).join('')}`;
+        if (rows.length) content += `## ${category}\n\n${rows.map((row) => entry(row, model, basePath, sourceLinks)).join('')}`;
       }
       add(pageSlug(page.path, basePath), pageTitle, `Public declarations and source documentation for ${pageTitle}.`, content);
     }

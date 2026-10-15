@@ -20,7 +20,7 @@ function memberIndex(rows, basePath) {
     if (!members.length) return '';
     const items = members.map((row) => {
       const parameters = row.parameterDetails?.map((parameter) => parameter.source) ?? row.parameters;
-      const signature = kind.includes('method') ? `${row.displayName}(${parameters.join(', ')})` : row.displayName;
+      const signature = kind.includes('method') ? `${row.name}(${parameters.join(', ')})` : row.displayName;
       return `<li><a class="api-index-link" href="${escapeHtml(`${pageUrl(row.page, basePath)}#${row.anchor}`)}">${code(signature)}</a><span class="api-meta">${escapeHtml(`${row.source.path}:${row.source.line}`)}</span></li>`;
     });
     return `<details open><summary>${title} (${members.length})</summary><ul>${items.join('\n')}</ul></details>`;

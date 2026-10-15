@@ -65,6 +65,7 @@ test('member index links each retained definition without requiring lens or clie
   assert.match(index, /href="\/api\/app\/example\/#zard-01"/);
   assert.match(index, /href="\/api\/app\/example\/#zard-02"/);
   assert.match(index, /lib\/reopened.rb:19/);
+  assert.match(index, /<code>call\(input\)<\/code>/);
   assert.doesNotMatch(index, /VALUE|<script|style=/);
   data.scopes[0].declarations = [data.scopes[0].declarations[2]];
   data.scopes[0].pages[0].declarations = [data.scopes[0].declarations[0].id];

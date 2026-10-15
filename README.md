@@ -119,6 +119,10 @@ markdown = Zard::Doc.render(document)
 
 The renderer emits documented public declarations and supports class, module, constant, attribute, and method prose, as well as `@param`, `@return`, `@yieldparam`, `@yieldreturn`, `@option`, `@raise`, `@note`, `@see`, `@deprecated`, and `@example`. Contracts remain in the model and are not duplicated into API prose.
 
+Repository builds also provide `zard-doc build --config zard-doc.yml --format json` for static-site consumers. It exports public declarations, documentation, unparsed contracts, source provenance, and scoped page/link metadata to stdout without publishing files. This experimental [JSON export](docs/json-export.md) is separate from Rigor lens and is not included in the released 0.0.1 gems.
+
+The experimental [`zard-doc-astro`](zard-doc-astro/README.md) JavaScript package owns unstyled API presentation and a separate Starlight adapter. Consumer sites own CSS, source acquisition, localization and publication; the Ruby gems do not depend on Astro.
+
 ---
 
 ## Supported Ruby Semantics

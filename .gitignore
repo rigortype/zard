@@ -5,3 +5,6 @@
 /.rigor/
 /.rigor.yml
 /vendor/bundle/
+/zard-doc-astro/node_modules/
+/zard-doc-astro/*.tgz
+/.pnpm-store/

@@ -161,11 +161,14 @@ scopes:
 ```sh
 zard-doc build --config zard-doc.yml
 zard-doc build --config zard-doc.yml --scope playground --layout file
+zard-doc build --config zard-doc.yml --format json > api.json
 ```
 
 Paths are relative to the configuration file. The default layout is `namespace`: reopened classes and modules share a page, preserving each definition's description and source location. `file` preserves each source root's relative file hierarchy with `.md` extensions. A source mapping can set `prefix` to distinguish multiple roots in file layout. `include` defaults to `["**/*.rb"]`; `exclude` defaults to `[]`. Source selection uses globs independently of Git and gemspecs.
 
 CLI layout overrides configuration. With no `--scope`, all scopes are built; repeat `--scope` to select several. Selected scopes include their recursive documentation dependencies for generation. References search the current scope first, then only directly declared dependencies. Separate scopes do not merge declarations even when Ruby namespace names match. Ambiguous references remain text with warnings; local shadowing prevents fallback to unrelated dependency declarations.
+
+The default `--format markdown` publishes managed Markdown pages. `--format json` instead prints one experimental, versioned JSON document after validation and leaves `docroot` untouched. JSON includes public declarations even without prose, their original documentation and unparsed contracts, source spans and digests, page assignments, stable anchors, and resolved documentation links. Private and protected declarations are excluded. See the [JSON export contract](json-export.md) for the schema, path conventions, and differences from Markdown publication. This export does not require Rigor or a Rigor lens result.
 
 Each scope has an index. Namespace pages follow Ruby namespace hierarchy, with documented top-level members in `_top-level.md`. Files without publishable declarations produce no API page. The documentation root has an index linking the scopes. Links use relative paths and stable anchors.
 

@@ -18,14 +18,19 @@ end
 require_relative "build_configuration"
 require_relative "build_publisher"
 require_relative "build_renderer"
+require_relative "build_export"
 
 module Zard
   module Doc
     class Build
       attr_reader :diagnostics
 
-      def initialize(path, layout: nil, scopes: [])
+      def initialize(path, layout: nil, scopes: [], format: "markdown", stdout: $stdout)
+        raise BuildError, "format must be markdown or json" unless %w[markdown json].include?(format)
+
         @configuration = BuildConfiguration.new(path, layout: layout, scopes: scopes)
+        @format = format
+        @stdout = stdout
         @partial = !scopes.empty?
         @diagnostics = []
       end
@@ -33,11 +38,14 @@ module Zard
       def run
         files = {}
         documents = {}
+        digests = {}
         input_errors = []
         @configuration.selected_scopes.each do |name|
           files[name] = @configuration.source_files(name)
           documents[name] = files.fetch(name).keys.filter_map do |path|
-            document = Zard.parse(File.read(path), path: path)
+            source = File.read(path)
+            digests[path] = Digest::SHA256.hexdigest(source)
+            document = Zard.parse(source, path: path)
             document.diagnostics.each { |diagnostic| @diagnostics << format_diagnostic(diagnostic) }
             document
           rescue SystemCallError => error
@@ -50,9 +58,15 @@ module Zard
         return 1 if documents.values.flatten.any? { |document| document.diagnostics.any? { |diagnostic| diagnostic.severity == :error } }
 
         renderer = BuildRenderer.new(scope_documents: documents, scope_files: files,
-          scopes: @configuration.scopes, layout: @configuration.layout)
+          scopes: @configuration.scopes, layout: @configuration.layout, include_undocumented: @format == "json")
         pages = renderer.render
         @diagnostics.concat(renderer.diagnostics)
+        if @format == "json"
+          export = BuildExport.new(@configuration, documents, digests)
+          @stdout.write(export.render(renderer))
+          return 0
+        end
+
         destinations = @configuration.selected_scopes.to_h do |name|
           [name, @configuration.scopes.fetch(name).fetch(:destination)]
         end
@@ -83,6 +97,6 @@ module Zard
       end
     end
 
-    private_constant :BuildError, :BuildConfiguration, :BuildPublisher, :BuildRenderer, :Build
+    private_constant :BuildError, :BuildConfiguration, :BuildPublisher, :BuildRenderer, :BuildExport, :Build
   end
 end

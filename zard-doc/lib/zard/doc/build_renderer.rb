@@ -7,12 +7,12 @@ module Zard
     class BuildRenderer
       attr_reader :diagnostics, :links
 
-      def initialize(scope_documents:, scope_files:, scopes:, layout:)
+      def initialize(scope_documents:, scope_files:, scopes:, layout:, include_undocumented: false)
         @diagnostics = []
         @links = {}
         @scopes = scopes
         @renderers = scope_documents.keys.sort.to_h do |name|
-          [name, ScopeRenderer.new(name, scope_documents.fetch(name), scope_files.fetch(name), scopes.fetch(name), layout, self)]
+          [name, ScopeRenderer.new(name, scope_documents.fetch(name), scope_files.fetch(name), scopes.fetch(name), layout, self, include_undocumented: include_undocumented)]
         end
       end
 
@@ -27,6 +27,10 @@ module Zard
 
       def dependencies(name)
         @scopes.fetch(name).fetch(:references, []).uniq.filter_map { |dependency| @renderers[dependency] }
+      end
+
+      def export_declarations
+        @renderers.transform_values(&:export_declarations)
       end
 
       def record_link(from, path, anchor)
@@ -52,11 +56,12 @@ module Zard
       class ScopeRenderer < Renderer
         attr_reader :name, :index_path
 
-        def initialize(name, documents, files, config, layout, build)
+        def initialize(name, documents, files, config, layout, build, include_undocumented: false)
           @name = name
           @build = build
           @layout = layout
           @destination = config.fetch(:destination)
+          @include_undocumented = include_undocumented
           @index_path = join_path("index.md")
           @declarations = documents.sort_by(&:path).flat_map(&:declarations)
           @container_names = @declarations.select { |declaration| %i[class module constant].include?(declaration.kind) }.map { |declaration| qualified_name(declaration) }
@@ -138,6 +143,17 @@ module Zard
           [@paths.fetch(declaration), @anchors.fetch(declaration)]
         end
 
+        def export_declarations
+          @paths.map do |declaration, path|
+            descriptions = @descriptions.fetch(declaration).to_h do |tag, description|
+              [tag, (tag.name == :text) ? render_prose(tag.description, declaration) : description]
+            end
+            {declaration: declaration, page: path, anchor: @anchors.fetch(declaration),
+             display_name: reference_names(declaration).first || display_name(declaration),
+             references: reference_names(declaration), descriptions: descriptions}
+          end
+        end
+
         def published?(declaration)
           renderable?(declaration)
         end
@@ -151,6 +167,10 @@ module Zard
         end
 
         private
+
+        def renderable?(declaration)
+          declaration.visibility == :public && (@include_undocumented || super)
+        end
 
         def join_path(path)
           Pathname.new(File.join(@destination, path)).cleanpath.to_s

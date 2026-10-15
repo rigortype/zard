@@ -10,6 +10,28 @@ permissions:
   contents: read
 
 jobs:
+  astro:
+    runs-on: ubuntu-latest
+    name: Astro presentation
+    defaults:
+      run:
+        working-directory: zard-doc-astro
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: zard-doc-astro/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: zard-doc-astro/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm pack --pack-destination "$RUNNER_TEMP/package"
+
   build:
     runs-on: ubuntu-latest
     name: Ruby ${{ matrix.ruby }}

@@ -8,6 +8,8 @@ zard-doc build --config zard-doc.yml --format json > api.json
 
 This is ZARD documentation data, not a Rigor lens result. Generation does not execute Ruby source, parse contract types, infer signatures, or require Rigor. A future optional lens adapter can associate facts with source declarations without replacing their documentation or provenance.
 
+Framework-specific HTML lives in [`zard-doc-astro`](../zard-doc-astro/README.md), with Starlight conventions isolated in its adapter. Styling, source acquisition and publication belong to each consumer. This export does not embed an Astro component or stylesheet.
+
 ## Invocation and publication
 
 The existing build configuration, source selection, explicit documentation scopes, dependency closure and `--layout` / `--scope` options apply. `--format markdown` remains the default and retains its managed-page behavior.

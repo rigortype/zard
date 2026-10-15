@@ -121,6 +121,8 @@ The renderer emits documented public declarations and supports class, module, co
 
 Repository builds also provide `zard-doc build --config zard-doc.yml --format json` for static-site consumers. It exports public declarations, documentation, unparsed contracts, source provenance, and scoped page/link metadata to stdout without publishing files. This experimental [JSON export](docs/json-export.md) is separate from Rigor lens and is not included in the released 0.0.1 gems.
 
+The experimental [`zard-doc-astro`](zard-doc-astro/README.md) JavaScript package owns unstyled API presentation and a separate Starlight adapter. Consumer sites own CSS, source acquisition, localization and publication; the Ruby gems do not depend on Astro.
+
 ---
 
 ## Supported Ruby Semantics

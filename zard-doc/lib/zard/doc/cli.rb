@@ -45,15 +45,17 @@ module Zard
       def build_command
         config = nil
         layout = nil
+        format = "markdown"
         scopes = []
         OptionParser.new do |parser|
           parser.on("--config FILE", "Read the documentation build configuration") { |value| config = value }
           parser.on("--layout LAYOUT", %w[namespace file], "Override page organization") { |value| layout = value }
+          parser.on("--format FORMAT", %w[markdown json], "Write Markdown pages or export JSON to stdout") { |value| format = value }
           parser.on("--scope NAME", "Build a scope and its documentation dependencies (repeatable)") { |value| scopes << value }
         end.parse!(@argv)
         return usage_error("Pass --config FILE without positional arguments.") unless config && @argv.empty?
 
-        builder = Build.new(config, layout: layout, scopes: scopes)
+        builder = Build.new(config, layout: layout, scopes: scopes, format: format, stdout: @stdout)
         builder.run
       rescue BuildError => error
         @stderr.puts error.message
@@ -211,7 +213,7 @@ module Zard
             zard-doc lint [--fail-on error|warning] PATH...
             zard-doc render PATH...
             zard-doc format [--check | --write] PATH...
-            zard-doc build --config FILE [--scope NAME ...] [--layout namespace|file]
+            zard-doc build --config FILE [--scope NAME ...] [--layout namespace|file] [--format markdown|json]
         USAGE
       end
     end

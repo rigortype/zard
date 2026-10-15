@@ -6,10 +6,10 @@ require "pathname"
 module Zard
   module Doc
     class BuildConfiguration
-      attr_reader :docroot, :layout, :selected_scopes, :scopes
+      attr_reader :base, :docroot, :layout, :selected_scopes, :scopes
 
       def initialize(path, layout: nil, scopes: [])
-        base = File.realpath(File.dirname(File.expand_path(path)))
+        base = @base = File.realpath(File.dirname(File.expand_path(path)))
         text = File.read(path)
         validate_yaml_keys(Psych.parse_stream(text))
         raw = YAML.safe_load(text, permitted_classes: [], permitted_symbols: [], aliases: false)
@@ -41,6 +41,11 @@ module Zard
         end
         requested.sort.each { |name| visit.call(name) }
         @selected_scopes.sort!
+        @selected_scopes.combination(2) do |left, right|
+          a = @scopes.fetch(left).fetch(:destination)
+          b = @scopes.fetch(right).fetch(:destination)
+          fail_build("overlapping scope destinations: #{left} and #{right}") if a == b || a.start_with?(b + "/") || b.start_with?(a + "/")
+        end
       rescue Psych::Exception, SystemCallError, ArgumentError => error
         fail_build("cannot load configuration #{path}: #{error.message}")
       end

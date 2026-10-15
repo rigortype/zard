@@ -34,6 +34,8 @@ zard-doc render lib
 
 Repository builds provide hierarchical monorepo documentation with `zard-doc build --config zard-doc.yml`. Named scopes separate applications; namespace or file layouts, direct documentation dependencies, and managed output updates are described in the [usage guide](https://github.com/rigortype/zard/blob/master/docs/usage.md#build-a-documentation-tree). Rigor lens integration is deferred to the `v0.1.0` goal.
 
+`zard-doc build --config zard-doc.yml --format json` exports one experimental JSON document to stdout instead of publishing Markdown. It includes public declarations with or without prose, unparsed contracts, source provenance and digests, and scoped page assignments and links. See the [JSON export contract](https://github.com/rigortype/zard/blob/master/docs/json-export.md). The export needs no Rigor installation and is not a Rigor lens result.
+
 Repository builds also provide annotation formatting (not included in the published 0.0.1 gems):
 
 ```console

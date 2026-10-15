@@ -63,6 +63,7 @@ module Zard
          alias_target: item.alias_target, superclass: item.superclass, superclass_span: span(item.superclass_span),
          container_builder: item.container_builder, container_builder_span: span(item.container_builder_span),
          mixins: item.mixins.map { |mixin| {kind: mixin.kind, target: mixin.target, span: span(mixin.span)} },
+         relationships: entry.fetch(:relationships).map { |relationship| relationship.merge(span: span(relationship.fetch(:span))) },
          span: span(item.span), comment_span: span(item.comment_span),
          documentation: item.documentation.map { |tag| documentation(tag, entry.fetch(:descriptions).fetch(tag)) },
          contracts: item.contracts.map { |contract| contract(contract) }}

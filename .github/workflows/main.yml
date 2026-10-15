@@ -26,10 +26,11 @@ jobs:
           GEM_HOME: ${{ runner.temp }}/rigor
           GEM_PATH: ${{ runner.temp }}/rigor
         run: |
+          RIGOR_VERSION=$(ruby -rjson -e 'puts JSON.parse(File.read("zard-rigor/lib/zard/rigor/compatibility.json")).fetch("default_version")')
           gem install prism --version 1.9.0 --no-document
           gem install rbs --version 4.2.0 --no-document
           gem install language_server-protocol --version 3.17.0.6 --no-document
-          gem install rigortype --version 0.4.3 --no-document
+          gem install rigortype --version "$RIGOR_VERSION" --no-document
           gem install rbs-inline --version 0.14.0 --no-document
           cat > "$RUNNER_TEMP/rigor-cli" <<'SH'
           #!/bin/sh

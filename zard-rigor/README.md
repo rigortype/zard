@@ -48,6 +48,21 @@ definition body returns separately, escaping Rigor's display text verbatim.
 Consumer applications own all CSS. Revision 1 does not provide type-reference
 links, plugin-synthesized members, constant types, or the reserved `@extrbs`
 semantics. Missing capabilities and omissions are not empty type sets.
+Unavailable bindings carry explicit reasons for unsupported constructs or
+capabilities, target failures, ambiguous sites and unmatched declarations.
+Producer omission explanations are attached only after exact byte-span/name
+matching. Page coverage summaries distinguish these gaps from dynamic types.
 
 The shared fixture is attributed in `test/fixtures/rigor_lens/README.md`.
 Set `ZARD_RIGOR_COMMAND` to an executable for the opt-in released-CLI test.
+
+## Updating supported releases
+
+`lib/zard/rigor/compatibility.json` is the authoritative producer/schema allowlist.
+`default_version` selects the released executable tested in CI. Versions are
+explicitly reviewed; sharing a schema revision does not automatically admit an
+untested producer. After verifying a new released executable with the shared
+fixture and real project, add its version and update the default, then run
+`node scripts/sync-lens-compatibility.mjs` from the repository root. The Astro
+package ships the generated manifest and tests/packing reject a stale copy.
+Its notice renders the validated producer version from the actual artifact.

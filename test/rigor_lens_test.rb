@@ -25,7 +25,7 @@ class RigorLensTest < Minitest::Test
 
   def fixture_document
     data = JSON.parse(File.read(File.join(FIXTURE, "expected.json")))
-    data["producer"]["version"] = "0.4.3"
+    data["producer"]["version"] = Zard::Rigor::Compatibility::DATA.fetch("default_version")
     data["files"].select! { |file| file["status"] == "ok" }
     data["files"].sort_by! { |file| file.fetch("path") }
     data["files"].each { |file| file["argument"] = "./#{file.fetch("path")}" }
@@ -61,7 +61,8 @@ class RigorLensTest < Minitest::Test
       assert_equal "contested", fetch.fetch("basis")
       assert_empty fetch.fetch("overloads")
       refute lens.fetch("members").any? { |member| member.fetch("name") == "secret" }
-      assert lens.fetch("bindings").any? { |binding| binding["reason"] == "not_reported" }
+      omitted = lens.fetch("bindings").select { |binding| binding["reason"] == "unsupported_declaration" }
+      assert_equal %w[alias constant module_function], omitted.map { |binding| binding.fetch("omission").fetch("kind") }.sort
     end
   end
 
@@ -78,6 +79,9 @@ class RigorLensTest < Minitest::Test
       assert_raises(Zard::Rigor::Error) { adapter(root, bad).enrich(export, base: root) }
       bad = fixture_document
       bad.fetch("files").first.fetch("sites").first.fetch("span")["start_line"] += 1
+      assert_raises(Zard::Rigor::Error) { adapter(root, bad).enrich(export, base: root) }
+      bad = fixture_document
+      bad.fetch("files").find { |file| !file.fetch("omissions").empty? }.fetch("omissions").first.fetch("span")["end_offset"] += 1
       assert_raises(Zard::Rigor::Error) { adapter(root, bad).enrich(export, base: root) }
       assert_raises(Zard::Rigor::Error) do
         adapter(root) { File.write(File.join(root, "lib/shop.rb"), "# changed\n") }.enrich(export, base: root)
@@ -115,6 +119,7 @@ class RigorLensTest < Minitest::Test
       data.fetch("members").reject! { |member| (member.fetch("sites") & keys).any? }
       result = adapter(root, data).enrich(export, base: root)
       assert result.fetch("lens").fetch("bindings").any? { |binding| binding["reason"] == "outside_project" }
+      assert_equal "excluded", result.fetch("lens").fetch("bindings").find { |binding| binding["reason"] == "outside_project" }.fetch("detail")
       assert result.fetch("lens").fetch("bindings").any? { |binding| binding["status"] == "matched" }
     end
   end

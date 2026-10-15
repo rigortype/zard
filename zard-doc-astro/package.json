@@ -10,7 +10,7 @@
     "./starlight": "./src/starlight.mjs"
   },
   "files": ["src", "README.md", "LICENSE"],
-  "scripts": { "test": "node --test test/*.test.mjs" },
+  "scripts": { "test": "node ../scripts/sync-lens-compatibility.mjs --check && node --test test/*.test.mjs", "prepack": "node ../scripts/sync-lens-compatibility.mjs --check" },
   "engines": { "node": ">=22" },
   "dependencies": {
     "github-slugger": "2.0.0",

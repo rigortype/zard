@@ -6,7 +6,7 @@ Repository builds support an experimental static-site producer:
 zard-doc build --config zard-doc.yml --format json > api.json
 ```
 
-This is ZARD documentation data, not a Rigor lens result. Generation does not execute Ruby source, parse contract types, infer signatures, or require Rigor. A future optional lens adapter can associate facts with source declarations without replacing their documentation or provenance.
+This is ZARD documentation data, not a Rigor lens result. Plain generation does not execute Ruby source, parse contract types, infer signatures, or require Rigor. The optional `zard-rigor` adapter can associate facts with source declarations without replacing their documentation or provenance.
 
 Framework-specific HTML lives in [`zard-doc-astro`](../zard-doc-astro/README.md), with Starlight conventions isolated in its adapter. Styling, source acquisition and publication belong to each consumer. This export does not embed an Astro component or stylesheet.
 
@@ -75,3 +75,29 @@ All generated source paths are relative to the real directory containing the bui
 Spans retain the model's 1-based lines, 0-based columns and byte offsets, including an exclusive `end_offset`. Digests cover the entire source file, including documentation comments. Neither the digest nor a declaration ID proves the semantic inputs of a future Rigor analysis are unchanged.
 
 Reference lookup searches the current documentation scope, then only its explicit direct documentation dependencies. Transitive dependencies are generated without becoming visible to lookup. Ambiguous references remain literal with warnings. The `links` entries target actual exported pages/anchors and provide route mapping input without requiring consumers to reverse-engineer references from text.
+
+## Written class and module relationships
+
+The additive `relationships` array on each declaration records written
+`superclass`, `include`, `prepend`, `extend` and `container_builder` references.
+Each entry carries the original `expression` and `span`, a `status` (`resolved`,
+`unresolved` or `expression`), and `targets`. Each target has `scope`,
+`declaration_id`, `path` and `anchor`, and names a published class or module.
+Resolved reopenings retain all published definition targets, including file
+layout. Older exports may omit the field.
+
+Resolution uses the existing documentation lookup: local before direct scope
+dependencies, without transitive fallback or first-match ambiguity resolution.
+Superclass expressions use the enclosing lexical namespace; mixins use the
+class/module body context. A local constant or unpublished target prevents
+fallthrough to a dependency. Non-constant expressions and container builders
+remain literal; no application code is loaded or evaluated. Unresolved
+relationships produce diagnostics. Target links are included in `links`.
+
+These are documentation relationships, not runtime ancestry, lookup precedence,
+overrides or inherited member facts. Consumers must retain conflicting written
+parents and guard traversal against cycles. The Astro presentation generates a
+per-scope hierarchy with separate module usage, reports cycles/conflicts, and
+preserves each definition's own source location. The `hierarchy` route within a
+scope is reserved when the extension is present; route collisions fail before
+publication. Legacy exports without the extension keep their existing routes.

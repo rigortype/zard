@@ -64,7 +64,9 @@ module Zard
         @diagnostics.concat(renderer.diagnostics)
         if @format == "json"
           export = BuildExport.new(@configuration, documents, digests)
-          @stdout.write(export.render(renderer, enricher: @enricher))
+          json = export.render(renderer, enricher: @enricher)
+          @diagnostics |= renderer.diagnostics
+          @stdout.write(json)
           return 0
         end
 

@@ -55,6 +55,38 @@ test('preserves repeated definitions and supplies real source anchors on rendere
   assert.deepEqual(namespaceTree(model.scopes[0], 'apiref'), [{ label: 'Example', url: '/apiref/app/example/', children: [] }]);
 });
 
+test('member index links each retained definition without requiring lens or client code', () => {
+  const data = fixture();
+  data.scopes[0].declarations[1].span = {path: 'lib/reopened.rb', start_line: 19};
+  const page = createReference(data).pages.find((page) => page.slug === 'api/app/example');
+  const index = page.body.match(/<nav class="api-member-index"[\s\S]*?<\/nav>/)?.[0];
+  assert.ok(index);
+  assert.match(index, /<details open><summary>Instance methods \(2\)/);
+  assert.match(index, /href="\/api\/app\/example\/#zard-01"/);
+  assert.match(index, /href="\/api\/app\/example\/#zard-02"/);
+  assert.match(index, /lib\/reopened.rb:19/);
+  assert.match(index, /<code>call\(input\)<\/code>/);
+  assert.doesNotMatch(index, /VALUE|<script|style=/);
+  data.scopes[0].declarations = [data.scopes[0].declarations[2]];
+  data.scopes[0].pages[0].declarations = [data.scopes[0].declarations[0].id];
+  assert.doesNotMatch(createReference(data).pages.at(-1).body, /api-member-index/);
+});
+
+test('Starlight filenames preserve top-level and Index routes without hiding or overwriting pages', () => {
+  for (const name of ['_top-level','Index']) {
+    const data = fixture();
+    const path = `app/${name}.md`;
+    data.scopes[0].pages[0].path = path;
+    for (const row of data.scopes[0].declarations) row.page = path;
+    const reference = createReference(data);
+    const files = starlightPages(reference);
+    assert.ok(files.has(`api/app/${name.toLowerCase()}/index.md`));
+    assert.ok(files.has('api/app/index.md'));
+    assert.equal(files.size,3);
+    assert.match(files.get('api/app/index.md'),new RegExp(`/api/app/${name.toLowerCase()}/#zard-01`));
+  }
+});
+
 test('renders exact parameter syntax and optional immutable source links through the public interface', () => {
   const data = fixture();
   const row = data.scopes[0].declarations[0];

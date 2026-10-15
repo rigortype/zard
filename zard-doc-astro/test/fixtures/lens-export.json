@@ -2377,6 +2377,7 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-636c617373004f7264657200",
+        "file": "lib/order.rb",
         "site_key": "lib/order.rb:0-168:0",
         "member_keys": [],
         "status": "matched"
@@ -2384,6 +2385,7 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004f7264657223616d6f756e7400",
+        "file": "lib/order.rb",
         "site_key": "lib/order.rb:14-29:0",
         "member_keys": [
           "[\"Order\",\"instance\",\"amount\"]"
@@ -2393,6 +2395,7 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004f72646572236e6f746500",
+        "file": "lib/order.rb",
         "site_key": "lib/order.rb:33-94:0",
         "member_keys": [
           "[\"Order\",\"instance\",\"note\"]"
@@ -2402,6 +2405,7 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004f7264657223656163685f6c696e6500",
+        "file": "lib/order.rb",
         "site_key": "lib/order.rb:98-134:0",
         "member_keys": [
           "[\"Order\",\"instance\",\"each_line\"]"
@@ -2411,6 +2415,7 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004f726465722362726f6b656e00",
+        "file": "lib/order.rb",
         "site_key": "lib/order.rb:138-164:0",
         "member_keys": [
           "[\"Order\",\"instance\",\"broken\"]"
@@ -2420,6 +2425,7 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-636c6173730053686f7000",
+        "file": "lib/shop.rb",
         "site_key": "lib/shop.rb:33-451:0",
         "member_keys": [],
         "status": "matched"
@@ -2427,14 +2433,20 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-636f6e7374616e740053686f703a3a4c494d495400",
+        "file": "lib/shop.rb",
         "site_key": null,
         "member_keys": [],
         "status": "unavailable",
-        "reason": "not_reported"
+        "reason": "unsupported_declaration",
+        "omission": {
+          "kind": "constant",
+          "reason": "unsupported_kind"
+        }
       },
       {
         "scope": "app",
         "declaration_id": "app:zard-696e7374616e63655f6d6574686f640053686f70236c6162656c00",
+        "file": "lib/shop.rb",
         "site_key": "lib/shop.rb:122-143:0",
         "member_keys": [
           "[\"Shop\",\"instance\",\"label\"]"
@@ -2444,6 +2456,7 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-696e7374616e63655f6d6574686f640053686f70237363616c6500",
+        "file": "lib/shop.rb",
         "site_key": "lib/shop.rb:167-191:0",
         "member_keys": [
           "[\"Shop\",\"instance\",\"scale\"]"
@@ -2453,6 +2466,7 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-696e7374616e63655f6d6574686f640053686f7023746f74616c00",
+        "file": "lib/shop.rb",
         "site_key": "lib/shop.rb:195-223:0",
         "member_keys": [
           "[\"Shop\",\"instance\",\"total\"]"
@@ -2462,6 +2476,7 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-696e7374616e63655f6d6574686f640053686f7023666574636800",
+        "file": "lib/shop.rb",
         "site_key": "lib/shop.rb:227-245:0",
         "member_keys": [
           "[\"Shop\",\"instance\",\"fetch\"]"
@@ -2471,6 +2486,7 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-696e7374616e63655f6174747269627574655f7265616465720053686f70236e616d6500",
+        "file": "lib/shop.rb",
         "site_key": "lib/shop.rb:249-273:0",
         "member_keys": [
           "[\"Shop\",\"instance\",\"name\"]"
@@ -2480,6 +2496,7 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-696e7374616e63655f6174747269627574655f7265616465720053686f7023636f646500",
+        "file": "lib/shop.rb",
         "site_key": "lib/shop.rb:249-273:1",
         "member_keys": [
           "[\"Shop\",\"instance\",\"code\"]"
@@ -2489,6 +2506,7 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-73696e676c65746f6e5f6d6574686f640053686f702e6275696c6400",
+        "file": "lib/shop.rb",
         "site_key": "lib/shop.rb:287-307:0",
         "member_keys": [
           "[\"Shop\",\"singleton\",\"build\"]"
@@ -2498,6 +2516,7 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-696e7374616e63655f6174747269627574655f6163636573736f720053686f7023707269636500",
+        "file": "lib/shop.rb",
         "site_key": "lib/shop.rb:311-331:0",
         "member_keys": [
           "[\"Shop\",\"instance\",\"price\"]",
@@ -2508,6 +2527,7 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-73696e676c65746f6e5f6d6574686f640053686f702e726567697374727900",
+        "file": "lib/shop.rb",
         "site_key": "lib/shop.rb:364-381:0",
         "member_keys": [
           "[\"Shop\",\"singleton\",\"registry\"]"
@@ -2517,14 +2537,20 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-696e7374616e63655f6d6574686f640053686f70237469746c6500",
+        "file": "lib/shop.rb",
         "site_key": null,
         "member_keys": [],
         "status": "unavailable",
-        "reason": "not_reported"
+        "reason": "unsupported_declaration",
+        "omission": {
+          "kind": "alias",
+          "reason": "unsupported_kind"
+        }
       },
       {
         "scope": "app",
         "declaration_id": "app:zard-6d6f64756c65005574696c00",
+        "file": "lib/util.rb",
         "site_key": "lib/util.rb:0-51:0",
         "member_keys": [],
         "status": "matched"
@@ -2532,14 +2558,20 @@
       {
         "scope": "app",
         "declaration_id": "app:zard-73696e676c65746f6e5f6d6574686f64005574696c2e68656c70657200",
+        "file": "lib/util.rb",
         "site_key": null,
         "member_keys": [],
         "status": "unavailable",
-        "reason": "not_reported"
+        "reason": "unsupported_declaration",
+        "omission": {
+          "kind": "module_function",
+          "reason": "unsupported_kind"
+        }
       },
       {
         "scope": "app",
         "declaration_id": "app:zard-696e7374616e63655f6d6574686f640023746f705f68656c70657200",
+        "file": "lib/util.rb",
         "site_key": "lib/util.rb:53-73:0",
         "member_keys": [
           "[\"Object\",\"instance\",\"top_helper\"]"
@@ -2548,9 +2580,9 @@
       }
     ],
     "warnings": [
-      "app:Shop::LIMIT: lens not_reported",
-      "app:Shop#title: lens not_reported",
-      "app:Util.helper: lens not_reported"
+      "app:Shop::LIMIT: lens unsupported_declaration",
+      "app:Shop#title: lens unsupported_declaration",
+      "app:Util.helper: lens unsupported_declaration"
     ]
   }
 }

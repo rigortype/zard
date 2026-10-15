@@ -57,6 +57,18 @@ function declaration(value) {
     displayName: text(row.display_name, 'display name'), page: outputPath(row.page), anchor,
     parameters: list(row.parameters, 'parameters').map((item) => text(item, 'parameter')),
     parameterDetails,
+    relationships: row.relationships == null ? null : list(row.relationships, 'relationships').map((relationship) => {
+      object(relationship, 'relationship');
+      if (!['superclass', 'include', 'prepend', 'extend', 'container_builder'].includes(relationship.kind)) fail('unknown relationship kind');
+      if (!['resolved', 'unresolved', 'expression'].includes(relationship.status)) fail('unknown relationship status');
+      const targets = list(relationship.targets, 'relationship targets').map((target) => ({
+        scope: text(target.scope, 'target scope'), id: text(target.declaration_id, 'target declaration id'),
+        path: outputPath(target.path), anchor: text(target.anchor, 'target anchor'),
+      }));
+      if ((relationship.status === 'resolved') !== (targets.length > 0)) fail('relationship status contradicts targets');
+      return {kind: relationship.kind, expression: text(relationship.expression, 'relationship expression'),
+        source: sourceSpan(relationship.span), status: relationship.status, targets};
+    }),
     source: sourceSpan(row.span), tags };
 }
 
@@ -88,7 +100,7 @@ export function parseExport(value) {
     });
     unique(pages.map((page) => page.path), 'page path');
     if (pages.reduce((count, page) => count + page.declarations.length, 0) !== declarations.length) fail('declaration missing from pages');
-    return { name, destination, pages, declarations };
+    return { name, destination, pages, declarations, references: list(scope.references || [], 'scope references').map((name) => text(name, 'dependency scope')) };
   });
   unique(scopes.map((scope) => scope.name), 'scope name');
   unique(scopes.flatMap((scope) => scope.declarations.map((row) => row.id)), 'global declaration id');

@@ -37,6 +37,10 @@ Signatures use additive `parameter_details[].source` when supplied by the produc
 `basePath` defaults to `api`. Route segments follow Astro's `github-slugger` normalization. Stable ZARD declaration anchors remain unchanged, including repeated definitions. Provenance labels are escaped and optional links must use HTTP(S). Consumer-supplied localization entry pages can be added after `starlightPages`; locale prefixes and fallback policy are not inferred.
 
 Starlight dependencies are not imported at runtime: the adapter returns the Markdown/configuration values for the consumer's existing installation. Full-text search and content rendering remain the host's responsibility.
+Underscore-prefixed page names and `Index` declarations are emitted as directory
+`index.md` files. This preserves their routes while avoiding Starlight's hidden
+filename rule and Astro's trailing-index normalization. Declaration IDs and
+anchors remain unchanged; conflicting content filenames are rejected.
 
 ## Styling interface
 
@@ -44,6 +48,7 @@ Consumers style these hooks with their own stylesheet:
 
 - `.api-breadcrumbs`: semantic `nav`/`ol` breadcrumb structure.
 - `.api-index-link`: links in scope and declaration lists.
+- `.api-member-index`: per-page member navigation with native disclosure groups and exact definition anchors.
 - `.api-provenance`: optional source/build attribution.
 - `.api-declaration`: a declaration `section` labelled by its heading.
 - `.api-signature`: declaration heading containing escaped source parameter labels.
@@ -52,12 +57,22 @@ Consumers style these hooks with their own stylesheet:
 - `.api-lens`: optional member facts and this definition's body return.
 - `.api-lens-signature`: verbatim escaped Rigor signature in `pre`/`code`.
 - `.api-lens-status`: experimental protocol notice or unavailable binding.
+- `.api-lens-summary`: page-level coverage, producer omissions and unavailable capabilities.
+- `.api-relationships`: written source references and reverse documentation links in a definition list.
+- `.api-hierarchy`: nested class relationship list, separate from module usage.
 
 An optional `lens` extension from `zard-rigor` supports Rigor 0.4.3's experimental
 `lens/v0` revision 1. Member signatures are shared across definitions; body
 returns belong to one definition. Dynamic and unavailable states retain their
 meaning. The renderer neither parses type text nor selects runtime winners.
 It rejects incompatible revisions and dangling bindings before publication.
+
+Additive producer `relationships` enable a per-scope hierarchy page and forward/
+reverse links. Only validated targets in the current scope or its explicit direct
+dependencies are linked. Expressions, conflicts and cycles remain visible; no
+runtime inheritance or inherited member facts are inferred. `reference.diagnostics`
+reports graph conflicts/cycles for consumers to surface during publication.
+The scope's `hierarchy` route is reserved when relationship metadata is present.
 
 Hooks and structure are an experimental presentation contract. Accessibility attributes and stable IDs belong to the renderer; focus appearance, spacing, wrapping and header scroll offsets belong to consumer CSS. Consumers must provide responsive layout and keyboard-visible focus appropriate to their site. Contracts remain in the export and are not presented as inferred signatures.
 

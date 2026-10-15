@@ -1,6 +1,7 @@
 import { code, escapeHtml, markdownText, prose } from './prose.mjs';
-import { renderLens } from './lens.mjs';
-import { pageSlug, pageUrl, routePages, scopeSlug, scopeUrl, namespaceTree } from './routes.mjs';
+import { renderLens, renderLensSummary } from './lens.mjs';
+import { pageSlug, pageUrl, routePages, scopeSlug, scopeUrl, namespaceTree, hasRelationships, hierarchySlug } from './routes.mjs';
+import { relationshipIndex, renderRelationships, renderHierarchy } from './relationships.mjs';
 
 const link = (label, href, index = false) => `<a${index ? ' class="api-index-link"' : ''} href="${escapeHtml(href)}">${escapeHtml(label)}</a>`;
 const crumbs = (items) => `<nav class="api-breadcrumbs" aria-label="Breadcrumb"><ol>${items.map(([label, href]) => `<li>${href ? link(label, href) : `<span aria-current="page">${escapeHtml(label)}</span>`}</li>`).join('')}</ol></nav>\n\n`;
@@ -11,6 +12,21 @@ const declarationKind = (kind) => {
 };
 const titleFor = (scope, page) => page.path.slice(scope.destination.length + 1).replace(/\.md$/, '').split('/').join('::');
 const categories = [['Classes', 'class'], ['Modules', 'module'], ['Constants', 'constant'], ['Attributes', 'attribute'], ['Instance methods', 'instance method'], ['Singleton methods', 'singleton method'], ['Ruby refinements', 'refinement']];
+
+function memberIndex(rows, basePath) {
+  const groups = categories.filter(([, kind]) => ['attribute', 'instance method', 'singleton method'].includes(kind));
+  const content = groups.map(([title, kind]) => {
+    const members = rows.filter((row) => declarationKind(row.kind) === kind);
+    if (!members.length) return '';
+    const items = members.map((row) => {
+      const parameters = row.parameterDetails?.map((parameter) => parameter.source) ?? row.parameters;
+      const signature = kind.includes('method') ? `${row.name}(${parameters.join(', ')})` : row.displayName;
+      return `<li><a class="api-index-link" href="${escapeHtml(`${pageUrl(row.page, basePath)}#${row.anchor}`)}">${code(signature)}</a><span class="api-meta">${escapeHtml(`${row.source.path}:${row.source.line}`)}</span></li>`;
+    });
+    return `<details open><summary>${title} (${members.length})</summary><ul>${items.join('\n')}</ul></details>`;
+  }).join('\n');
+  return content.trim() ? `## Member index\n\n<nav class="api-member-index" aria-label="Members on this page">${content}</nav>\n\n` : '';
+}
 
 function indexEntries(rows, basePath) {
   return categories.map(([title, kind]) => {
@@ -27,6 +43,7 @@ function entry(row, model, basePath, sourceLinks) {
   const location = `${row.source.path}:${row.source.line}`;
   const source = Object.hasOwn(sourceLinks, row.id) ? link(location, sourceLinks[row.id]) : code(location);
   let result = `<section class="api-declaration" aria-labelledby="${row.anchor}">\n\n<h3 id="${row.anchor}" class="api-signature">${code(signature)}</h3>\n\n<p class="api-meta">${escapeHtml(kind)} · ${source}</p>\n\n`;
+  result += renderRelationships(row, model.relationshipIndex, basePath);
   const texts = row.tags.filter((tag) => tag.name === 'text');
   const description = texts.map((tag, i) => {
     const previous = texts[i - 1];
@@ -50,6 +67,8 @@ export function renderReference(model, options = {}) {
     introduction = '', provenance = [], sourceLinks = {} } = options;
   if (!/^[a-z0-9_-]+(?:\/[a-z0-9_-]+)*$/.test(basePath)) throw new Error('Invalid API basePath');
   routePages(model, basePath);
+  const relationships = relationshipIndex(model.scopes);
+  model = {...model, relationshipIndex: relationships};
   const ids = new Set(model.scopes.flatMap((scope) => scope.declarations.map((row) => row.id)));
   for (const [id, url] of Object.entries(sourceLinks)) {
     if (!ids.has(id) || typeof url !== 'string' || !/^https?:\/\//i.test(url)) throw new Error('Invalid declaration source link');
@@ -58,7 +77,7 @@ export function renderReference(model, options = {}) {
   }
   const pages = [];
   const add = (slug, title, description, body) => pages.push({ slug, title, description, body });
-  const provenanceHtml = (model.lens ? '<p class="api-lens-status">Rigor 0.4.3 · experimental lens/v0 revision 1. Body returns use declared or unknown parameter types.</p>\n\n' : '') + (provenance.length
+  const provenanceHtml = (model.lens ? `<p class="api-lens-status">Rigor ${escapeHtml(model.lens.producer.version)} · experimental ${escapeHtml(model.lens.schema)} revision ${model.lens.revision}. Body returns use declared or unknown parameter types.</p>\n\n` : '') + (provenance.length
     ? `<p class="api-provenance">${provenance.map(({ label, url }) => {
       if (url && !/^https?:\/\//i.test(url)) throw new Error('Invalid provenance URL');
       return url ? link(label, url) : escapeHtml(label);
@@ -68,6 +87,11 @@ export function renderReference(model, options = {}) {
   add(basePath, title, description, root + '\n');
   for (const scope of model.scopes) {
     let index = crumbs([[title, `/${basePath}/`], [scope.name]]) + provenanceHtml;
+    if (hasRelationships(scope)) {
+      const hierarchy = hierarchySlug(scope, basePath);
+      index += `${link('Hierarchy and module usage', `/${hierarchy}/`, true)}\n\n`;
+      add(hierarchy, `${scope.name} hierarchy`, `Written class and module relationships in ${scope.name}.`, crumbs([[title, `/${basePath}/`], [scope.name, scopeUrl(scope, basePath)], ['Hierarchy and module usage']]) + renderHierarchy(scope, relationships, basePath));
+    }
     index += indexEntries(scope.declarations, basePath) || 'No public declarations were exported for this documentation scope.\n';
     add(scopeSlug(scope, basePath), `${scope.name} API`, `Public API declarations in the ${scope.name} documentation scope.`, index);
     for (const page of scope.pages) {
@@ -78,6 +102,8 @@ export function renderReference(model, options = {}) {
         return scope.pages.some((item) => item.path === candidate) ? [[segments[i], pageUrl(candidate, basePath)]] : [];
       });
       let content = crumbs([[title, `/${basePath}/`], [scope.name, scopeUrl(scope, basePath)], ...ancestors, [segments.at(-1)]]) + provenanceHtml;
+      content += renderLensSummary(page.declarations, model.lens);
+      content += memberIndex(page.declarations, basePath);
       for (const [category, kind] of categories) {
         const rows = page.declarations.filter((row) => declarationKind(row.kind) === kind);
         if (rows.length) content += `## ${category}\n\n${rows.map((row) => entry(row, model, basePath, sourceLinks)).join('')}`;
@@ -85,7 +111,7 @@ export function renderReference(model, options = {}) {
       add(pageSlug(page.path, basePath), pageTitle, `Public declarations and source documentation for ${pageTitle}.`, content);
     }
   }
-  return { title, url: `/${basePath}/`, pages, navigation: model.scopes.map((scope) => ({
-    label: scope.name, indexUrl: scopeUrl(scope, basePath), items: namespaceTree(scope, basePath),
+  return { title, url: `/${basePath}/`, pages, diagnostics: relationships.diagnostics, navigation: model.scopes.map((scope) => ({
+    label: scope.name, indexUrl: scopeUrl(scope, basePath), items: [...(hasRelationships(scope) ? [{label: 'Hierarchy and module usage', url: `/${hierarchySlug(scope, basePath)}/`, children: []}] : []), ...namespaceTree(scope, basePath)],
   })) };
 }

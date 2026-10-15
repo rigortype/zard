@@ -57,7 +57,7 @@ module Zard
           parser.on("--format FORMAT", %w[markdown json], "Write Markdown pages or export JSON to stdout") { |value| format = value }
           parser.on("--scope NAME", "Build a scope and its documentation dependencies (repeatable)") { |value| scopes << value }
           parser.on("--lens-root DIR", "Enrich JSON using experimental Rigor lens (requires zard-rigor)") { |value| lens_root = value }
-          parser.on("--rigor-command FILE", "Rigor 0.4.3 executable (default: rigor)") { |value| rigor_command = value }
+          parser.on("--rigor-command FILE", "Supported Rigor executable (default: rigor)") { |value| rigor_command = value }
           parser.on("--lens-workers N", Integer, "Lens workers (default: 4)") { |value| lens_workers = value }
           parser.on("--lens-config FILE", "Rigor configuration, relative to lens root") { |value| lens_config = value }
         end.parse!(@argv)

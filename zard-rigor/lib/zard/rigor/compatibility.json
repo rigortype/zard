@@ -1,0 +1,7 @@
+{
+  "schema": "lens/v0",
+  "revision": 1,
+  "producer": "rigor",
+  "versions": ["0.4.3"],
+  "default_version": "0.4.3"
+}

@@ -37,6 +37,10 @@ Signatures use additive `parameter_details[].source` when supplied by the produc
 `basePath` defaults to `api`. Route segments follow Astro's `github-slugger` normalization. Stable ZARD declaration anchors remain unchanged, including repeated definitions. Provenance labels are escaped and optional links must use HTTP(S). Consumer-supplied localization entry pages can be added after `starlightPages`; locale prefixes and fallback policy are not inferred.
 
 Starlight dependencies are not imported at runtime: the adapter returns the Markdown/configuration values for the consumer's existing installation. Full-text search and content rendering remain the host's responsibility.
+Underscore-prefixed page names and `Index` declarations are emitted as directory
+`index.md` files. This preserves their routes while avoiding Starlight's hidden
+filename rule and Astro's trailing-index normalization. Declaration IDs and
+anchors remain unchanged; conflicting content filenames are rejected.
 
 ## Styling interface
 

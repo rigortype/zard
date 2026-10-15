@@ -55,24 +55,6 @@ test('preserves repeated definitions and supplies real source anchors on rendere
   assert.deepEqual(namespaceTree(model.scopes[0], 'apiref'), [{ label: 'Example', url: '/apiref/app/example/', children: [] }]);
 });
 
-test('renders exact parameter syntax and optional immutable source links through the public interface', () => {
-  const data = fixture();
-  const row = data.scopes[0].declarations[0];
-  row.parameter_details = [{ kind: 'optional_keyword', name: 'input', source: 'input: [1,\n\n  "<value>"]',
-    span: { path: 'lib/example.rb', start_line: 2, end_line: 3 }, default: '[1,\n  "<value>"]',
-    default_span: { path: 'lib/example.rb', start_line: 2, end_line: 3 } }];
-  const url = `https://example.com/blob/${'a'.repeat(40)}/lib/example.rb#L2-L4`;
-  const reference = createReference(data, { sourceLinks: { [row.id]: url } });
-  const page = reference.pages.find((page) => page.slug.endsWith('/example'));
-  assert.match(page.body, /Example#call\(input: \[1,&#10;&#10;  &quot;&lt;value&gt;&quot;\]\)/);
-  assert.ok(page.body.includes(`href="${url}"`));
-  assert.match(page.body, /lib\/example.rb:2/);
-  assert.throws(() => createReference(data, { sourceLinks: { [row.id]: 'javascript:alert(1)' } }), /source link/);
-  assert.throws(() => createReference(data, { sourceLinks: { missing: url } }), /source link/);
-  row.parameter_details[0].kind = 'invented';
-  assert.throws(() => createReference(data), /parameter kind/);
-});
-
 test('rejects incompatible schemas, private members, escaping paths and missing targets', () => {
   const changes = [
     (data) => { data.revision = 2; },

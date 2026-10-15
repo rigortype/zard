@@ -32,8 +32,6 @@ const topic = starlightTopic(reference, { id: 'api', label: 'API Reference' });
 
 `createReference` is synchronous and does not mutate the export. It returns `{ title, url, pages, navigation }`; each page contains `{ slug, title, description, body }`, where body is Markdown with semantic HTML. Navigation contains documentation scopes and namespace trees. Unsupported schema/revision, non-public declarations, unsafe logical output paths, unmatched declarations, missing reference targets and normalized route collisions throw before publication. Only namespace layout is supported initially.
 
-Signatures use additive `parameter_details[].source` when supplied by the producer, retaining Ruby defaults, forwarding and anonymous/destructured parameter patterns. Older exports fall back to `parameters`. These are syntax labels, not inferred types. An optional `sourceLinks` object maps declaration IDs to HTTP(S) URLs; the renderer checks IDs and protocols and displays each declaration's own source link. The consumer owns URL templates, commit pinning and repository-path policy. With no link, the recorded source location remains readable text.
-
 `basePath` defaults to `api`. Route segments follow Astro's `github-slugger` normalization. Stable ZARD declaration anchors remain unchanged, including repeated definitions. Provenance labels are escaped and optional links must use HTTP(S). Consumer-supplied localization entry pages can be added after `starlightPages`; locale prefixes and fallback policy are not inferred.
 
 Starlight dependencies are not imported at runtime: the adapter returns the Markdown/configuration values for the consumer's existing installation. Full-text search and content rendering remain the host's responsibility.

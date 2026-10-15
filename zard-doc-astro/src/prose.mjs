@@ -4,7 +4,7 @@ import { toMarkdown } from 'mdast-util-to-markdown';
 import { pageUrl } from './routes.mjs';
 
 export const escapeHtml = (text) => text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
-export const code = (text) => `<code>${escapeHtml(text)}</code>`;
+export const code = (text) => `<code>${escapeHtml(text).replaceAll('\r', '&#13;').replaceAll('\n', '&#10;')}</code>`;
 export const markdownText = (value) => toMarkdown({ type: 'root', children: [{ type: 'paragraph', children: [{ type: 'text', value }] }] }).trim();
 
 function commentCodeBlocks(markdown) {

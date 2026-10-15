@@ -24,7 +24,8 @@ function sourceSpan(value) {
   const path = text(span.path, 'source path');
   if (!path || path.startsWith('/') || /^[A-Za-z]:/.test(path) || path.includes('\\')) fail('absolute or invalid source path');
   if (!Number.isInteger(span.start_line) || span.start_line < 1) fail('invalid source line');
-  return { path, line: span.start_line };
+  if (span.end_line != null && (!Number.isInteger(span.end_line) || span.end_line < span.start_line)) fail('invalid source end line');
+  return { path, line: span.start_line, endLine: span.end_line ?? span.start_line };
 }
 function declaration(value) {
   const row = object(value, 'declaration');
@@ -42,9 +43,18 @@ function declaration(value) {
       description: text(entry.rendered_description, 'rendered description'),
       line, endLine: entry.span.end_line };
   });
+  const parameterDetails = row.parameter_details == null ? null : list(row.parameter_details, 'parameter details').map((item) => {
+    object(item, 'parameter detail');
+    const kinds = ['required', 'optional', 'rest', 'post', 'required_keyword', 'optional_keyword', 'keyword_rest', 'block', 'forwarding', 'no_keywords', 'implicit_rest'];
+    if (!kinds.includes(item.kind)) fail('unsupported parameter kind');
+    sourceSpan(item.span);
+    if (item.default != null) { text(item.default, 'parameter default'); sourceSpan(item.default_span); }
+    return { kind: item.kind, source: text(item.source, 'parameter source') };
+  });
   return { id: text(row.id, 'declaration id'), kind: text(row.kind, 'kind'), name: text(row.name, 'name'),
     displayName: text(row.display_name, 'display name'), page: outputPath(row.page), anchor,
     parameters: list(row.parameters, 'parameters').map((item) => text(item, 'parameter')),
+    parameterDetails,
     source: sourceSpan(row.span), tags };
 }
 

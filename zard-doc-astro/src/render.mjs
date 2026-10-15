@@ -2,6 +2,7 @@ import { code, escapeHtml, markdownText, prose } from './prose.mjs';
 import { renderLens, renderLensSummary } from './lens.mjs';
 import { pageSlug, pageUrl, routePages, scopeSlug, scopeUrl, namespaceTree, hasRelationships, hierarchySlug } from './routes.mjs';
 import { relationshipIndex, renderRelationships, renderHierarchy } from './relationships.mjs';
+import { compareMembers } from './members.mjs';
 
 const link = (label, href, index = false) => `<a${index ? ' class="api-index-link"' : ''} href="${escapeHtml(href)}">${escapeHtml(label)}</a>`;
 const crumbs = (items) => `<nav class="api-breadcrumbs" aria-label="Breadcrumb"><ol>${items.map(([label, href]) => `<li>${href ? link(label, href) : `<span aria-current="page">${escapeHtml(label)}</span>`}</li>`).join('')}</ol></nav>\n\n`;
@@ -12,20 +13,24 @@ const declarationKind = (kind) => {
 };
 const titleFor = (scope, page) => page.path.slice(scope.destination.length + 1).replace(/\.md$/, '').split('/').join('::');
 const categories = [['Classes', 'class'], ['Modules', 'module'], ['Constants', 'constant'], ['Attributes', 'attribute'], ['Instance methods', 'instance method'], ['Singleton methods', 'singleton method'], ['Ruby refinements', 'refinement']];
+const isMember = (row) => ['attribute', 'instance method', 'singleton method'].includes(declarationKind(row.kind));
+const memberData = (row) => `data-api-name="${escapeHtml(row.name)}" data-api-path="${escapeHtml(row.source.path)}" data-api-line="${row.source.line}" data-api-anchor="${row.anchor}"`;
+const definitionOrder = (rows) => rows.toSorted((a, b) => compareMembers({name:a.name, path:a.source.path, line:a.source.line, anchor:a.anchor}, {name:b.name, path:b.source.path, line:b.source.line, anchor:b.anchor}));
 
 function memberIndex(rows, basePath) {
   const groups = categories.filter(([, kind]) => ['attribute', 'instance method', 'singleton method'].includes(kind));
   const content = groups.map(([title, kind]) => {
-    const members = rows.filter((row) => declarationKind(row.kind) === kind);
+    const members = definitionOrder(rows.filter((row) => declarationKind(row.kind) === kind));
     if (!members.length) return '';
     const items = members.map((row) => {
       const parameters = row.parameterDetails?.map((parameter) => parameter.source) ?? row.parameters;
       const signature = kind.includes('method') ? `${row.name}(${parameters.join(', ')})` : row.displayName;
-      return `<li><a class="api-index-link" href="${escapeHtml(`${pageUrl(row.page, basePath)}#${row.anchor}`)}">${code(signature)}</a><span class="api-meta">${escapeHtml(`${row.source.path}:${row.source.line}`)}</span></li>`;
+      const preview = row.tags.find((tag) => tag.name === 'text')?.description.split('\n')[0] ?? '';
+      return `<li ${memberData(row)}><a class="api-index-link" href="${escapeHtml(`${pageUrl(row.page, basePath)}#${row.anchor}`)}">${code(signature)}</a><span class="api-meta">public · ${escapeHtml(`${row.source.path}:${row.source.line}`)}</span>${preview ? `<span class="api-member-preview">${escapeHtml(preview)}</span>` : ''}</li>`;
     });
-    return `<details open><summary>${title} (${members.length})</summary><ul>${items.join('\n')}</ul></details>`;
+    return `<details open><summary>${title} (${members.length})</summary><ul data-api-member-list>${items.join('\n')}</ul></details>`;
   }).join('\n');
-  return content.trim() ? `## Member index\n\n<nav class="api-member-index" aria-label="Members on this page">${content}</nav>\n\n` : '';
+  return content.trim() ? `## Member index\n\n<div class="api-member-controls" hidden><label>Member order <select data-api-member-order><option value="definition">Definition order</option><option value="name">Name order</option></select></label></div>\n\n<nav class="api-member-index" aria-label="Members on this page">${content}</nav>\n\n` : '';
 }
 
 function indexEntries(rows, basePath) {
@@ -42,7 +47,11 @@ function entry(row, model, basePath, sourceLinks) {
   const signature = kind.includes('method') ? `${row.displayName}(${parameters.join(', ')})` : row.displayName;
   const location = `${row.source.path}:${row.source.line}`;
   const source = Object.hasOwn(sourceLinks, row.id) ? link(location, sourceLinks[row.id]) : code(location);
-  let result = `<section class="api-declaration" aria-labelledby="${row.anchor}">\n\n<h3 id="${row.anchor}" class="api-signature">${code(signature)}</h3>\n\n<p class="api-meta">${escapeHtml(kind)} · ${source}</p>\n\n`;
+  const member = isMember(row);
+  const heading = `<h3 id="${row.anchor}" class="api-signature">${code(signature)}</h3>`;
+  let result = member
+    ? `<details open class="api-declaration api-member" ${memberData(row)}><summary>${heading}<span class="api-meta">public · ${escapeHtml(kind)} · ${escapeHtml(location)}</span></summary>\n\n<p class="api-meta">Source: ${source}</p>\n\n`
+    : `<section class="api-declaration" aria-labelledby="${row.anchor}">\n\n${heading}\n\n<p class="api-meta">${escapeHtml(kind)} · ${source}</p>\n\n`;
   result += renderRelationships(row, model.relationshipIndex, basePath);
   const texts = row.tags.filter((tag) => tag.name === 'text');
   const description = texts.map((tag, i) => {
@@ -59,7 +68,7 @@ function entry(row, model, basePath, sourceLinks) {
       ? `<pre class="api-example"><code>${escapeHtml(tag.description)}</code></pre>\n`
       : prose(tag.description, row.page, model, basePath);
   }
-  return `${result}\n</section>\n\n`;
+  return `${result}\n</${member ? 'details' : 'section'}>\n\n`;
 }
 
 export function renderReference(model, options = {}) {
@@ -106,7 +115,10 @@ export function renderReference(model, options = {}) {
       content += memberIndex(page.declarations, basePath);
       for (const [category, kind] of categories) {
         const rows = page.declarations.filter((row) => declarationKind(row.kind) === kind);
-        if (rows.length) content += `## ${category}\n\n${rows.map((row) => entry(row, model, basePath, sourceLinks)).join('')}`;
+        if (rows.length) {
+          const member = isMember(rows[0]);
+          content += `## ${category}\n\n${member ? '<div data-api-member-list>\n\n' : ''}${(member ? definitionOrder(rows) : rows).map((row) => entry(row, model, basePath, sourceLinks)).join('')}${member ? '</div>\n\n' : ''}`;
+        }
       }
       add(pageSlug(page.path, basePath), pageTitle, `Public declarations and source documentation for ${pageTitle}.`, content);
     }

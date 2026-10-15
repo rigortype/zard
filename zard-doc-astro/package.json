@@ -7,7 +7,8 @@
   "license": "MPL-2.0",
   "exports": {
     ".": "./src/index.mjs",
-    "./starlight": "./src/starlight.mjs"
+    "./starlight": "./src/starlight.mjs",
+    "./members": "./src/members.mjs"
   },
   "files": ["src", "README.md", "LICENSE"],
   "scripts": { "test": "node ../scripts/sync-lens-compatibility.mjs --check && node --test test/*.test.mjs", "prepack": "node ../scripts/sync-lens-compatibility.mjs --check" },

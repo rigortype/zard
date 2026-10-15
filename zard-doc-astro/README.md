@@ -85,3 +85,8 @@ pnpm pack --pack-destination /tmp/zard-doc-astro
 ```
 
 Until registry publication, a consumer can check in the packed archive and install it with a relative `file:` dependency. The archive contains only this package's source, README, license and manifest. This explicit snapshot keeps consumer builds reproducible without relying on a developer's sibling checkout or installing the Ruby repository as an npm package. Refresh the archive from a reviewed package revision when changing the renderer.
+## Member browsing
+
+Member indexes and declaration disclosures use native `details` elements, initially open, and remain readable without JavaScript. Public visibility, instance/singleton groups, exact parameter syntax, source locations and stable definition anchors remain visible. Index previews show the first source documentation line as escaped plain text; the complete documentation retains the existing Markdown handling.
+
+Optionally import `enhanceMembers` from `zard-doc-astro/members` in a browser script and call it after page load (and after framework page transitions). It reveals a native order selector and sorts both index and declaration groups without replacing nodes or losing disclosure state. Definition order compares source path, source line and anchor; name order compares the Ruby name first, then those same tie-breakers. Text comparisons are locale-independent. Consumers own all styling, including the `.api-member-controls`, `.api-member-preview` and `.api-member` hooks.

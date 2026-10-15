@@ -924,7 +924,6 @@ module Zard
           namespace: namespace,
           visibility: visibility,
           parameters: parameters,
-          parameter_details: declaration_parameters(node, kind, alias_target),
           receiver: receiver,
           receiver_span: receiver_span,
           refinement: refinement,
@@ -1316,7 +1315,6 @@ module Zard
           namespace: declaration.namespace,
           visibility: visibility,
           parameters: parameters,
-          parameter_details: declaration.parameter_details,
           receiver: declaration.receiver,
           receiver_span: declaration.receiver_span,
           refinement: declaration.refinement,
@@ -1332,47 +1330,6 @@ module Zard
           documentation: declaration.documentation,
           contracts: declaration.contracts
         )
-      end
-
-      def declaration_parameters(node, kind, alias_target)
-        return if alias_target || !%i[instance_method singleton_method].include?(kind)
-
-        parameters = if node.is_a?(Prism::DefNode)
-          node.parameters
-        elsif node.is_a?(Prism::CallNode) && node.block.is_a?(Prism::BlockNode)
-          node.block.parameters&.parameters
-        else
-          return
-        end
-        return [].freeze unless parameters
-
-        groups = [[parameters.requireds, :required], [parameters.optionals, :optional],
-          [[parameters.rest].compact, :rest], [parameters.posts, :post],
-          [parameters.keywords, :required_keyword], [[parameters.keyword_rest].compact, :keyword_rest],
-          [[parameters.block].compact, :block]]
-        groups.flat_map do |nodes, kind|
-          nodes.map { |parameter| parameter_detail(parameter, kind) }
-        end.sort_by { |parameter| parameter.span.start_offset }.freeze
-      end
-
-      def parameter_detail(parameter, kind)
-        kind = case parameter
-        when Prism::OptionalKeywordParameterNode then :optional_keyword
-        when Prism::ForwardingParameterNode then :forwarding
-        when Prism::NoKeywordsParameterNode then :no_keywords
-        when Prism::ImplicitRestNode then :implicit_rest
-        else kind
-        end
-        value = parameter.value if parameter.is_a?(Prism::OptionalParameterNode) || parameter.is_a?(Prism::OptionalKeywordParameterNode)
-        if value.respond_to?(:heredoc?) && value.heredoc?
-          @diagnostics << Model::V1::Diagnostic.new(code: "parameter.unsupported-default", severity: :warning,
-            message: "Heredoc parameter defaults retain their header; a contiguous default expression is unavailable.", span: span(value.location))
-          value = nil
-        end
-        Model::V1::Parameter.new(kind: kind,
-          name: parameter.respond_to?(:name) ? parameter.name&.to_s : nil,
-          source: parameter.location.slice, span: span(parameter.location),
-          default: value&.location&.slice, default_span: value ? span(value.location) : nil)
       end
 
       def parameter_names(parameters)

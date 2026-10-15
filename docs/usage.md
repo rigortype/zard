@@ -170,8 +170,6 @@ CLI layout overrides configuration. With no `--scope`, all scopes are built; rep
 
 The default `--format markdown` publishes managed Markdown pages. `--format json` instead prints one experimental, versioned JSON document after validation and leaves `docroot` untouched. JSON includes public declarations even without prose, their original documentation and unparsed contracts, source spans and digests, page assignments, stable anchors, and resolved documentation links. Private and protected declarations are excluded. See the [JSON export contract](json-export.md) for the schema, path conventions, and differences from Markdown publication. This export does not require Rigor or a Rigor lens result.
 
-`Declaration#parameter_details` additionally records ordered Ruby parameter syntax and default-expression provenance. `Declaration#parameters` retains its existing labels for compatibility, and the Markdown renderer remains unchanged. Astro presentation uses the richer syntax when available, without assigning parameter types or evaluating defaults.
-
 Each scope has an index. Namespace pages follow Ruby namespace hierarchy, with documented top-level members in `_top-level.md`. Files without publishable declarations produce no API page. The documentation root has an index linking the scopes. Links use relative paths and stable anchors.
 
 Build reports diagnostics to stderr and does not print generated Markdown to stdout. Source errors return 1; configuration, input, ownership, and publication errors return 2. Warnings permit generation. All selected inputs and destinations are validated before publication. Missing roots or dependencies, empty source selections, conflicting destinations, and paths escaping declared roots are errors.

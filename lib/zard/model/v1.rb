@@ -69,30 +69,15 @@ module Zard
         end
       end
 
-      class Parameter
-        attr_reader :kind, :name, :source, :span, :default, :default_span
-
-        def initialize(kind:, name:, source:, span:, default: nil, default_span: nil)
-          @kind = kind
-          @name = name
-          @source = source
-          @span = span
-          @default = default
-          @default_span = default_span
-          freeze
-        end
-      end
-
       class Declaration
-        attr_reader :kind, :name, :namespace, :visibility, :parameters, :parameter_details, :receiver, :receiver_span, :refinement, :refinement_span, :alias_target, :superclass, :superclass_span, :container_builder, :container_builder_span, :mixins, :span, :comment_span, :documentation, :contracts
+        attr_reader :kind, :name, :namespace, :visibility, :parameters, :receiver, :receiver_span, :refinement, :refinement_span, :alias_target, :superclass, :superclass_span, :container_builder, :container_builder_span, :mixins, :span, :comment_span, :documentation, :contracts
 
-        def initialize(kind:, name:, namespace:, visibility:, parameters:, span:, comment_span:, documentation:, contracts:, parameter_details: nil, receiver: nil, receiver_span: nil, refinement: nil, refinement_span: nil, alias_target: nil, superclass: nil, superclass_span: nil, container_builder: nil, container_builder_span: nil, mixins: [].freeze)
+        def initialize(kind:, name:, namespace:, visibility:, parameters:, span:, comment_span:, documentation:, contracts:, receiver: nil, receiver_span: nil, refinement: nil, refinement_span: nil, alias_target: nil, superclass: nil, superclass_span: nil, container_builder: nil, container_builder_span: nil, mixins: [].freeze)
           @kind = kind
           @name = name
           @namespace = namespace
           @visibility = visibility
           @parameters = parameters
-          @parameter_details = parameter_details
           @receiver = receiver
           @receiver_span = receiver_span
           @refinement = refinement

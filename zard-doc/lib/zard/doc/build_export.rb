@@ -52,10 +52,6 @@ module Zard
         {id: "#{scope}:#{entry.fetch(:anchor)}", kind: item.kind, name: item.name,
          namespace: item.namespace, display_name: entry.fetch(:display_name),
          visibility: item.visibility, parameters: item.parameters,
-         parameter_details: item.parameter_details&.map do |parameter|
-           {kind: parameter.kind, name: parameter.name, source: parameter.source, span: span(parameter.span),
-            default: parameter.default, default_span: span(parameter.default_span)}
-         end,
          page: entry.fetch(:page), anchor: entry.fetch(:anchor), references: entry.fetch(:references),
          receiver: item.receiver, receiver_span: span(item.receiver_span),
          refinement: item.refinement, refinement_span: span(item.refinement_span),

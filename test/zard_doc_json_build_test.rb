@@ -12,21 +12,6 @@ require "rbconfig"
 require "zard/doc/cli"
 
 class ZardDocJSONBuildTest < Minitest::Test
-  def test_exports_structured_parameters_without_changing_legacy_labels
-    with_project do |root, config|
-      write_source(root, "lib/api.rb", "def call(value = [1, 2], option: {key: 3}, **options); end\n")
-      write_config(config, {"app" => scope("lib", "app")})
-      status, output, errors = run_cli(config)
-      assert_equal 0, status, errors
-      row = JSON.parse(output).fetch("scopes").first.fetch("declarations").first
-      assert_equal ["value", "option:", "**options"], row.fetch("parameters")
-      details = row.fetch("parameter_details")
-      assert_equal %w[optional optional_keyword keyword_rest], details.map { |item| item.fetch("kind") }
-      assert_equal ["[1, 2]", "{key: 3}", nil], details.map { |item| item.fetch("default") }
-      assert_equal "lib/api.rb", details.first.fetch("default_span").fetch("path")
-    end
-  end
-
   def test_exports_public_declarations_without_requiring_prose_or_running_ruby
     with_project do |root, config|
       code = "raise 'must not execute'\nclass API\n attr_accessor :value\n def run(path, **options); end\n private\n def secret; end\nend\n"

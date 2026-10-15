@@ -48,13 +48,45 @@ export function parseLens(data, scopes) {
     if (!['matched', 'unavailable'].includes(binding.status)) fail('unknown binding status');
     if (binding.status === 'matched' && !sites.has(binding.site_key)) fail('missing bound site');
     if (binding.status === 'unavailable' && (binding.site_key != null || typeof binding.reason !== 'string')) fail('invalid unavailable binding');
+    for (const field of ['file', 'capability', 'detail']) {
+      if (binding[field] != null && typeof binding[field] !== 'string') fail('invalid binding explanation');
+    }
+    if (binding.omission && (typeof binding.omission.kind !== 'string' || typeof binding.omission.reason !== 'string')) fail('invalid omission explanation');
     for (const key of array(binding.member_keys)) {
       if (!members.get(key)?.sites.includes(binding.site_key)) fail('missing bound member');
     }
     bindings.set(binding.declaration_id, binding);
   }
   if (bindings.size !== declarations.size) fail('declaration missing from bindings');
-  return { bindings, sites, members, producer: data.producer, schema: data.schema, revision: data.revision };
+  return { bindings, sites, members, files: data.files, capabilities: array(data.capabilities), producer: data.producer, schema: data.schema, revision: data.revision };
+}
+
+const bindingReasons = {
+  unsupported_declaration: 'This declaration uses a construct not supported by this lens version',
+  unsupported_capability: 'The producer does not supply this declaration capability',
+  unmatched_declaration: 'No matching source site was reported',
+  not_reported: 'No matching source site was reported',
+  ambiguous_site: 'Several source sites match; no site was selected',
+  failed: 'The producer failed to analyze this file',
+  parse_error: 'The producer could not parse this file',
+  not_found: 'The requested source file was not found',
+  not_ruby: 'The producer did not recognize a Ruby source file',
+  outside_project: 'The source file is outside the configured analysis project',
+  duplicate: 'The producer reported a duplicate target',
+};
+
+export function renderLensSummary(rows, lens) {
+  if (!lens) return '';
+  const missing = rows.filter((row) => lens.bindings.get(row.id).status === 'unavailable').length;
+  const paths = new Set(rows.map((row) => lens.bindings.get(row.id).file || lens.sites.get(lens.bindings.get(row.id).site_key)?.path || row.source.path));
+  const incomplete = lens.files.filter((file) => paths.has(file.path) && file.complete === false);
+  const absent = ['body_return', 'diagnostics', 'inputs'].filter((capability) => !lens.capabilities.includes(capability));
+  if (!missing && !incomplete.length && !absent.length) return '';
+  let content = '<aside class="api-lens-summary" aria-label="Type information coverage"><p><strong>Type information coverage</strong></p><ul>';
+  if (missing) content += `<li>${missing} of ${rows.length} declarations have no attached type information. Each declaration explains why.</li>`;
+  for (const file of incomplete) content += `<li>${code(file.path)}: the producer omitted ${array(file.omissions).length} declarations or constructs. Source documentation remains available.</li>`;
+  if (absent.length) content += `<li>Capabilities not supplied by this producer: ${absent.map(code).join(', ')}.</li>`;
+  return `${content}</ul></aside>\n\n`;
 }
 
 const unavailable = { contested: 'multiple definitions', not_computed: 'not computed', definition_build_failed: 'definition could not be analyzed' };
@@ -74,7 +106,13 @@ function slotText(value, lens) {
 export function renderLens(row, lens) {
   if (!lens) return '';
   const binding = lens.bindings.get(row.id);
-  if (binding.status === 'unavailable') return `<p class="api-lens-status">Rigor type information unavailable: ${escapeHtml(binding.reason.replaceAll('_', ' '))}.</p>\n\n`;
+  if (binding.status === 'unavailable') {
+    let reason = bindingReasons[binding.reason] || binding.reason.replaceAll('_', ' ');
+    if (binding.omission) reason += ` (${binding.omission.kind}: ${binding.omission.reason})`;
+    if (binding.capability) reason += ` (${binding.capability})`;
+    if (binding.detail) reason += `: ${binding.detail}`;
+    return `<p class="api-lens-status">Rigor type information unavailable: ${escapeHtml(reason)}.</p>\n\n`;
+  }
   const site = lens.sites.get(binding.site_key);
   if (!binding.member_keys.length && !site.body_return) return '';
   let content = '<aside class="api-lens" aria-label="Rigor type information">\n';

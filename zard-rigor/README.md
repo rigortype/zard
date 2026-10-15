@@ -48,6 +48,10 @@ definition body returns separately, escaping Rigor's display text verbatim.
 Consumer applications own all CSS. Revision 1 does not provide type-reference
 links, plugin-synthesized members, constant types, or the reserved `@extrbs`
 semantics. Missing capabilities and omissions are not empty type sets.
+Unavailable bindings carry explicit reasons for unsupported constructs or
+capabilities, target failures, ambiguous sites and unmatched declarations.
+Producer omission explanations are attached only after exact byte-span/name
+matching. Page coverage summaries distinguish these gaps from dynamic types.
 
 The shared fixture is attributed in `test/fixtures/rigor_lens/README.md`.
 Set `ZARD_RIGOR_COMMAND` to an executable for the opt-in released-CLI test.

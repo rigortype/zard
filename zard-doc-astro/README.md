@@ -52,6 +52,7 @@ Consumers style these hooks with their own stylesheet:
 - `.api-lens`: optional member facts and this definition's body return.
 - `.api-lens-signature`: verbatim escaped Rigor signature in `pre`/`code`.
 - `.api-lens-status`: experimental protocol notice or unavailable binding.
+- `.api-lens-summary`: page-level coverage, producer omissions and unavailable capabilities.
 
 An optional `lens` extension from `zard-rigor` supports Rigor 0.4.3's experimental
 `lens/v0` revision 1. Member signatures are shared across definitions; body

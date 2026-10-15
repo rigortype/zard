@@ -25,7 +25,7 @@ module Zard
             path = Pathname.new(File.expand_path(row.fetch("span").fetch("path"), base)).relative_path_from(Pathname.new(@root)).to_s
             file = @files.fetch(path)
             candidates = (file["sites"] || []).select { |site| matches?(row, site) }
-            binding = {"scope" => scope.fetch("name"), "declaration_id" => row.fetch("id"), "site_key" => nil, "member_keys" => []}
+            binding = {"scope" => scope.fetch("name"), "declaration_id" => row.fetch("id"), "file" => path, "site_key" => nil, "member_keys" => []}
             if candidates.one?
               site = candidates.first
               retained << site.fetch("key")
@@ -34,13 +34,7 @@ module Zard
               binding["member_keys"] = @members.filter_map { |key, member| key if member.fetch("sites").include?(site.fetch("key")) }
             else
               binding["status"] = "unavailable"
-              binding["reason"] = if file["status"] != "ok"
-                file["status"]
-              elsif candidates.empty?
-                "not_reported"
-              else
-                "ambiguous_site"
-              end
+              binding.merge!(unavailable(row, file, candidates))
               warnings << "#{scope.fetch("name")}:#{row.fetch("display_name")}: lens #{binding.fetch("reason")}"
             end
             bindings << binding
@@ -60,6 +54,30 @@ module Zard
       end
 
       private
+
+      def unavailable(row, file, candidates)
+        return {"reason" => file.fetch("status"), "detail" => file.fetch("reason")} if file.fetch("status") != "ok"
+        return {"reason" => "ambiguous_site"} unless candidates.empty?
+
+        omissions = file.fetch("omissions").select do |omission|
+          %w[start_offset end_offset].all? { |edge| omission.fetch("span")[edge] == row.fetch("span")[edge] } &&
+            [row.fetch("name"), row.fetch("display_name")].include?(omission["name"])
+        end
+        if omissions.one?
+          return {"reason" => "unsupported_declaration", "omission" => omissions.first.slice("kind", "reason")}
+        end
+        kind = row.fetch("kind")
+        capability = if kind.include?("attribute")
+          "attribute"
+        elsif kind.include?("method")
+          "method"
+        else
+          kind
+        end
+        return {"reason" => "unsupported_capability", "capability" => capability} unless @data.fetch("capabilities").include?(capability)
+
+        {"reason" => "unmatched_declaration"}
+      end
 
       def reject!(message)
         raise Error, "Invalid lens/v0 document: #{message}"
@@ -100,6 +118,7 @@ module Zard
         reject!("invalid completeness/omissions") unless [true, false].include?(file.fetch("complete")) && file.fetch("omissions").is_a?(Array)
         reject!("completeness contradicts omissions") unless file.fetch("complete") == file.fetch("omissions").empty?
         reject!("expected sites/inputs arrays") unless file.fetch("sites").is_a?(Array) && file.fetch("inputs").is_a?(Array)
+        file.fetch("omissions").each { |omission| validate_span(omission.fetch("span"), @selected.fetch(absolute)) }
         file.fetch("sites").each do |site|
           location = site.fetch("span")
           validate_span(location, @selected.fetch(absolute))

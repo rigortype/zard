@@ -1,5 +1,5 @@
 import { code, escapeHtml, markdownText, prose } from './prose.mjs';
-import { renderLens } from './lens.mjs';
+import { renderLens, renderLensSummary } from './lens.mjs';
 import { pageSlug, pageUrl, routePages, scopeSlug, scopeUrl, namespaceTree } from './routes.mjs';
 
 const link = (label, href, index = false) => `<a${index ? ' class="api-index-link"' : ''} href="${escapeHtml(href)}">${escapeHtml(label)}</a>`;
@@ -78,6 +78,7 @@ export function renderReference(model, options = {}) {
         return scope.pages.some((item) => item.path === candidate) ? [[segments[i], pageUrl(candidate, basePath)]] : [];
       });
       let content = crumbs([[title, `/${basePath}/`], [scope.name, scopeUrl(scope, basePath)], ...ancestors, [segments.at(-1)]]) + provenanceHtml;
+      content += renderLensSummary(page.declarations, model.lens);
       for (const [category, kind] of categories) {
         const rows = page.declarations.filter((row) => declarationKind(row.kind) === kind);
         if (rows.length) content += `## ${category}\n\n${rows.map((row) => entry(row, model, basePath, sourceLinks)).join('')}`;

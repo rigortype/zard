@@ -47,21 +47,49 @@ module Zard
         layout = nil
         format = "markdown"
         scopes = []
+        lens_root = nil
+        rigor_command = nil
+        lens_workers = 4
+        lens_config = nil
         OptionParser.new do |parser|
           parser.on("--config FILE", "Read the documentation build configuration") { |value| config = value }
           parser.on("--layout LAYOUT", %w[namespace file], "Override page organization") { |value| layout = value }
           parser.on("--format FORMAT", %w[markdown json], "Write Markdown pages or export JSON to stdout") { |value| format = value }
           parser.on("--scope NAME", "Build a scope and its documentation dependencies (repeatable)") { |value| scopes << value }
+          parser.on("--lens-root DIR", "Enrich JSON using experimental Rigor lens (requires zard-rigor)") { |value| lens_root = value }
+          parser.on("--rigor-command FILE", "Rigor 0.4.3 executable (default: rigor)") { |value| rigor_command = value }
+          parser.on("--lens-workers N", Integer, "Lens workers (default: 4)") { |value| lens_workers = value }
+          parser.on("--lens-config FILE", "Rigor configuration, relative to lens root") { |value| lens_config = value }
         end.parse!(@argv)
         return usage_error("Pass --config FILE without positional arguments.") unless config && @argv.empty?
 
-        builder = Build.new(config, layout: layout, scopes: scopes, format: format, stdout: @stdout)
+        return usage_error("--lens-root requires --format json.") if lens_root && format != "json"
+        return usage_error("--rigor-command requires --lens-root.") if rigor_command && !lens_root
+        return usage_error("--lens-config requires --lens-root.") if lens_config && !lens_root
+        return usage_error("--lens-workers must be non-negative.") if lens_workers.negative?
+
+        enricher = lens_enricher(lens_root, rigor_command || "rigor", lens_workers, lens_config) if lens_root
+        builder = Build.new(config, layout: layout, scopes: scopes, format: format, stdout: @stdout, enricher: enricher)
         builder.run
       rescue BuildError => error
         @stderr.puts error.message
         error.status
       ensure
         builder&.diagnostics&.each { |diagnostic| @stderr.puts diagnostic }
+      end
+
+      def lens_enricher(root, command, workers, config)
+        require "zard/rigor"
+        adapter = Zard::Rigor::Lens.new(root: root, command: command, workers: workers, config: config)
+        lambda do |data, base:|
+          adapter.enrich(data, base: base)
+        rescue Zard::Rigor::Error => error
+          raise BuildError, error.message
+        end
+      rescue LoadError => error
+        raise BuildError, "Install the optional zard-rigor gem to use --lens-root: #{error.message}"
+      rescue SystemCallError => error
+        raise BuildError, "Invalid lens project root: #{error.message}"
       end
 
       def lint_command
@@ -214,6 +242,7 @@ module Zard
             zard-doc render PATH...
             zard-doc format [--check | --write] PATH...
             zard-doc build --config FILE [--scope NAME ...] [--layout namespace|file] [--format markdown|json]
+              [--lens-root DIR [--rigor-command FILE] [--lens-workers N] [--lens-config FILE]]
         USAGE
       end
     end

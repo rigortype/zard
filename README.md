@@ -16,7 +16,7 @@ ZARD separates contracts from API documentation:
 - **API Documentation (`@param`, `@return`, etc.)**: Human- and AI-facing prose explains *what* and *why* without repeating type signatures.
 - **Structured Declaration Model**: The parser captures declarations, contracts, documentation, and diagnostics with precise source spans and provenance—ideal for IDEs, automated tooling, and AI agents.
 
-The current release preserves contract payloads as text. It does not parse or validate their types, check documentation claims against contracts, or integrate with the Rigor lens.
+The current release preserves contract payloads as text. It does not parse or validate their types or check documentation claims against contracts. The development checkout also provides an optional experimental Rigor lens adapter, described below.
 
 ---
 
@@ -46,12 +46,13 @@ end
 
 ## Architecture & Packages
 
-This repository provides two coordinated gems:
+The published parser and documentation gems are accompanied by an optional adapter in this checkout:
 
 | Gem | Role | Description |
 | --- | --- | --- |
 | [`zard`](.) | Parser & Model | Parses Ruby source into a versioned, static document model (`Zard::Model::V1`) with source spans and provenance. |
 | [`zard-doc`](zard-doc) | Renderer & CLI | Renders API documentation from the ZARD model into Markdown, and provides the `zard-doc` CLI tool. |
+| [`zard-rigor`](zard-rigor) | Optional adapter | Enriches JSON exports through the released Rigor 0.4.3 CLI (`lens/v0` revision 1), without loading analyzer internals. Not yet published. |
 
 ---
 

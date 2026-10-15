@@ -1,3 +1,5 @@
+import { parseLens } from './lens.mjs';
+
 const fail = (message) => { throw new Error(`Invalid ZARD API export: ${message}`); };
 const object = (value, label) => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) fail(`${label} must be an object`);
@@ -101,5 +103,5 @@ export function parseExport(value) {
       if (!page?.declarations.some((row) => row.anchor === target.anchor)) fail('link to missing declaration');
     }
   }
-  return { scopes, producer: { zard: text(producer.zard, 'ZARD version'), zardDoc: text(producer.zard_doc, 'zard-doc version') } };
+  return { scopes, lens: parseLens(data.lens, scopes), producer: { zard: text(producer.zard, 'ZARD version'), zardDoc: text(producer.zard_doc, 'zard-doc version') } };
 }

@@ -10,6 +10,35 @@ permissions:
   contents: read
 
 jobs:
+  lens:
+    runs-on: ubuntu-latest
+    name: Released Rigor lens
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+      - name: Install standalone analyzer
+        env:
+          GEM_HOME: ${{ runner.temp }}/rigor
+          GEM_PATH: ${{ runner.temp }}/rigor
+        run: |
+          gem install prism --version 1.9.0 --no-document
+          gem install rbs --version 4.2.0 --no-document
+          gem install language_server-protocol --version 3.17.0.6 --no-document
+          gem install rigortype --version 0.4.3 --no-document
+          gem install rbs-inline --version 0.14.0 --no-document
+          cat > "$RUNNER_TEMP/rigor-cli" <<'SH'
+          #!/bin/sh
+          unset RUBYOPT BUNDLE_GEMFILE BUNDLE_PATH
+          GEM_HOME="$RUNNER_TEMP/rigor" GEM_PATH="$RUNNER_TEMP/rigor" exec ruby "$RUNNER_TEMP/rigor/bin/rigor" "$@"
+          SH
+          chmod +x "$RUNNER_TEMP/rigor-cli"
+      - run: ZARD_RIGOR_COMMAND="$RUNNER_TEMP/rigor-cli" bundle exec ruby -Itest test/rigor_lens_test.rb
+
   astro:
     runs-on: ubuntu-latest
     name: Astro presentation

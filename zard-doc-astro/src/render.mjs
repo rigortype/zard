@@ -12,6 +12,21 @@ const declarationKind = (kind) => {
 const titleFor = (scope, page) => page.path.slice(scope.destination.length + 1).replace(/\.md$/, '').split('/').join('::');
 const categories = [['Classes', 'class'], ['Modules', 'module'], ['Constants', 'constant'], ['Attributes', 'attribute'], ['Instance methods', 'instance method'], ['Singleton methods', 'singleton method'], ['Ruby refinements', 'refinement']];
 
+function memberIndex(rows, basePath) {
+  const groups = categories.filter(([, kind]) => ['attribute', 'instance method', 'singleton method'].includes(kind));
+  const content = groups.map(([title, kind]) => {
+    const members = rows.filter((row) => declarationKind(row.kind) === kind);
+    if (!members.length) return '';
+    const items = members.map((row) => {
+      const parameters = row.parameterDetails?.map((parameter) => parameter.source) ?? row.parameters;
+      const signature = kind.includes('method') ? `${row.displayName}(${parameters.join(', ')})` : row.displayName;
+      return `<li><a class="api-index-link" href="${escapeHtml(`${pageUrl(row.page, basePath)}#${row.anchor}`)}">${code(signature)}</a><span class="api-meta">${escapeHtml(`${row.source.path}:${row.source.line}`)}</span></li>`;
+    });
+    return `<details open><summary>${title} (${members.length})</summary><ul>${items.join('\n')}</ul></details>`;
+  }).join('\n');
+  return content.trim() ? `## Member index\n\n<nav class="api-member-index" aria-label="Members on this page">${content}</nav>\n\n` : '';
+}
+
 function indexEntries(rows, basePath) {
   return categories.map(([title, kind]) => {
     const matches = rows.filter((row) => declarationKind(row.kind) === kind);
@@ -79,6 +94,7 @@ export function renderReference(model, options = {}) {
       });
       let content = crumbs([[title, `/${basePath}/`], [scope.name, scopeUrl(scope, basePath)], ...ancestors, [segments.at(-1)]]) + provenanceHtml;
       content += renderLensSummary(page.declarations, model.lens);
+      content += memberIndex(page.declarations, basePath);
       for (const [category, kind] of categories) {
         const rows = page.declarations.filter((row) => declarationKind(row.kind) === kind);
         if (rows.length) content += `## ${category}\n\n${rows.map((row) => entry(row, model, basePath, sourceLinks)).join('')}`;

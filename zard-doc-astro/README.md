@@ -44,6 +44,7 @@ Consumers style these hooks with their own stylesheet:
 
 - `.api-breadcrumbs`: semantic `nav`/`ol` breadcrumb structure.
 - `.api-index-link`: links in scope and declaration lists.
+- `.api-member-index`: per-page member navigation with native disclosure groups and exact definition anchors.
 - `.api-provenance`: optional source/build attribution.
 - `.api-declaration`: a declaration `section` labelled by its heading.
 - `.api-signature`: declaration heading containing escaped source parameter labels.

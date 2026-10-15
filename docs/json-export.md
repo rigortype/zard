@@ -49,6 +49,7 @@ JSON exports all public declarations, including those without API prose, so a si
 | `id`, `page`, `anchor` | Scope-specific identity and logical page destination; `id` combines the documentation scope with the existing stable anchor. |
 | `kind`, `name`, `namespace`, `display_name`, `visibility` | Original declaration kind/name, lexical namespace, display/reference name and visibility. |
 | `parameters` | Existing source parameter labels, not a structured typed signature. |
+| `parameter_details` | Additive Ruby syntax metadata: ordered `kind`, nullable `name`, exact `source`, source `span`, nullable default-expression `default` and `default_span`. No types or evaluated values. |
 | `references` | Names by which this declaration participates in documentation reference lookup. |
 | `span`, `comment_span` | Declaration and attached comment provenance. |
 | `documentation` | Original tag data plus resolved Markdown descriptions. |
@@ -58,6 +59,8 @@ JSON exports all public declarations, including those without API prose, so a si
 | `mixins` | Written mixin `kind`, `target` and `span`. |
 
 Absent optional fields are `null`; arrays remain arrays. A repeated method definition has its own identity/anchor. Nothing chooses a runtime-winning definition, resolves dynamic receivers, or asserts effective ancestry. Attribute accessors remain a source declaration with multiple reference names, rather than separate inferred getter/setter signatures.
+
+`parameter_details` is additive within revision 1; older exports may omit it and consumers fall back to `parameters`. It is `null` when no source-backed parameter list is available (including aliases and generated attributes), and `[]` for an explicit parameterless method. Kinds are `required`, `optional`, `rest`, `post`, `required_keyword`, `optional_keyword`, `keyword_rest`, `block`, `forwarding`, `no_keywords` and `implicit_rest`. Anonymous and destructured forms retain their exact source patterns with a nullable name; destructured required/post parameters keep their positional kind. Visibility changes and module-function copies retain metadata. Default expressions are never executed. A heredoc default's body is not contiguous with its parameter header: its header remains in `source`, `default`/`default_span` are unavailable and `parameter.unsupported-default` is emitted rather than presenting the opener as a complete expression.
 
 Documentation entries carry `name`, `owner`, `subject`, optional `claim`, `description`, `raw`, and `span`, matching the source model. `rendered_description` contains Markdown with resolvable ZARD references linked, using the same resolution rules as a documentation build. Original descriptions remain unchanged. Examples, raw text and inline/fenced code preserve literal reference syntax. Consumers must use their normal safe Markdown rendering policy; strings in JSON are not trusted HTML.
 

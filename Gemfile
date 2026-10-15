@@ -5,6 +5,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "zard-doc", path: "zard-doc"
+gem "zard-rigor", path: "zard-rigor"
 
 gem "irb"
 gem "minitest", "~> 5.0"

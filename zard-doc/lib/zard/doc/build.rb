@@ -25,12 +25,13 @@ module Zard
     class Build
       attr_reader :diagnostics
 
-      def initialize(path, layout: nil, scopes: [], format: "markdown", stdout: $stdout)
+      def initialize(path, layout: nil, scopes: [], format: "markdown", stdout: $stdout, enricher: nil)
         raise BuildError, "format must be markdown or json" unless %w[markdown json].include?(format)
 
         @configuration = BuildConfiguration.new(path, layout: layout, scopes: scopes)
         @format = format
         @stdout = stdout
+        @enricher = enricher
         @partial = !scopes.empty?
         @diagnostics = []
       end
@@ -63,7 +64,7 @@ module Zard
         @diagnostics.concat(renderer.diagnostics)
         if @format == "json"
           export = BuildExport.new(@configuration, documents, digests)
-          @stdout.write(export.render(renderer))
+          @stdout.write(export.render(renderer, enricher: @enricher))
           return 0
         end
 

@@ -19,4 +19,12 @@ task :build_doc do
   end
 end
 
-task default: %i[test standard rbs build build_doc]
+desc "Build the optional zard-rigor gem"
+task :build_rigor do
+  Dir.chdir("zard-rigor") do
+    spec = Gem::Specification.load("zard-rigor.gemspec")
+    sh "gem build zard-rigor.gemspec --output ../pkg/#{spec.full_name}.gem"
+  end
+end
+
+task default: %i[test standard rbs build build_doc build_rigor]

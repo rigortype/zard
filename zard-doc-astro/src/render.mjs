@@ -1,4 +1,5 @@
 import { code, escapeHtml, markdownText, prose } from './prose.mjs';
+import { renderLens } from './lens.mjs';
 import { pageSlug, pageUrl, routePages, scopeSlug, scopeUrl, namespaceTree } from './routes.mjs';
 
 const link = (label, href, index = false) => `<a${index ? ' class="api-index-link"' : ''} href="${escapeHtml(href)}">${escapeHtml(label)}</a>`;
@@ -32,6 +33,7 @@ function entry(row, model, basePath, sourceLinks) {
     const gap = previous ? '\n'.repeat(tag.line > previous.endLine + 1 ? 2 : 1) : '';
     return gap + tag.description;
   }).join('');
+  result += renderLens(row, model.lens);
   result += prose(description, row.page, model, basePath);
   for (const tag of row.tags.filter((tag) => !['text', 'raw'].includes(tag.name))) {
     const names = { param: 'Parameter', return: 'Returns', yieldparam: 'Block parameter', yieldreturn: 'Block returns', raise: 'Raises', note: 'Note', see: 'See also', deprecated: 'Deprecated', example: 'Example', option: 'Option' };
@@ -56,11 +58,11 @@ export function renderReference(model, options = {}) {
   }
   const pages = [];
   const add = (slug, title, description, body) => pages.push({ slug, title, description, body });
-  const provenanceHtml = provenance.length
+  const provenanceHtml = (model.lens ? '<p class="api-lens-status">Rigor 0.4.3 · experimental lens/v0 revision 1. Body returns use declared or unknown parameter types.</p>\n\n' : '') + (provenance.length
     ? `<p class="api-provenance">${provenance.map(({ label, url }) => {
       if (url && !/^https?:\/\//i.test(url)) throw new Error('Invalid provenance URL');
       return url ? link(label, url) : escapeHtml(label);
-    }).join(' · ')}</p>\n\n` : '';
+    }).join(' · ')}</p>\n\n` : '');
   let root = provenanceHtml + (introduction ? prose(introduction, '', model, basePath) + '\n' : '');
   root += model.scopes.length ? model.scopes.map((scope) => `- ${link(scope.name, scopeUrl(scope, basePath), true)} — ${scope.pages.length} namespace pages, ${scope.declarations.length} public declarations`).join('\n') : 'No public declarations were exported. Check the selected source mappings before publishing.';
   add(basePath, title, description, root + '\n');

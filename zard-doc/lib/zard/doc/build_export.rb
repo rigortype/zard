@@ -12,7 +12,7 @@ module Zard
         @digests = digests
       end
 
-      def render(renderer)
+      def render(renderer, enricher: nil)
         declarations = renderer.export_declarations
         data = {schema: "zard-doc/v0", revision: 1,
                 producer: {zard: Zard::VERSION, zard_doc: Zard::Doc::VERSION},
@@ -20,6 +20,7 @@ module Zard
                 scopes: @configuration.selected_scopes.map { |name| scope(name, declarations.fetch(name)) },
                 links: renderer.links.sort.to_h,
                 warnings: renderer.diagnostics.map { |message| relative_message(message) }}
+        data = enricher.call(data, base: @configuration.base) if enricher
         JSON.pretty_generate(data) + "\n"
       rescue JSON::GeneratorError => error
         raise BuildError, "cannot export documentation JSON: #{error.message}"

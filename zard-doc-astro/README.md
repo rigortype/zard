@@ -49,6 +49,15 @@ Consumers style these hooks with their own stylesheet:
 - `.api-signature`: declaration heading containing escaped source parameter labels.
 - `.api-meta`: declaration kind and source location.
 - `.api-example`: literal example `pre`/`code`.
+- `.api-lens`: optional member facts and this definition's body return.
+- `.api-lens-signature`: verbatim escaped Rigor signature in `pre`/`code`.
+- `.api-lens-status`: experimental protocol notice or unavailable binding.
+
+An optional `lens` extension from `zard-rigor` supports Rigor 0.4.3's experimental
+`lens/v0` revision 1. Member signatures are shared across definitions; body
+returns belong to one definition. Dynamic and unavailable states retain their
+meaning. The renderer neither parses type text nor selects runtime winners.
+It rejects incompatible revisions and dangling bindings before publication.
 
 Hooks and structure are an experimental presentation contract. Accessibility attributes and stable IDs belong to the renderer; focus appearance, spacing, wrapping and header scroll offsets belong to consumer CSS. Consumers must provide responsive layout and keyboard-visible focus appropriate to their site. Contracts remain in the export and are not presented as inferred signatures.
 

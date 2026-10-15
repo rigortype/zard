@@ -8,6 +8,8 @@ export function pageSlug(path, basePath) {
 export const pageUrl = (path, basePath) => `/${pageSlug(path, basePath)}/`;
 export const scopeSlug = (scope, basePath) => `${basePath}/${siteSlugRoute(scope.destination)}`;
 export const scopeUrl = (scope, basePath) => `/${scopeSlug(scope, basePath)}/`;
+export const hasRelationships = (scope) => scope.declarations.some((row) => row.relationships != null);
+export const hierarchySlug = (scope, basePath) => `${scopeSlug(scope, basePath)}/hierarchy`;
 
 export function routePages(model, basePath) {
   const routes = new Map([[basePath, 'API landing']]);
@@ -19,6 +21,7 @@ export function routePages(model, basePath) {
   };
   for (const scope of model.scopes) {
     add(scopeSlug(scope, basePath), scope.name);
+    if (hasRelationships(scope)) add(hierarchySlug(scope, basePath), `${scope.name} hierarchy`);
     for (const page of scope.pages) add(pageSlug(page.path, basePath), page.path);
   }
   return routes;

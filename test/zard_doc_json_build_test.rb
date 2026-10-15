@@ -12,6 +12,60 @@ require "rbconfig"
 require "zard/doc/cli"
 
 class ZardDocJSONBuildTest < Minitest::Test
+  def test_exports_written_relationships_with_lexical_context_and_all_reopened_targets
+    with_project do |root, config|
+      write_source(root, "app/a.rb", "class Parent; end\nmodule Feature; end\nclass Child < Parent\n class Parent; end\n include Feature\n prepend Feature\n extend Feature\nend\n")
+      write_source(root, "app/b.rb", "class Parent; end\n")
+      write_config(config, {"app" => scope("app", "app")})
+      status, output, errors = run_cli(config)
+      assert_equal 0, status, errors
+      assert_empty errors
+      data = JSON.parse(output)
+      declarations = data.fetch("scopes").first.fetch("declarations")
+      child = declarations.find { |row| row.fetch("display_name") == "Child" }
+      relations = child.fetch("relationships")
+      assert_equal %w[superclass include prepend extend], relations.map { |row| row.fetch("kind") }
+      assert_equal 2, relations.first.fetch("targets").length
+      targets = relations.first.fetch("targets").map { |target| declarations.find { |row| row.fetch("id") == target.fetch("declaration_id") } }
+      assert_equal ["Parent", "Parent"], targets.map { |row| row.fetch("display_name") }
+      assert_equal "app/a.rb", relations.first.fetch("span").fetch("path")
+      assert relations.all? { |row| row.fetch("status") == "resolved" }
+      assert_equal 3, data.fetch("links").fetch("app/Child.md").length
+      status, output, errors = run_cli(config, "--layout", "file")
+      assert_equal 0, status, errors
+      child = JSON.parse(output).fetch("scopes").first.fetch("declarations").find { |row| row.fetch("display_name") == "Child" }
+      assert_equal %w[app/a.md app/b.md], child.fetch("relationships").first.fetch("targets").map { |row| row.fetch("path") }
+    end
+  end
+
+  def test_relationships_observe_direct_dependencies_shadowing_and_ambiguity
+    with_project do |root, config|
+      write_source(root, "app/api.rb", "class App < Core; end\nclass DeepChild < Hidden; end\nclass Ambiguous < Same; end\nmodule Ns\n Core = Object\n class Shadow < Core; end\nend\nclass Dynamic < factory(); end\nBuilt = Data.define(:name)\n")
+      write_source(root, "dep/api.rb", "class Core; end\nclass Same; end\n")
+      write_source(root, "other/api.rb", "class Same; end\n")
+      write_source(root, "deep/api.rb", "class Hidden; end\n")
+      write_config(config, {"app" => scope("app", "app", %w[dep other]), "dep" => scope("dep", "dep", ["deep"]), "other" => scope("other", "other"), "deep" => scope("deep", "deep")})
+      status, output, errors = run_cli(config)
+      assert_equal 0, status, errors
+      data = JSON.parse(output)
+      rows = data.fetch("scopes").find { |scope| scope.fetch("name") == "app" }.fetch("declarations").to_h { |row| [row.fetch("display_name"), row] }
+      assert_equal "dep", rows.fetch("App").fetch("relationships").first.fetch("targets").first.fetch("scope")
+      %w[DeepChild Ambiguous Ns::Shadow].each do |name|
+        relation = rows.fetch(name).fetch("relationships").first
+        assert_equal "unresolved", relation.fetch("status")
+        assert_empty relation.fetch("targets")
+      end
+      assert_equal "expression", rows.fetch("Dynamic").fetch("relationships").first.fetch("status")
+      builder = rows.fetch("Built").fetch("relationships").first
+      assert_equal "container_builder", builder.fetch("kind")
+      assert_equal "expression", builder.fetch("status")
+      assert_empty builder.fetch("targets")
+      assert_match(/ambiguous reference/, errors)
+      assert_match(/unresolved superclass documentation relationship/, errors)
+      refute_includes output, root
+    end
+  end
+
   def test_exports_structured_parameters_without_changing_legacy_labels
     with_project do |root, config|
       write_source(root, "lib/api.rb", "def call(value = [1, 2], option: {key: 3}, **options); end\n")

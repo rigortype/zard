@@ -45,6 +45,11 @@ module Zard
         @diagnostics << message unless @diagnostics.include?(message)
       end
 
+      def warn_relationship(kind, expression, origin)
+        message = "warning: unresolved #{kind} documentation relationship #{expression.inspect} at #{origin.span.path}:#{origin.span.start_line}"
+        @diagnostics << message unless @diagnostics.include?(message)
+      end
+
       private
 
       def add_page(pages, path, text)
@@ -118,12 +123,12 @@ module Zard
           result
         end
 
-        def lookup(candidates, path)
+        def lookup(candidates, path, containers: false)
           path = path.delete_prefix("::")
           candidates.each do |candidate|
             targets = @targets[candidate].uniq
             unless targets.empty?
-              if @layout == "namespace" && targets.all? { |target| %i[class module].include?(target.kind) }
+              if (@layout == "namespace" || containers) && targets.map(&:kind).uniq.one? && targets.all? { |target| %i[class module].include?(target.kind) }
                 published = targets.find { |target| renderable?(target) }
                 return [:found, [published]] if published
               end
@@ -150,7 +155,14 @@ module Zard
             end
             {declaration: declaration, page: path, anchor: @anchors.fetch(declaration),
              display_name: reference_names(declaration).first || display_name(declaration),
-             references: reference_names(declaration), descriptions: descriptions}
+             references: reference_names(declaration), descriptions: descriptions, relationships: relationship_entries(declaration)}
+          end
+        end
+
+        def relationship_targets(declaration)
+          @targets.fetch(qualified_name(declaration)).select { |item| %i[class module].include?(item.kind) && published?(item) }.map do |item|
+            path, anchor = destination(item)
+            {scope: name, declaration_id: "#{name}:#{anchor}", path: path, anchor: anchor}
           end
         end
 
@@ -196,7 +208,7 @@ module Zard
           url(Pathname.new(to).relative_path_from(Pathname.new(File.dirname(from))).to_s)
         end
 
-        def resolve_scoped(reference, declaration)
+        def resolve_scoped(reference, declaration, outer: false, containers: false)
           return if !reference || declaration.refinement
 
           path = reference.sub(/\A((?:::)?[[:upper:]\p{Lt}][[:word:]]*(?:::[[:upper:]\p{Lt}][[:word:]]*)*)?(?:\?\.|\.#)/) { "#{$1}." }
@@ -207,14 +219,14 @@ module Zard
             owner = qualified_name(declaration) if %i[class module].include?(declaration.kind)
             ["#{owner&.delete_prefix("::")}#{path}"]
           else
-            namespace = %i[class module].include?(declaration.kind) ? qualified_name(declaration) : declaration.namespace
+            namespace = (!outer && %i[class module].include?(declaration.kind)) ? qualified_name(declaration) : declaration.namespace
             lexical_candidates(path, namespace)
           end
-          status, targets = lookup(candidates, path)
+          status, targets = lookup(candidates, path, containers: containers)
           matches = targets.map { |target| [self, target] }
           if status == :missing
             matches = @build.dependencies(name).flat_map do |renderer|
-              _, dependency_targets = renderer.lookup(candidates, path)
+              _, dependency_targets = renderer.lookup(candidates, path, containers: containers)
               dependency_targets.map { |target| [renderer, target] }
             end
           end
@@ -226,6 +238,32 @@ module Zard
           return unless match
 
           match if match.first.published?(match.last)
+        end
+
+        def relationship_entries(declaration)
+          return [] unless %i[class module].include?(declaration.kind) && !declaration.refinement
+
+          entries = []
+          entries << [:superclass, declaration.superclass, declaration.superclass_span] if declaration.superclass
+          entries << [:container_builder, declaration.container_builder, declaration.container_builder_span] if declaration.container_builder
+          entries.concat(declaration.mixins.map { |mixin| [mixin.kind, mixin.target, mixin.span] })
+          entries.map do |kind, expression, span|
+            constant = expression.match?(/\A(?:::)?[[:upper:]\p{Lt}][[:word:]]*(?:::[[:upper:]\p{Lt}][[:word:]]*)*\z/)
+            match = resolve_scoped(expression, declaration, outer: kind == :superclass, containers: true) if constant && kind != :container_builder
+            expected_kind = (kind == :superclass) ? :class : :module
+            match = nil if match && match.last.kind != expected_kind
+            targets = match ? match.first.relationship_targets(match.last) : []
+            targets.each { |target| @build.record_link(@paths.fetch(declaration), target.fetch(:path), target.fetch(:anchor)) }
+            status = if !targets.empty?
+              :resolved
+            elsif constant && kind != :container_builder
+              :unresolved
+            else
+              :expression
+            end
+            @build.warn_relationship(kind, expression, declaration) unless status == :resolved
+            {kind: kind, expression: expression, span: span, status: status, targets: targets}
+          end
         end
 
         def link_destination(match, declaration)

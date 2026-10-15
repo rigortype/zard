@@ -67,10 +67,7 @@ module Zard
 
       def validate(arguments, status)
         reject!("expected object") unless @data.is_a?(Hash)
-        reject!("unsupported schema/revision") unless @data.values_at("schema", "revision") == ["lens/v0", 1]
-        producer = @data.fetch("producer")
-        reject!("invalid producer") unless producer.is_a?(Hash)
-        reject!("expected Rigor 0.4.3") unless producer.values_at("name", "version") == ["rigor", "0.4.3"]
+        Compatibility.validate!(@data)
         reject!("invalid context") unless @data.fetch("context").is_a?(Hash)
         capabilities = @data.fetch("capabilities")
         reject!("missing required capabilities") unless capabilities.is_a?(Array) && (%w[class module method attribute] - capabilities).empty?

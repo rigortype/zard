@@ -58,7 +58,7 @@ export function renderReference(model, options = {}) {
   }
   const pages = [];
   const add = (slug, title, description, body) => pages.push({ slug, title, description, body });
-  const provenanceHtml = (model.lens ? '<p class="api-lens-status">Rigor 0.4.3 · experimental lens/v0 revision 1. Body returns use declared or unknown parameter types.</p>\n\n' : '') + (provenance.length
+  const provenanceHtml = (model.lens ? `<p class="api-lens-status">Rigor ${escapeHtml(model.lens.producer.version)} · experimental ${escapeHtml(model.lens.schema)} revision ${model.lens.revision}. Body returns use declared or unknown parameter types.</p>\n\n` : '') + (provenance.length
     ? `<p class="api-provenance">${provenance.map(({ label, url }) => {
       if (url && !/^https?:\/\//i.test(url)) throw new Error('Invalid provenance URL');
       return url ? link(label, url) : escapeHtml(label);

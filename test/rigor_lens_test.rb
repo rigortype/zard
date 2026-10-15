@@ -25,7 +25,7 @@ class RigorLensTest < Minitest::Test
 
   def fixture_document
     data = JSON.parse(File.read(File.join(FIXTURE, "expected.json")))
-    data["producer"]["version"] = "0.4.3"
+    data["producer"]["version"] = Zard::Rigor::Compatibility::DATA.fetch("default_version")
     data["files"].select! { |file| file["status"] == "ok" }
     data["files"].sort_by! { |file| file.fetch("path") }
     data["files"].each { |file| file["argument"] = "./#{file.fetch("path")}" }

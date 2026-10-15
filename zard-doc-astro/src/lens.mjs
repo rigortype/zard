@@ -1,4 +1,5 @@
 import { code, escapeHtml } from './prose.mjs';
+import compatibility from './lens-compatibility.json' with { type: 'json' };
 
 const fail = (message) => { throw new Error(`Invalid ZARD lens data: ${message}`); };
 const array = (value) => { if (!Array.isArray(value)) fail('expected array'); return value; };
@@ -14,7 +15,7 @@ const slot = (value) => {
 
 export function parseLens(data, scopes) {
   if (data == null) return null;
-  if (data.schema !== 'lens/v0' || data.revision !== 1 || data.producer?.name !== 'rigor' || data.producer?.version !== '0.4.3') fail('unsupported producer/schema/revision');
+  if (data.schema !== compatibility.schema || data.revision !== compatibility.revision || data.producer?.name !== compatibility.producer || !compatibility.versions.includes(data.producer?.version)) fail('unsupported producer/schema/revision');
   const declarations = new Map(scopes.flatMap((scope) => scope.declarations.map((row) => [row.id, scope.name])));
   const sites = new Map();
   for (const file of array(data.files)) {
@@ -53,7 +54,7 @@ export function parseLens(data, scopes) {
     bindings.set(binding.declaration_id, binding);
   }
   if (bindings.size !== declarations.size) fail('declaration missing from bindings');
-  return { bindings, sites, members, producer: data.producer };
+  return { bindings, sites, members, producer: data.producer, schema: data.schema, revision: data.revision };
 }
 
 const unavailable = { contested: 'multiple definitions', not_computed: 'not computed', definition_build_failed: 'definition could not be analyzed' };

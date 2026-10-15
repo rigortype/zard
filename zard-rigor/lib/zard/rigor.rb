@@ -6,6 +6,7 @@ require "digest/xxhash"
 require "open3"
 require "pathname"
 require_relative "rigor/version"
+require_relative "rigor/compatibility"
 require_relative "rigor/document"
 
 module Zard
@@ -54,7 +55,7 @@ module Zard
       rescue JSON::ParserError => error
         raise Error, "rigor lens returned invalid or truncated JSON: #{error.message}"
       rescue SystemCallError => error
-        raise Error, "Cannot run/read rigor lens; install Rigor 0.4.3 and check the configured executable/root: #{error.message}"
+        raise Error, "Cannot run/read rigor lens; install supported Rigor (#{Compatibility::DATA.fetch("versions").join(", ")}) and check the configured executable/root: #{error.message}"
       rescue KeyError, TypeError => error
         raise Error, "Malformed lens/export data: #{error.message}"
       end

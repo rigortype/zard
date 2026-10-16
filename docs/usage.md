@@ -1,10 +1,10 @@
-# ZARD 0.0.1 usage
+# ZARD 0.0.2 usage
 
-ZARD parses Ruby source into a versioned model. The separate `zard-doc` gem renders the model's human-facing API documentation as Markdown. Both `0.0.1` gems are available on RubyGems. Install the released pair with Bundler:
+ZARD parses Ruby source into a versioned model. The separate `zard-doc` gem renders human-facing API documentation. This guide describes the 0.0.2 release candidate; use path gems or locally built packages until publication, then install the pair with Bundler:
 
 ```ruby
-gem "zard", "~> 0.0.1"
-gem "zard-doc", "~> 0.0.1"
+gem "zard", "~> 0.0.2"
+gem "zard-doc", "~> 0.0.2"
 ```
 
 The gems require Ruby 3.2 or newer. The project is pre-1.0: the model has an explicit `Zard::Model::V1` namespace, but no general compatibility guarantee has been established yet. Review release notes when upgrading; pre-1.0 releases may change APIs and behavior.
@@ -24,7 +24,7 @@ markdown = Zard::Doc.render(document)
 
 ## Format annotations
 
-Repository builds provide `Zard.format` and `zard-doc format` (not included in the published 0.0.1 gems):
+Version 0.0.2 provides `Zard.format` and `zard-doc format`:
 
 ```ruby
 result = Zard.format(source, path: "lib/example.rb")
@@ -138,7 +138,7 @@ Visibility forms supported by the parser include bare visibility calls, inline f
 
 ### Build a documentation tree
 
-Repository builds provide `zard-doc build` (not included in the published 0.0.1 gems). Define named documentation scopes in a YAML file:
+Version 0.0.2 provides `zard-doc build`. Define named documentation scopes in a YAML file:
 
 ```yaml
 docroot: docs/api
@@ -178,7 +178,7 @@ Build reports diagnostics to stderr and does not print generated Markdown to std
 
 The output manifest tracks generated pages and resolved API links. Regeneration removes obsolete managed pages, retains unrelated handwritten files, and refuses to overwrite edited managed pages or existing unowned destination files. Partial scope builds retain other scopes' managed pages and refuse changes that would invalidate their generated links; include the affected scopes or run a full build instead. Publication prepares output before writing, attempts recovery on filesystem failures, and reports recovery failures; it is not a filesystem-wide atomic transaction.
 
-This workflow uses the existing ZARD parse model. External RBS ingestion is separate work; Rigor lens integration is deferred to the `v0.1.0` goal. See [ADR 0006](adr/0006-hierarchical-documentation-output.md).
+This workflow uses the existing ZARD parse model. The optional `zard-rigor` gem enriches JSON through the released Rigor CLI; see its [setup and limitations](../zard-rigor/README.md). External RBS ingestion and stable lens semantics remain separate work. See [ADR 0006](adr/0006-hierarchical-documentation-output.md).
 
 ### Lint and render to stdout
 

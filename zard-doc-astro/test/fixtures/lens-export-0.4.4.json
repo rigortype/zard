@@ -1,0 +1,2784 @@
+{
+  "schema": "zard-doc/v0",
+  "revision": 1,
+  "producer": {
+    "zard": "0.0.1",
+    "zard_doc": "0.0.1"
+  },
+  "layout": "namespace",
+  "scopes": [
+    {
+      "name": "app",
+      "destination": "app",
+      "references": [],
+      "files": [
+        {
+          "path": "lib/order.rb",
+          "digest": "2ee1536cf4bde723b3c99e2d8ebf53feada24083d46d7dbe4927e32e4ccb3273",
+          "diagnostics": []
+        },
+        {
+          "path": "lib/shop.rb",
+          "digest": "5918c8a49f187640607bf8c7e1a37258fd36826f0855dcec081182bd2f46d5a7",
+          "diagnostics": []
+        },
+        {
+          "path": "lib/util.rb",
+          "digest": "370e24c9258e4ca9c2bd75126a3f338c3cf9cacbef905c080ef4e2910c342bec",
+          "diagnostics": []
+        }
+      ],
+      "declarations": [
+        {
+          "id": "app:zard-636c617373004f7264657200",
+          "kind": "class",
+          "name": "Order",
+          "namespace": null,
+          "display_name": "Order",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/Order.md",
+          "anchor": "zard-636c617373004f7264657200",
+          "references": [
+            "Order"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/order.rb",
+            "start_line": 1,
+            "end_line": 11,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 0,
+            "end_offset": 168
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64004f7264657223616d6f756e7400",
+          "kind": "instance_method",
+          "name": "amount",
+          "namespace": "Order",
+          "display_name": "Order#amount",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": [],
+          "page": "app/Order.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64004f7264657223616d6f756e7400",
+          "references": [
+            "Order#amount"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/order.rb",
+            "start_line": 2,
+            "end_line": 2,
+            "start_column": 2,
+            "end_column": 17,
+            "start_offset": 14,
+            "end_offset": 29
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64004f72646572236e6f746500",
+          "kind": "instance_method",
+          "name": "note",
+          "namespace": "Order",
+          "display_name": "Order#note",
+          "visibility": "public",
+          "parameters": [
+            "text",
+            "*rest",
+            "key:",
+            "flag:",
+            "**opts",
+            "&blk"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "text",
+              "source": "text",
+              "span": {
+                "path": "lib/order.rb",
+                "start_line": 4,
+                "end_line": 4,
+                "start_column": 11,
+                "end_column": 15,
+                "start_offset": 42,
+                "end_offset": 46
+              },
+              "default": null,
+              "default_span": null
+            },
+            {
+              "kind": "rest",
+              "name": "rest",
+              "source": "*rest",
+              "span": {
+                "path": "lib/order.rb",
+                "start_line": 4,
+                "end_line": 4,
+                "start_column": 17,
+                "end_column": 22,
+                "start_offset": 48,
+                "end_offset": 53
+              },
+              "default": null,
+              "default_span": null
+            },
+            {
+              "kind": "required_keyword",
+              "name": "key",
+              "source": "key:",
+              "span": {
+                "path": "lib/order.rb",
+                "start_line": 4,
+                "end_line": 4,
+                "start_column": 24,
+                "end_column": 28,
+                "start_offset": 55,
+                "end_offset": 59
+              },
+              "default": null,
+              "default_span": null
+            },
+            {
+              "kind": "optional_keyword",
+              "name": "flag",
+              "source": "flag: false",
+              "span": {
+                "path": "lib/order.rb",
+                "start_line": 4,
+                "end_line": 4,
+                "start_column": 30,
+                "end_column": 41,
+                "start_offset": 61,
+                "end_offset": 72
+              },
+              "default": "false",
+              "default_span": {
+                "path": "lib/order.rb",
+                "start_line": 4,
+                "end_line": 4,
+                "start_column": 36,
+                "end_column": 41,
+                "start_offset": 67,
+                "end_offset": 72
+              }
+            },
+            {
+              "kind": "keyword_rest",
+              "name": "opts",
+              "source": "**opts",
+              "span": {
+                "path": "lib/order.rb",
+                "start_line": 4,
+                "end_line": 4,
+                "start_column": 43,
+                "end_column": 49,
+                "start_offset": 74,
+                "end_offset": 80
+              },
+              "default": null,
+              "default_span": null
+            },
+            {
+              "kind": "block",
+              "name": "blk",
+              "source": "&blk",
+              "span": {
+                "path": "lib/order.rb",
+                "start_line": 4,
+                "end_line": 4,
+                "start_column": 51,
+                "end_column": 55,
+                "start_offset": 82,
+                "end_offset": 86
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/Order.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64004f72646572236e6f746500",
+          "references": [
+            "Order#note"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/order.rb",
+            "start_line": 4,
+            "end_line": 4,
+            "start_column": 2,
+            "end_column": 63,
+            "start_offset": 33,
+            "end_offset": 94
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64004f7264657223656163685f6c696e6500",
+          "kind": "instance_method",
+          "name": "each_line",
+          "namespace": "Order",
+          "display_name": "Order#each_line",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": [],
+          "page": "app/Order.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64004f7264657223656163685f6c696e6500",
+          "references": [
+            "Order#each_line"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/order.rb",
+            "start_line": 6,
+            "end_line": 8,
+            "start_column": 2,
+            "end_column": 5,
+            "start_offset": 98,
+            "end_offset": 134
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64004f726465722362726f6b656e00",
+          "kind": "instance_method",
+          "name": "broken",
+          "namespace": "Order",
+          "display_name": "Order#broken",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": [],
+          "page": "app/Order.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64004f726465722362726f6b656e00",
+          "references": [
+            "Order#broken"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/order.rb",
+            "start_line": 10,
+            "end_line": 10,
+            "start_column": 2,
+            "end_column": 28,
+            "start_offset": 138,
+            "end_offset": 164
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-636c6173730053686f7000",
+          "kind": "class",
+          "name": "Shop",
+          "namespace": null,
+          "display_name": "Shop",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/Shop.md",
+          "anchor": "zard-636c6173730053686f7000",
+          "references": [
+            "Shop"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shop.rb",
+            "start_line": 4,
+            "end_line": 33,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 33,
+            "end_offset": 451
+          },
+          "comment_span": {
+            "path": "lib/shop.rb",
+            "start_line": 3,
+            "end_line": 3,
+            "start_column": 0,
+            "end_column": 9,
+            "start_offset": 23,
+            "end_offset": 32
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "A shop.",
+              "rendered_description": "A shop.",
+              "raw": "# A shop.",
+              "span": {
+                "path": "lib/shop.rb",
+                "start_line": 3,
+                "end_line": 3,
+                "start_column": 0,
+                "end_column": 9,
+                "start_offset": 23,
+                "end_offset": 32
+              }
+            }
+          ],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-636f6e7374616e740053686f703a3a4c494d495400",
+          "kind": "constant",
+          "name": "LIMIT",
+          "namespace": "Shop",
+          "display_name": "Shop::LIMIT",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/Shop.md",
+          "anchor": "zard-636f6e7374616e740053686f703a3a4c494d495400",
+          "references": [
+            "Shop::LIMIT"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shop.rb",
+            "start_line": 5,
+            "end_line": 5,
+            "start_column": 2,
+            "end_column": 12,
+            "start_offset": 46,
+            "end_offset": 56
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f640053686f70236c6162656c00",
+          "kind": "instance_method",
+          "name": "label",
+          "namespace": "Shop",
+          "display_name": "Shop#label",
+          "visibility": "public",
+          "parameters": [
+            "n"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "n",
+              "source": "n",
+              "span": {
+                "path": "lib/shop.rb",
+                "start_line": 9,
+                "end_line": 9,
+                "start_column": 12,
+                "end_column": 13,
+                "start_offset": 132,
+                "end_offset": 133
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/Shop.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f640053686f70236c6162656c00",
+          "references": [
+            "Shop#label"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shop.rb",
+            "start_line": 9,
+            "end_line": 9,
+            "start_column": 2,
+            "end_column": 23,
+            "start_offset": 122,
+            "end_offset": 143
+          },
+          "comment_span": {
+            "path": "lib/shop.rb",
+            "start_line": 7,
+            "end_line": 8,
+            "start_column": 2,
+            "end_column": 26,
+            "start_offset": 60,
+            "end_offset": 119
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Documentation prose for label.",
+              "rendered_description": "Documentation prose for label.",
+              "raw": "# Documentation prose for label.",
+              "span": {
+                "path": "lib/shop.rb",
+                "start_line": 7,
+                "end_line": 7,
+                "start_column": 2,
+                "end_column": 34,
+                "start_offset": 60,
+                "end_offset": 92
+              }
+            }
+          ],
+          "contracts": [
+            {
+              "channel": "rbs",
+              "payload": "(Integer n) -> String",
+              "note": null,
+              "raw": "#: (Integer n) -> String",
+              "span": {
+                "path": "lib/shop.rb",
+                "start_line": 8,
+                "end_line": 8,
+                "start_column": 2,
+                "end_column": 26,
+                "start_offset": 95,
+                "end_offset": 119
+              }
+            }
+          ]
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f640053686f70237363616c6500",
+          "kind": "instance_method",
+          "name": "scale",
+          "namespace": "Shop",
+          "display_name": "Shop#scale",
+          "visibility": "public",
+          "parameters": [
+            "num"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "num",
+              "source": "num",
+              "span": {
+                "path": "lib/shop.rb",
+                "start_line": 12,
+                "end_line": 12,
+                "start_column": 12,
+                "end_column": 15,
+                "start_offset": 177,
+                "end_offset": 180
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/Shop.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f640053686f70237363616c6500",
+          "references": [
+            "Shop#scale"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shop.rb",
+            "start_line": 12,
+            "end_line": 12,
+            "start_column": 2,
+            "end_column": 26,
+            "start_offset": 167,
+            "end_offset": 191
+          },
+          "comment_span": {
+            "path": "lib/shop.rb",
+            "start_line": 11,
+            "end_line": 11,
+            "start_column": 2,
+            "end_column": 19,
+            "start_offset": 147,
+            "end_offset": 164
+          },
+          "documentation": [],
+          "contracts": [
+            {
+              "channel": "rbs",
+              "payload": "num: Float",
+              "note": null,
+              "raw": "# @rbs num: Float",
+              "span": {
+                "path": "lib/shop.rb",
+                "start_line": 11,
+                "end_line": 11,
+                "start_column": 2,
+                "end_column": 19,
+                "start_offset": 147,
+                "end_offset": 164
+              }
+            }
+          ]
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f640053686f7023746f74616c00",
+          "kind": "instance_method",
+          "name": "total",
+          "namespace": "Shop",
+          "display_name": "Shop#total",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": [],
+          "page": "app/Shop.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f640053686f7023746f74616c00",
+          "references": [
+            "Shop#total"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shop.rb",
+            "start_line": 14,
+            "end_line": 14,
+            "start_column": 2,
+            "end_column": 30,
+            "start_offset": 195,
+            "end_offset": 223
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f640053686f7023666574636800",
+          "kind": "instance_method",
+          "name": "fetch",
+          "namespace": "Shop",
+          "display_name": "Shop#fetch",
+          "visibility": "public",
+          "parameters": [
+            "id"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "id",
+              "source": "id",
+              "span": {
+                "path": "lib/shop.rb",
+                "start_line": 16,
+                "end_line": 16,
+                "start_column": 12,
+                "end_column": 14,
+                "start_offset": 237,
+                "end_offset": 239
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/Shop.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f640053686f7023666574636800",
+          "references": [
+            "Shop#fetch"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shop.rb",
+            "start_line": 16,
+            "end_line": 16,
+            "start_column": 2,
+            "end_column": 20,
+            "start_offset": 227,
+            "end_offset": 245
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6174747269627574655f7265616465720053686f70236e616d6500",
+          "kind": "instance_attribute_reader",
+          "name": "name",
+          "namespace": "Shop",
+          "display_name": "Shop#name",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/Shop.md",
+          "anchor": "zard-696e7374616e63655f6174747269627574655f7265616465720053686f70236e616d6500",
+          "references": [
+            "Shop#name"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shop.rb",
+            "start_line": 18,
+            "end_line": 18,
+            "start_column": 2,
+            "end_column": 26,
+            "start_offset": 249,
+            "end_offset": 273
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6174747269627574655f7265616465720053686f7023636f646500",
+          "kind": "instance_attribute_reader",
+          "name": "code",
+          "namespace": "Shop",
+          "display_name": "Shop#code",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/Shop.md",
+          "anchor": "zard-696e7374616e63655f6174747269627574655f7265616465720053686f7023636f646500",
+          "references": [
+            "Shop#code"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shop.rb",
+            "start_line": 18,
+            "end_line": 18,
+            "start_column": 2,
+            "end_column": 26,
+            "start_offset": 249,
+            "end_offset": 273
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-73696e676c65746f6e5f6d6574686f640053686f702e6275696c6400",
+          "kind": "singleton_method",
+          "name": "build",
+          "namespace": "Shop",
+          "display_name": "Shop.build",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": [],
+          "page": "app/Shop.md",
+          "anchor": "zard-73696e676c65746f6e5f6d6574686f640053686f702e6275696c6400",
+          "references": [
+            "Shop.build"
+          ],
+          "receiver": "self",
+          "receiver_span": {
+            "path": "lib/shop.rb",
+            "start_line": 20,
+            "end_line": 20,
+            "start_column": 6,
+            "end_column": 10,
+            "start_offset": 291,
+            "end_offset": 295
+          },
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shop.rb",
+            "start_line": 20,
+            "end_line": 20,
+            "start_column": 2,
+            "end_column": 22,
+            "start_offset": 287,
+            "end_offset": 307
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6174747269627574655f6163636573736f720053686f7023707269636500",
+          "kind": "instance_attribute_accessor",
+          "name": "price",
+          "namespace": "Shop",
+          "display_name": "Shop#price",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/Shop.md",
+          "anchor": "zard-696e7374616e63655f6174747269627574655f6163636573736f720053686f7023707269636500",
+          "references": [
+            "Shop#price",
+            "Shop#price="
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shop.rb",
+            "start_line": 22,
+            "end_line": 22,
+            "start_column": 2,
+            "end_column": 22,
+            "start_offset": 311,
+            "end_offset": 331
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-73696e676c65746f6e5f6d6574686f640053686f702e726567697374727900",
+          "kind": "singleton_method",
+          "name": "registry",
+          "namespace": "Shop",
+          "display_name": "Shop.registry",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": [],
+          "page": "app/Shop.md",
+          "anchor": "zard-73696e676c65746f6e5f6d6574686f640053686f702e726567697374727900",
+          "references": [
+            "Shop.registry"
+          ],
+          "receiver": "self",
+          "receiver_span": {
+            "path": "lib/shop.rb",
+            "start_line": 24,
+            "end_line": 24,
+            "start_column": 11,
+            "end_column": 15,
+            "start_offset": 355,
+            "end_offset": 359
+          },
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shop.rb",
+            "start_line": 25,
+            "end_line": 25,
+            "start_column": 4,
+            "end_column": 21,
+            "start_offset": 364,
+            "end_offset": 381
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f640053686f70237469746c6500",
+          "kind": "instance_method",
+          "name": "title",
+          "namespace": "Shop",
+          "display_name": "Shop#title",
+          "visibility": "public",
+          "parameters": [
+            "n"
+          ],
+          "parameter_details": null,
+          "page": "app/Shop.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f640053686f70237469746c6500",
+          "references": [
+            "Shop#title"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": "label",
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shop.rb",
+            "start_line": 28,
+            "end_line": 28,
+            "start_column": 2,
+            "end_column": 29,
+            "start_offset": 391,
+            "end_offset": 418
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-6d6f64756c65005574696c00",
+          "kind": "module",
+          "name": "Util",
+          "namespace": null,
+          "display_name": "Util",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/Util.md",
+          "anchor": "zard-6d6f64756c65005574696c00",
+          "references": [
+            "Util"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/util.rb",
+            "start_line": 1,
+            "end_line": 5,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 0,
+            "end_offset": 51
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-73696e676c65746f6e5f6d6574686f64005574696c2e68656c70657200",
+          "kind": "singleton_method",
+          "name": "helper",
+          "namespace": "Util",
+          "display_name": "Util.helper",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": [],
+          "page": "app/Util.md",
+          "anchor": "zard-73696e676c65746f6e5f6d6574686f64005574696c2e68656c70657200",
+          "references": [
+            "Util.helper"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/util.rb",
+            "start_line": 4,
+            "end_line": 4,
+            "start_column": 2,
+            "end_column": 16,
+            "start_offset": 33,
+            "end_offset": 47
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f640023746f705f68656c70657200",
+          "kind": "instance_method",
+          "name": "top_helper",
+          "namespace": null,
+          "display_name": "#top_helper",
+          "visibility": "public",
+          "parameters": [],
+          "parameter_details": [],
+          "page": "app/_top-level.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f640023746f705f68656c70657200",
+          "references": [
+            "#top_helper"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/util.rb",
+            "start_line": 7,
+            "end_line": 7,
+            "start_column": 0,
+            "end_column": 20,
+            "start_offset": 53,
+            "end_offset": 73
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        }
+      ],
+      "pages": [
+        {
+          "path": "app/Order.md",
+          "declarations": [
+            "app:zard-636c617373004f7264657200",
+            "app:zard-696e7374616e63655f6d6574686f64004f7264657223616d6f756e7400",
+            "app:zard-696e7374616e63655f6d6574686f64004f72646572236e6f746500",
+            "app:zard-696e7374616e63655f6d6574686f64004f7264657223656163685f6c696e6500",
+            "app:zard-696e7374616e63655f6d6574686f64004f726465722362726f6b656e00"
+          ]
+        },
+        {
+          "path": "app/Shop.md",
+          "declarations": [
+            "app:zard-636c6173730053686f7000",
+            "app:zard-636f6e7374616e740053686f703a3a4c494d495400",
+            "app:zard-696e7374616e63655f6d6574686f640053686f70236c6162656c00",
+            "app:zard-696e7374616e63655f6d6574686f640053686f70237363616c6500",
+            "app:zard-696e7374616e63655f6d6574686f640053686f7023746f74616c00",
+            "app:zard-696e7374616e63655f6d6574686f640053686f7023666574636800",
+            "app:zard-696e7374616e63655f6174747269627574655f7265616465720053686f70236e616d6500",
+            "app:zard-696e7374616e63655f6174747269627574655f7265616465720053686f7023636f646500",
+            "app:zard-73696e676c65746f6e5f6d6574686f640053686f702e6275696c6400",
+            "app:zard-696e7374616e63655f6174747269627574655f6163636573736f720053686f7023707269636500",
+            "app:zard-73696e676c65746f6e5f6d6574686f640053686f702e726567697374727900",
+            "app:zard-696e7374616e63655f6d6574686f640053686f70237469746c6500"
+          ]
+        },
+        {
+          "path": "app/Util.md",
+          "declarations": [
+            "app:zard-6d6f64756c65005574696c00",
+            "app:zard-73696e676c65746f6e5f6d6574686f64005574696c2e68656c70657200"
+          ]
+        },
+        {
+          "path": "app/_top-level.md",
+          "declarations": [
+            "app:zard-696e7374616e63655f6d6574686f640023746f705f68656c70657200"
+          ]
+        }
+      ]
+    }
+  ],
+  "links": {},
+  "warnings": [],
+  "lens": {
+    "schema": "lens/v0",
+    "revision": 1,
+    "producer": {
+      "name": "rigor",
+      "version": "0.4.4",
+      "engine_source": null
+    },
+    "context": {
+      "config": ".rigor.yml",
+      "target_ruby": "3.4",
+      "rbs_version": "4.2.0",
+      "signature_roots": [
+        "sig"
+      ],
+      "signature_digest": "xxh3-64:1623bff860a2465e",
+      "plugins": [
+        {
+          "id": "rbs-inline",
+          "version": "0.4.4"
+        }
+      ],
+      "lockfiles": [],
+      "digest": "xxh3-64:292f4f19a03c86ab"
+    },
+    "capabilities": [
+      "class",
+      "module",
+      "method",
+      "attribute",
+      "constant",
+      "module_function",
+      "builder",
+      "alias",
+      "body_return",
+      "diagnostics",
+      "inputs"
+    ],
+    "files": [
+      {
+        "argument": "./lib/order.rb",
+        "path": "lib/order.rb",
+        "status": "ok",
+        "reason": null,
+        "digest": "xxh3-64:6d2b9e362db29a12",
+        "complete": true,
+        "omissions": [],
+        "sites": [
+          {
+            "key": "lib/order.rb:0-168:0",
+            "kind": "class",
+            "name": "Order",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 1,
+              "start_column": 0,
+              "end_line": 11,
+              "end_column": 3,
+              "start_offset": 0,
+              "end_offset": 168
+            },
+            "contract_span": null,
+            "anchor": "1:c2e4",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/order.rb:14-29:0",
+            "kind": "method",
+            "name": "amount",
+            "owner": "Order",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "amount"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 2,
+              "start_column": 2,
+              "end_line": 2,
+              "end_column": 17,
+              "start_offset": 14,
+              "end_offset": 29
+            },
+            "contract_span": null,
+            "anchor": "2:bb5a",
+            "visibility": "public",
+            "contract": null,
+            "params": [],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "42",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/order.rb:33-94:0",
+            "kind": "method",
+            "name": "note",
+            "owner": "Order",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "note"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 4,
+              "start_column": 2,
+              "end_line": 4,
+              "end_column": 63,
+              "start_offset": 33,
+              "end_offset": 94
+            },
+            "contract_span": null,
+            "anchor": "4:1b16",
+            "visibility": "public",
+            "contract": null,
+            "params": [
+              {
+                "name": "text",
+                "kind": "required",
+                "type": null
+              },
+              {
+                "name": "rest",
+                "kind": "rest",
+                "type": null
+              },
+              {
+                "name": "key",
+                "kind": "keyreq",
+                "type": null
+              },
+              {
+                "name": "flag",
+                "kind": "key",
+                "type": null
+              },
+              {
+                "name": "opts",
+                "kind": "keyrest",
+                "type": null
+              }
+            ],
+            "block": {
+              "required": false,
+              "type": null
+            },
+            "body_return": {
+              "state": "dynamic",
+              "type": "untyped",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null,
+              "cause": "inferred_return_untyped"
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/order.rb:98-134:0",
+            "kind": "method",
+            "name": "each_line",
+            "owner": "Order",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "each_line"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 6,
+              "start_column": 2,
+              "end_line": 8,
+              "end_column": 5,
+              "start_offset": 98,
+              "end_offset": 134
+            },
+            "contract_span": null,
+            "anchor": "6:97da",
+            "visibility": "public",
+            "contract": null,
+            "params": [],
+            "block": {
+              "required": false,
+              "type": null
+            },
+            "body_return": {
+              "state": "dynamic",
+              "type": "untyped",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null,
+              "cause": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/order.rb:138-164:0",
+            "kind": "method",
+            "name": "broken",
+            "owner": "Order",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "broken"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 10,
+              "start_column": 2,
+              "end_line": 10,
+              "end_column": 28,
+              "start_offset": 138,
+              "end_offset": 164
+            },
+            "contract_span": null,
+            "anchor": "10:fc6c",
+            "visibility": "public",
+            "contract": null,
+            "params": [],
+            "block": null,
+            "body_return": {
+              "state": "dynamic",
+              "type": "untyped",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null,
+              "cause": "unsupported_syntax"
+            },
+            "value": null,
+            "alias_of": null
+          }
+        ],
+        "diagnostics": [
+          {
+            "rule": "call.undefined-method",
+            "severity": "error",
+            "message": "undefined method `upcase' for Integer",
+            "line": 10,
+            "column": 23
+          }
+        ],
+        "inputs": []
+      },
+      {
+        "argument": "./lib/shop.rb",
+        "path": "lib/shop.rb",
+        "status": "ok",
+        "reason": null,
+        "digest": "xxh3-64:af24c3087206d10d",
+        "complete": true,
+        "omissions": [],
+        "sites": [
+          {
+            "key": "lib/shop.rb:33-451:0",
+            "kind": "class",
+            "name": "Shop",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 4,
+              "start_column": 0,
+              "end_line": 33,
+              "end_column": 3,
+              "start_offset": 33,
+              "end_offset": 451
+            },
+            "contract_span": null,
+            "anchor": "4:40bc",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shop.rb:46-56:0",
+            "kind": "constant",
+            "name": "Shop::LIMIT",
+            "owner": "Shop",
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 5,
+              "start_column": 2,
+              "end_line": 5,
+              "end_column": 12,
+              "start_offset": 46,
+              "end_offset": 56
+            },
+            "contract_span": null,
+            "anchor": "5:8b07",
+            "visibility": "public",
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": {
+              "state": "typed",
+              "type": "10",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "alias_of": null
+          },
+          {
+            "key": "lib/shop.rb:122-143:0",
+            "kind": "method",
+            "name": "label",
+            "owner": "Shop",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "label"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 9,
+              "start_column": 2,
+              "end_line": 9,
+              "end_column": 23,
+              "start_offset": 122,
+              "end_offset": 143
+            },
+            "contract_span": {
+              "start_line": 8,
+              "start_column": 2,
+              "end_line": 8,
+              "end_column": 26,
+              "start_offset": 95,
+              "end_offset": 119
+            },
+            "anchor": "8:e37e",
+            "visibility": "public",
+            "contract": "inline",
+            "params": [
+              {
+                "name": "n",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "String",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shop.rb:167-191:0",
+            "kind": "method",
+            "name": "scale",
+            "owner": "Shop",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "scale"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 12,
+              "start_column": 2,
+              "end_line": 12,
+              "end_column": 26,
+              "start_offset": 167,
+              "end_offset": 191
+            },
+            "contract_span": {
+              "start_line": 11,
+              "start_column": 2,
+              "end_line": 11,
+              "end_column": 19,
+              "start_offset": 147,
+              "end_offset": 164
+            },
+            "anchor": "11:16b3",
+            "visibility": "public",
+            "contract": "inline",
+            "params": [
+              {
+                "name": "num",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "Float",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shop.rb:195-223:0",
+            "kind": "method",
+            "name": "total",
+            "owner": "Shop",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "total"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 14,
+              "start_column": 2,
+              "end_line": 14,
+              "end_column": 30,
+              "start_offset": 195,
+              "end_offset": 223
+            },
+            "contract_span": null,
+            "anchor": "14:ce93",
+            "visibility": "public",
+            "contract": null,
+            "params": [],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "Integer",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shop.rb:227-245:0",
+            "kind": "method",
+            "name": "fetch",
+            "owner": "Shop",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "fetch"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 16,
+              "start_column": 2,
+              "end_line": 16,
+              "end_column": 20,
+              "start_offset": 227,
+              "end_offset": 245
+            },
+            "contract_span": null,
+            "anchor": "16:182b",
+            "visibility": "public",
+            "contract": null,
+            "params": [
+              {
+                "name": "id",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": null,
+            "body_return": {
+              "state": "dynamic",
+              "type": "untyped",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null,
+              "cause": "inferred_return_untyped"
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shop.rb:249-273:0",
+            "kind": "attribute",
+            "name": "name",
+            "owner": "Shop",
+            "scope": "instance",
+            "attribute": "reader",
+            "members": [
+              "name"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 18,
+              "start_column": 2,
+              "end_line": 18,
+              "end_column": 26,
+              "start_offset": 249,
+              "end_offset": 273
+            },
+            "contract_span": {
+              "start_line": 18,
+              "start_column": 27,
+              "end_line": 18,
+              "end_column": 36,
+              "start_offset": 274,
+              "end_offset": 283
+            },
+            "anchor": "18:d309",
+            "visibility": "public",
+            "contract": "inline",
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shop.rb:249-273:1",
+            "kind": "attribute",
+            "name": "code",
+            "owner": "Shop",
+            "scope": "instance",
+            "attribute": "reader",
+            "members": [
+              "code"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 1,
+            "span": {
+              "start_line": 18,
+              "start_column": 2,
+              "end_line": 18,
+              "end_column": 26,
+              "start_offset": 249,
+              "end_offset": 273
+            },
+            "contract_span": {
+              "start_line": 18,
+              "start_column": 27,
+              "end_line": 18,
+              "end_column": 36,
+              "start_offset": 274,
+              "end_offset": 283
+            },
+            "anchor": "18:d309",
+            "visibility": "public",
+            "contract": "inline",
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shop.rb:287-307:0",
+            "kind": "method",
+            "name": "build",
+            "owner": "Shop",
+            "scope": "singleton",
+            "attribute": null,
+            "members": [
+              "build"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 20,
+              "start_column": 2,
+              "end_line": 20,
+              "end_column": 22,
+              "start_offset": 287,
+              "end_offset": 307
+            },
+            "contract_span": null,
+            "anchor": "20:9a34",
+            "visibility": "public",
+            "contract": null,
+            "params": [],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "Shop",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shop.rb:311-331:0",
+            "kind": "attribute",
+            "name": "price",
+            "owner": "Shop",
+            "scope": "instance",
+            "attribute": "accessor",
+            "members": [
+              "price",
+              "price="
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 22,
+              "start_column": 2,
+              "end_line": 22,
+              "end_column": 22,
+              "start_offset": 311,
+              "end_offset": 331
+            },
+            "contract_span": {
+              "start_line": 22,
+              "start_column": 23,
+              "end_line": 22,
+              "end_column": 33,
+              "start_offset": 332,
+              "end_offset": 342
+            },
+            "anchor": "22:b5e5",
+            "visibility": "public",
+            "contract": "inline",
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shop.rb:364-381:0",
+            "kind": "method",
+            "name": "registry",
+            "owner": "Shop",
+            "scope": "singleton",
+            "attribute": null,
+            "members": [
+              "registry"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 25,
+              "start_column": 4,
+              "end_line": 25,
+              "end_column": 21,
+              "start_offset": 364,
+              "end_offset": 381
+            },
+            "contract_span": null,
+            "anchor": "25:812c",
+            "visibility": "public",
+            "contract": null,
+            "params": [],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "{}",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shop.rb:391-418:0",
+            "kind": "method",
+            "name": "title",
+            "owner": "Shop",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "title"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 28,
+              "start_column": 2,
+              "end_line": 28,
+              "end_column": 29,
+              "start_offset": 391,
+              "end_offset": 418
+            },
+            "contract_span": null,
+            "anchor": "28:bc16",
+            "visibility": "public",
+            "contract": null,
+            "params": [
+              {
+                "name": "n",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "String",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": "label"
+          }
+        ],
+        "diagnostics": [],
+        "inputs": [
+          {
+            "path": "lib/legacy_shop.rb",
+            "digest": "xxh3-64:5d4b876e7c33f2e4"
+          },
+          {
+            "path": "lib/order.rb",
+            "digest": "xxh3-64:6d2b9e362db29a12"
+          }
+        ]
+      },
+      {
+        "argument": "./lib/util.rb",
+        "path": "lib/util.rb",
+        "status": "ok",
+        "reason": null,
+        "digest": "xxh3-64:8bb9bdd3c71159e9",
+        "complete": true,
+        "omissions": [],
+        "sites": [
+          {
+            "key": "lib/util.rb:0-51:0",
+            "kind": "module",
+            "name": "Util",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 1,
+              "start_column": 0,
+              "end_line": 5,
+              "end_column": 3,
+              "start_offset": 0,
+              "end_offset": 51
+            },
+            "contract_span": null,
+            "anchor": "1:5213",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/util.rb:33-47:0",
+            "kind": "method",
+            "name": "helper",
+            "owner": "Util",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "helper"
+            ],
+            "module_function": true,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 4,
+              "start_column": 2,
+              "end_line": 4,
+              "end_column": 16,
+              "start_offset": 33,
+              "end_offset": 47
+            },
+            "contract_span": null,
+            "anchor": "4:428d",
+            "visibility": "private",
+            "contract": null,
+            "params": [],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "1",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/util.rb:53-73:0",
+            "kind": "method",
+            "name": "top_helper",
+            "owner": "Object",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "top_helper"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 7,
+              "start_column": 0,
+              "end_line": 7,
+              "end_column": 20,
+              "start_offset": 53,
+              "end_offset": 73
+            },
+            "contract_span": null,
+            "anchor": "7:81e3",
+            "visibility": "private",
+            "contract": null,
+            "params": [],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": ":ok",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          }
+        ],
+        "diagnostics": [],
+        "inputs": []
+      }
+    ],
+    "members": [
+      {
+        "owner": "Order",
+        "scope": "instance",
+        "name": "amount",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/order.rb:14-29:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "() -> ::Integer",
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "::Integer",
+              "provenance": "sig",
+              "path": "sig/order.rbs",
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"Order\",\"instance\",\"amount\"]"
+      },
+      {
+        "owner": "Order",
+        "scope": "instance",
+        "name": "note",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/order.rb:33-94:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": "(untyped text, *untyped rest, key: untyped, ?flag: untyped, **untyped opts) ?{ (?) -> untyped } -> untyped",
+            "params": [
+              {
+                "name": "text",
+                "kind": "required",
+                "type": {
+                  "state": "dynamic",
+                  "type": "untyped",
+                  "provenance": "inferred",
+                  "path": null,
+                  "from_site": null,
+                  "cause": "inferred_return_untyped"
+                }
+              },
+              {
+                "name": "rest",
+                "kind": "rest",
+                "type": {
+                  "state": "dynamic",
+                  "type": "untyped",
+                  "provenance": "inferred",
+                  "path": null,
+                  "from_site": null,
+                  "cause": "inferred_return_untyped"
+                }
+              },
+              {
+                "name": "key",
+                "kind": "keyreq",
+                "type": {
+                  "state": "dynamic",
+                  "type": "untyped",
+                  "provenance": "inferred",
+                  "path": null,
+                  "from_site": null,
+                  "cause": "inferred_return_untyped"
+                }
+              },
+              {
+                "name": "flag",
+                "kind": "key",
+                "type": {
+                  "state": "dynamic",
+                  "type": "untyped",
+                  "provenance": "inferred",
+                  "path": null,
+                  "from_site": null,
+                  "cause": "inferred_return_untyped"
+                }
+              },
+              {
+                "name": "opts",
+                "kind": "keyrest",
+                "type": {
+                  "state": "dynamic",
+                  "type": "untyped",
+                  "provenance": "inferred",
+                  "path": null,
+                  "from_site": null,
+                  "cause": "inferred_return_untyped"
+                }
+              }
+            ],
+            "block": {
+              "required": false,
+              "type": {
+                "state": "dynamic",
+                "type": "untyped",
+                "provenance": "inferred",
+                "path": null,
+                "from_site": null,
+                "cause": "inferred_return_untyped"
+              }
+            },
+            "return": {
+              "state": "dynamic",
+              "type": "untyped",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": "lib/order.rb:33-94:0",
+              "cause": "inferred_return_untyped"
+            }
+          }
+        ],
+        "key": "[\"Order\",\"instance\",\"note\"]"
+      },
+      {
+        "owner": "Order",
+        "scope": "instance",
+        "name": "each_line",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/order.rb:98-134:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": "() ?{ (?) -> untyped } -> untyped",
+            "params": [],
+            "block": {
+              "required": false,
+              "type": {
+                "state": "dynamic",
+                "type": "untyped",
+                "provenance": "inferred",
+                "path": null,
+                "from_site": null,
+                "cause": "inferred_return_untyped"
+              }
+            },
+            "return": {
+              "state": "dynamic",
+              "type": "untyped",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": "lib/order.rb:98-134:0",
+              "cause": null
+            }
+          }
+        ],
+        "key": "[\"Order\",\"instance\",\"each_line\"]"
+      },
+      {
+        "owner": "Order",
+        "scope": "instance",
+        "name": "broken",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/order.rb:138-164:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "() -> untyped",
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "dynamic",
+              "type": "untyped",
+              "provenance": "sig",
+              "path": "sig/order.rbs",
+              "from_site": null,
+              "cause": "explicit_untyped"
+            }
+          }
+        ],
+        "key": "[\"Order\",\"instance\",\"broken\"]"
+      },
+      {
+        "owner": "Shop",
+        "scope": "instance",
+        "name": "label",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/shop.rb:122-143:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "(::Integer n) -> ::String",
+            "params": [
+              {
+                "name": "n",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::Integer",
+                  "provenance": "inline",
+                  "path": null,
+                  "from_site": null
+                }
+              }
+            ],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "::String",
+              "provenance": "inline",
+              "path": null,
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"Shop\",\"instance\",\"label\"]"
+      },
+      {
+        "owner": "Shop",
+        "scope": "instance",
+        "name": "scale",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/shop.rb:167-191:0"
+        ],
+        "also_defined_at": [
+          {
+            "path": "lib/legacy_shop.rb",
+            "line": 4
+          }
+        ],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": null,
+            "params": [
+              {
+                "name": "num",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::Float",
+                  "provenance": "inline",
+                  "path": null,
+                  "from_site": null
+                }
+              }
+            ],
+            "block": null,
+            "return": {
+              "state": "unavailable",
+              "reason": "contested"
+            }
+          }
+        ],
+        "key": "[\"Shop\",\"instance\",\"scale\"]"
+      },
+      {
+        "owner": "Shop",
+        "scope": "instance",
+        "name": "total",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/shop.rb:195-223:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": "() -> Integer",
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "Integer",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": "lib/shop.rb:195-223:0"
+            }
+          }
+        ],
+        "key": "[\"Shop\",\"instance\",\"total\"]"
+      },
+      {
+        "owner": "Shop",
+        "scope": "instance",
+        "name": "fetch",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/shop.rb:227-245:0"
+        ],
+        "also_defined_at": [
+          {
+            "path": "lib/legacy_shop.rb",
+            "line": 2
+          }
+        ],
+        "basis": "contested",
+        "overloads": [],
+        "key": "[\"Shop\",\"instance\",\"fetch\"]"
+      },
+      {
+        "owner": "Shop",
+        "scope": "instance",
+        "name": "name",
+        "kind": "attribute",
+        "visibility": "public",
+        "sites": [
+          "lib/shop.rb:249-273:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "() -> ::String",
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "::String",
+              "provenance": "inline",
+              "path": null,
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"Shop\",\"instance\",\"name\"]"
+      },
+      {
+        "owner": "Shop",
+        "scope": "instance",
+        "name": "code",
+        "kind": "attribute",
+        "visibility": "public",
+        "sites": [
+          "lib/shop.rb:249-273:1"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "() -> ::String",
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "::String",
+              "provenance": "inline",
+              "path": null,
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"Shop\",\"instance\",\"code\"]"
+      },
+      {
+        "owner": "Shop",
+        "scope": "singleton",
+        "name": "build",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/shop.rb:287-307:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": "() -> Shop",
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "Shop",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": "lib/shop.rb:287-307:0"
+            }
+          }
+        ],
+        "key": "[\"Shop\",\"singleton\",\"build\"]"
+      },
+      {
+        "owner": "Shop",
+        "scope": "instance",
+        "name": "price",
+        "kind": "attribute",
+        "visibility": "public",
+        "sites": [
+          "lib/shop.rb:311-331:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "() -> ::Integer",
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "::Integer",
+              "provenance": "inline",
+              "path": null,
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"Shop\",\"instance\",\"price\"]"
+      },
+      {
+        "owner": "Shop",
+        "scope": "instance",
+        "name": "price=",
+        "kind": "attribute",
+        "visibility": "public",
+        "sites": [
+          "lib/shop.rb:311-331:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "(::Integer price) -> ::Integer",
+            "params": [
+              {
+                "name": "price",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::Integer",
+                  "provenance": "inline",
+                  "path": null,
+                  "from_site": null
+                }
+              }
+            ],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "::Integer",
+              "provenance": "inline",
+              "path": null,
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"Shop\",\"instance\",\"price=\"]"
+      },
+      {
+        "owner": "Shop",
+        "scope": "singleton",
+        "name": "registry",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/shop.rb:364-381:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": "() -> {}",
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "{}",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": "lib/shop.rb:364-381:0"
+            }
+          }
+        ],
+        "key": "[\"Shop\",\"singleton\",\"registry\"]"
+      },
+      {
+        "owner": "Shop",
+        "scope": "instance",
+        "name": "title",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/shop.rb:391-418:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": null,
+            "params": null,
+            "block": null,
+            "return": {
+              "state": "unavailable",
+              "reason": "not_computed"
+            }
+          }
+        ],
+        "key": "[\"Shop\",\"instance\",\"title\"]"
+      },
+      {
+        "owner": "Util",
+        "scope": "singleton",
+        "name": "helper",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/util.rb:33-47:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": "() -> 1",
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "1",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": "lib/util.rb:33-47:0"
+            }
+          }
+        ],
+        "key": "[\"Util\",\"singleton\",\"helper\"]"
+      },
+      {
+        "owner": "Object",
+        "scope": "instance",
+        "name": "top_helper",
+        "kind": "method",
+        "visibility": "private",
+        "sites": [
+          "lib/util.rb:53-73:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": "() -> :ok",
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": ":ok",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": "lib/util.rb:53-73:0"
+            }
+          }
+        ],
+        "key": "[\"Object\",\"instance\",\"top_helper\"]"
+      }
+    ],
+    "adapter": {
+      "name": "zard-rigor",
+      "version": "0.0.1",
+      "grammar": "rigor:v1"
+    },
+    "project": ".",
+    "bindings": [
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-636c617373004f7264657200",
+        "file": "lib/order.rb",
+        "site_key": "lib/order.rb:0-168:0",
+        "member_keys": [],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004f7264657223616d6f756e7400",
+        "file": "lib/order.rb",
+        "site_key": "lib/order.rb:14-29:0",
+        "member_keys": [
+          "[\"Order\",\"instance\",\"amount\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004f72646572236e6f746500",
+        "file": "lib/order.rb",
+        "site_key": "lib/order.rb:33-94:0",
+        "member_keys": [
+          "[\"Order\",\"instance\",\"note\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004f7264657223656163685f6c696e6500",
+        "file": "lib/order.rb",
+        "site_key": "lib/order.rb:98-134:0",
+        "member_keys": [
+          "[\"Order\",\"instance\",\"each_line\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004f726465722362726f6b656e00",
+        "file": "lib/order.rb",
+        "site_key": "lib/order.rb:138-164:0",
+        "member_keys": [
+          "[\"Order\",\"instance\",\"broken\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-636c6173730053686f7000",
+        "file": "lib/shop.rb",
+        "site_key": "lib/shop.rb:33-451:0",
+        "member_keys": [],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-636f6e7374616e740053686f703a3a4c494d495400",
+        "file": "lib/shop.rb",
+        "site_key": "lib/shop.rb:46-56:0",
+        "member_keys": [],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f640053686f70236c6162656c00",
+        "file": "lib/shop.rb",
+        "site_key": "lib/shop.rb:122-143:0",
+        "member_keys": [
+          "[\"Shop\",\"instance\",\"label\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f640053686f70237363616c6500",
+        "file": "lib/shop.rb",
+        "site_key": "lib/shop.rb:167-191:0",
+        "member_keys": [
+          "[\"Shop\",\"instance\",\"scale\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f640053686f7023746f74616c00",
+        "file": "lib/shop.rb",
+        "site_key": "lib/shop.rb:195-223:0",
+        "member_keys": [
+          "[\"Shop\",\"instance\",\"total\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f640053686f7023666574636800",
+        "file": "lib/shop.rb",
+        "site_key": "lib/shop.rb:227-245:0",
+        "member_keys": [
+          "[\"Shop\",\"instance\",\"fetch\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6174747269627574655f7265616465720053686f70236e616d6500",
+        "file": "lib/shop.rb",
+        "site_key": "lib/shop.rb:249-273:0",
+        "member_keys": [
+          "[\"Shop\",\"instance\",\"name\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6174747269627574655f7265616465720053686f7023636f646500",
+        "file": "lib/shop.rb",
+        "site_key": "lib/shop.rb:249-273:1",
+        "member_keys": [
+          "[\"Shop\",\"instance\",\"code\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-73696e676c65746f6e5f6d6574686f640053686f702e6275696c6400",
+        "file": "lib/shop.rb",
+        "site_key": "lib/shop.rb:287-307:0",
+        "member_keys": [
+          "[\"Shop\",\"singleton\",\"build\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6174747269627574655f6163636573736f720053686f7023707269636500",
+        "file": "lib/shop.rb",
+        "site_key": "lib/shop.rb:311-331:0",
+        "member_keys": [
+          "[\"Shop\",\"instance\",\"price\"]",
+          "[\"Shop\",\"instance\",\"price=\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-73696e676c65746f6e5f6d6574686f640053686f702e726567697374727900",
+        "file": "lib/shop.rb",
+        "site_key": "lib/shop.rb:364-381:0",
+        "member_keys": [
+          "[\"Shop\",\"singleton\",\"registry\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f640053686f70237469746c6500",
+        "file": "lib/shop.rb",
+        "site_key": "lib/shop.rb:391-418:0",
+        "member_keys": [
+          "[\"Shop\",\"instance\",\"title\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-6d6f64756c65005574696c00",
+        "file": "lib/util.rb",
+        "site_key": "lib/util.rb:0-51:0",
+        "member_keys": [],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-73696e676c65746f6e5f6d6574686f64005574696c2e68656c70657200",
+        "file": "lib/util.rb",
+        "site_key": "lib/util.rb:33-47:0",
+        "member_keys": [
+          "[\"Util\",\"singleton\",\"helper\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f640023746f705f68656c70657200",
+        "file": "lib/util.rb",
+        "site_key": "lib/util.rb:53-73:0",
+        "member_keys": [
+          "[\"Object\",\"instance\",\"top_helper\"]"
+        ],
+        "status": "matched"
+      }
+    ],
+    "warnings": []
+  }
+}

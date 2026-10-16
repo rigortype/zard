@@ -1,12 +1,12 @@
 # zard-rigor
 
-Optional, experimental adapter from the **released Rigor 0.4.3 CLI** to
+Optional, experimental adapter from the **released Rigor 0.4.4 CLI** to
 `zard-doc/v0` revision 1. It accepts only `lens/v0` revision 1; this is not
 the future stable lens protocol. Neither `zard` nor `zard-doc` loads Rigor.
 
-This gem is not yet published. Use the monorepo's path gems or build the
+Version 0.0.2 is the first release candidate for this gem. Use the monorepo's path gems or build the
 packages with `bundle exec rake build build_doc build_rigor`.
-Install `zard-rigor` alongside `zard-doc`, and install `rigortype` 0.4.3 in
+Install `zard-rigor` alongside `zard-doc`, and install `rigortype` 0.4.4 in
 the environment used by the executable. Projects using `rigor-rbs-inline`
 also need `rbs-inline` (the shared fixture uses 0.14.0). The child process
 runs outside the caller's Bundler environment, so its executable must have
@@ -33,7 +33,7 @@ inferred here. Unavailable and dynamic slots retain the producer's reasons.
 The optional top-level `lens` extension preserves producer/context/capability
 metadata and separates source `sites`, shared `members`, and ZARD `bindings`.
 Bindings match exact path, byte span, declaration kind, owner, scope and name;
-unsupported aliases/refinements never fall back to name-only matching. Site
+aliases match their recorded target and refinements remain unavailable, without name-only fallback. Site
 keys are document-local, not public identities or anchors. Only facts needed
 by public declarations are retained, including other definition sites supporting
 a public member. Visibility and runtime winners are never guessed.
@@ -46,8 +46,12 @@ in the calling build job. This adapter adds no persistent cache.
 `zard-doc-astro` owns the HTML presentation. It shows member signatures and
 definition body returns separately, escaping Rigor's display text verbatim.
 Consumer applications own all CSS. Revision 1 does not provide type-reference
-links, plugin-synthesized members, constant types, or the reserved `@extrbs`
+links, plugin-synthesized members, or the reserved `@extrbs`
 semantics. Missing capabilities and omissions are not empty type sets.
+Rigor 0.4.4 supplies constant value slots and alias/module-function sites. The
+adapter preserves these facts; a module function's public singleton binding
+does not expose its private instance signature or relabel its body return.
+Rigor 0.4.3 remains accepted for existing exports, with its original omissions.
 Unavailable bindings carry explicit reasons for unsupported constructs or
 capabilities, target failures, ambiguous sites and unmatched declarations.
 Producer omission explanations are attached only after exact byte-span/name

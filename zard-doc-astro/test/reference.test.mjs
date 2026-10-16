@@ -87,6 +87,22 @@ test('Starlight filenames preserve top-level and Index routes without hiding or 
   }
 });
 
+test('members disclose original documentation and keep visible anchors with hidden enhancement controls', () => {
+  const data = fixture();
+  const rows = data.scopes[0].declarations;
+  rows[0].name = 'zebra';
+  rows[0].span.start_line = 20;
+  rows[1].name = 'alpha';
+  rows[1].documentation = [{name:'text',subject:null,rendered_description:'<script>preview</script>\nsecond line',span:{path:'lib/example.rb',start_line:1,end_line:2}}];
+  const page = createReference(data).pages.at(-1).body;
+  assert.match(page, /class="api-member-controls" hidden/);
+  assert.match(page, /<details open class="api-declaration api-member"[^>]*><summary><h3 id="zard-02"/);
+  assert.match(page, /public · instance method/);
+  assert.match(page, /class="api-member-preview">&lt;script&gt;preview&lt;\/script&gt;<\/span>/);
+  assert.ok(page.indexOf('data-api-anchor="zard-02"') < page.indexOf('data-api-anchor="zard-01"'));
+  assert.match(page, /second line/);
+});
+
 test('renders exact parameter syntax and optional immutable source links through the public interface', () => {
   const data = fixture();
   const row = data.scopes[0].declarations[0];

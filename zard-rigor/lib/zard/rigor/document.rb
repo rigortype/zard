@@ -31,7 +31,8 @@ module Zard
               retained << site.fetch("key")
               binding["site_key"] = site.fetch("key")
               binding["status"] = "matched"
-              binding["member_keys"] = @members.filter_map { |key, member| key if member.fetch("sites").include?(site.fetch("key")) }
+              member_scope = row.fetch("kind").start_with?("singleton_") ? "singleton" : "instance"
+              binding["member_keys"] = @members.filter_map { |key, member| key if member.fetch("scope") == member_scope && member.fetch("sites").include?(site.fetch("key")) }
             else
               binding["status"] = "unavailable"
               binding.merge!(unavailable(row, file, candidates))
@@ -124,8 +125,9 @@ module Zard
           validate_span(location, @selected.fetch(absolute))
           key = "#{path}:#{location.fetch("start_offset")}-#{location.fetch("end_offset")}:#{site.fetch("ordinal")}"
           reject!("duplicate or invalid site key") if site.fetch("key") != key || @sites.key?(key)
-          reject!("unknown site kind") unless %w[class module method attribute].include?(site.fetch("kind"))
+          reject!("unknown site kind") unless %w[class module method attribute constant].include?(site.fetch("kind"))
           slot(site.fetch("body_return")) if site["body_return"]
+          slot(site.fetch("value")) if site["value"]
           @sites[key] = site
         end
         file.fetch("inputs").each do |input|
@@ -158,7 +160,8 @@ module Zard
         reject!("unknown member site") unless sites.is_a?(Array) && !sites.empty? && sites.uniq == sites && sites.all? { |site| @sites.key?(site) }
         sites.each do |key|
           site = @sites.fetch(key)
-          reject!("member ownership mismatch") unless site.values_at("owner", "scope") == member.values_at("owner", "scope") && site.fetch("members").include?(member.fetch("name"))
+          scopes = site["module_function"] ? %w[instance singleton] : [site.fetch("scope")]
+          reject!("member ownership mismatch") unless site.fetch("owner") == member.fetch("owner") && scopes.include?(member.fetch("scope")) && site.fetch("members").include?(member.fetch("name"))
         end
         overloads = member.fetch("overloads")
         reject!("expected overload array") unless overloads.is_a?(Array)
@@ -195,18 +198,20 @@ module Zard
       end
 
       def matches?(row, site)
-        return false if row["refinement"] || row["alias_target"]
+        return false if row["refinement"]
+        return false unless row["alias_target"] == site["alias_of"]
         return false unless %w[start_offset end_offset].all? { |key| row.fetch("span")[key] == site.fetch("span")[key] }
 
         kind = row.fetch("kind")
-        return site.values_at("kind", "name") == [kind, row.fetch("display_name")] if %w[class module].include?(kind)
+        return site.values_at("kind", "name") == [kind, row.fetch("display_name")] if %w[class module constant].include?(kind)
         return false unless kind.include?("method") || kind.include?("attribute")
 
         scope = kind.start_with?("singleton_") ? "singleton" : "instance"
         owner = row.fetch("namespace") || "Object"
         owner = "Object" if owner.empty?
         expected_kind = kind.include?("attribute") ? "attribute" : "method"
-        site.values_at("kind", "owner", "scope", "name") == [expected_kind, owner, scope, row.fetch("name")]
+        site_scope = (site["module_function"] && scope == "singleton") ? "singleton" : site.fetch("scope")
+        [site.fetch("kind"), site.fetch("owner"), site_scope, site.fetch("name")] == [expected_kind, owner, scope, row.fetch("name")]
       end
     end
     private_constant :Document

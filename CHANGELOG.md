@@ -6,12 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.0.2] - 2026-10-17
+
+Generate scoped API documentation and versioned JSON for static sites, optionally enriched by released Rigor lens facts. This release also adds annotation formatting and an unstyled Astro presentation package; consumer sites own styling and publication.
+
 ### Added
 
 - Build hierarchical Markdown documentation for explicitly configured monorepo scopes, with namespace or file organization, direct dependency links, navigation indexes, and managed output updates.
 - Link YARD-style `@see` references and URLs in generated Markdown, including cross-file CLI references and equivalent `.#` and `?.` module-function spellings.
 - Link BitClust Markdown and RD-compatible references in prose and documentation tags while preserving code regions, existing Markdown links, and source provenance.
 - Format annotation layout through `Zard.format` and `zard-doc format`, with safe contract ordering, redundant-marker removal, check/write modes, and reparsed source provenance.
+- Export experimental `zard-doc/v0` revision 1 JSON with public declarations, exact Ruby parameter syntax, source snapshots, scoped links and written superclass/mixin relationships ([#22](https://github.com/rigortype/zard/pull/22), [#23](https://github.com/rigortype/zard/pull/23), [#25](https://github.com/rigortype/zard/pull/25)).
+- Enrich exports through the optional `zard-rigor` gem and reviewed Rigor 0.4.3/0.4.4 CLI releases, preserving shared signatures, per-definition returns, provenance and explicit unavailable reasons without loading analyzer internals ([#24](https://github.com/rigortype/zard/pull/24)).
+- Consume Rigor 0.4.4 constant value types, aliases and module functions with exact source matching and separate instance/singleton member bindings.
+- Provide the experimental, unpublished `zard-doc-astro` package with unstyled accessible HTML, Starlight routes, grouped member navigation, definition/name sorting, native documentation disclosures and class/module relationship browsing.
 
 ## [0.0.1] - 2026-10-11
 
@@ -30,5 +38,6 @@ The first ZARD release separates Ruby API documentation from RBS and Rigor contr
 - Provide `zard-doc render` and `zard-doc lint` for files, recursive directories, and standard input, with deterministic path ordering and no partial Markdown on input errors.
 - Distribute `zard` and `zard-doc` as separate gems for Ruby 3.2 and newer, with a usage guide and a complete multi-file example.
 
-[Unreleased]: https://github.com/rigortype/zard/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/rigortype/zard/compare/v0.0.2...HEAD
+[0.0.2]: https://github.com/rigortype/zard/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/rigortype/zard/tree/v0.0.1

@@ -7,3 +7,5 @@ Types are producer output, not hand-authored expectations. The adapter adds
 public-declaration bindings; it does not alter type display strings.
 
 See `test/fixtures/rigor_lens/README.md` for upstream commit and attribution.
+
+`lens-export-0.4.4.json` is the same project regenerated through the released Rigor 0.4.4 CLI and ZARD's adapter. It exercises constant value slots, alias sites and the public singleton member of a module function. Its type strings are unchanged producer output.

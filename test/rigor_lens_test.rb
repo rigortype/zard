@@ -130,7 +130,8 @@ class RigorLensTest < Minitest::Test
 
     with_project do |root, export|
       lens = Zard::Rigor::Lens.new(root: root, command: command).enrich(export, base: root).fetch("lens")
-      expected = fixture_document
+      version = lens.fetch("producer").fetch("version")
+      expected = (version == "0.4.3") ? fixture_document : JSON.parse(File.read(File.join(FIXTURE, "expected-#{version}.json")))
       assert_equal expected.fetch("files").map { |file| file.fetch("digest") }, lens.fetch("files").map { |file| file.fetch("digest") }
       expected_members = expected.fetch("members").select do |member|
         lens.fetch("members").any? { |actual| actual.values_at("owner", "scope", "name") == member.values_at("owner", "scope", "name") }
@@ -139,6 +140,18 @@ class RigorLensTest < Minitest::Test
       actual_members = lens.fetch("members").map { |member| member.except("key") }
       assert_equal expected_members.sort_by(&identity), actual_members.sort_by(&identity)
       assert_equal 20, lens.fetch("bindings").size
+      if version == "0.4.4"
+        rows = export.fetch("scopes").first.fetch("declarations")
+        %w[LIMIT title helper].each do |name|
+          row = rows.find { |item| item.fetch("name") == name }
+          binding = lens.fetch("bindings").find { |item| item.fetch("declaration_id") == row.fetch("id") }
+          assert_equal "matched", binding.fetch("status"), name
+          if name == "helper"
+            assert_equal ["singleton"], binding.fetch("member_keys").map { |key| JSON.parse(key)[1] }
+          end
+        end
+        refute lens.fetch("members").any? { |member| member.values_at("owner", "scope") == ["Util", "instance"] }
+      end
     end
   end
 

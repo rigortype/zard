@@ -22,6 +22,7 @@ export function parseLens(data, scopes) {
     for (const site of file.sites || []) {
       if (sites.has(site.key) || typeof site.key !== 'string') fail('duplicate/invalid site key');
       if (site.body_return) slot(site.body_return);
+      if (site.value) slot(site.value);
       sites.set(site.key, { ...site, path: file.path });
     }
   }
@@ -114,7 +115,8 @@ export function renderLens(row, lens) {
     return `<p class="api-lens-status">Rigor type information unavailable: ${escapeHtml(reason)}.</p>\n\n`;
   }
   const site = lens.sites.get(binding.site_key);
-  if (!binding.member_keys.length && !site.body_return) return '';
+  const bodyReturn = site.body_return && !(site.module_function && row.kind.startsWith('singleton_'));
+  if (!binding.member_keys.length && !bodyReturn && !site.value) return '';
   let content = '<aside class="api-lens" aria-label="Rigor type information">\n';
   for (const key of binding.member_keys) {
     const member = lens.members.get(key);
@@ -130,6 +132,7 @@ export function renderLens(row, lens) {
       content += `<dt>Returns</dt><dd>${slotText(overload.return, lens)}</dd></dl>\n`;
     }
   }
-  if (site.body_return) content += `<p><strong>Body return for this definition</strong><br>${slotText(site.body_return, lens)}</p>\n`;
+  if (bodyReturn) content += `<p><strong>Body return for this definition</strong><br>${slotText(site.body_return, lens)}</p>\n`;
+  if (site.value) content += `<p><strong>Constant value type</strong><br>${slotText(site.value, lens)}</p>\n`;
   return `${content}</aside>\n\n`;
 }

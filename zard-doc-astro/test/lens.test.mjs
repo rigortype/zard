@@ -6,6 +6,20 @@ import { createReference } from '../src/index.mjs';
 // Real zard-doc + Rigor 0.4.3 output over Rigor's pinned shared fixture.
 const fixture = () => JSON.parse(readFileSync(new URL('fixtures/lens-export.json', import.meta.url), 'utf8'));
 
+test('renders released 0.4.4 constant facts and keeps module-function signatures separate', () => {
+  const data = JSON.parse(readFileSync(new URL('fixtures/lens-export-0.4.4.json', import.meta.url), 'utf8'));
+  const reference = createReference(data);
+  const shop = reference.pages.find((page) => page.slug === 'api/app/shop').body;
+  assert.match(shop, /Constant value type/);
+  const constant = data.lens.files.flatMap((file) => file.sites).find((site) => site.kind === 'constant');
+  assert.ok(shop.includes(`<code>${constant.value.type}</code>`));
+  const util = reference.pages.find((page) => page.slug === 'api/app/util').body;
+  assert.match(util, /Member signature <code>Util.helper/);
+  assert.doesNotMatch(util, /Member signature <code>Util#helper|Body return for this definition/);
+  constant.value = {state:'guessed'};
+  assert.throws(() => createReference(data), /unknown slot state/);
+});
+
 test('shows member facts, site body returns and unavailable/dynamic states without parsing types', () => {
   const data = fixture();
   const reference = createReference(data);

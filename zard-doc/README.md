@@ -2,11 +2,11 @@
 
 `zard-doc` renders API documentation from the versioned model produced by `zard`.
 
-See the [ZARD usage guide](https://github.com/rigortype/zard/blob/master/docs/usage.md) for installation, canonical tag syntax, model access, limitations, and exit codes. Both `0.0.1` gems are available on RubyGems. Install the released pair with Bundler:
+See the [ZARD usage guide](https://github.com/rigortype/zard/blob/master/docs/usage.md) for installation, canonical tag syntax, model access, limitations, and exit codes. The 0.0.2 release candidate supports this Bundler configuration after publication; before publication, use path gems or locally built packages:
 
 ```ruby
-gem "zard", "~> 0.0.1"
-gem "zard-doc", "~> 0.0.1"
+gem "zard", "~> 0.0.2"
+gem "zard-doc", "~> 0.0.2"
 ```
 
 ```ruby
@@ -32,11 +32,11 @@ Render Markdown to standard output with:
 zard-doc render lib
 ```
 
-Repository builds provide hierarchical monorepo documentation with `zard-doc build --config zard-doc.yml`. Named scopes separate applications; namespace or file layouts, direct documentation dependencies, and managed output updates are described in the [usage guide](https://github.com/rigortype/zard/blob/master/docs/usage.md#build-a-documentation-tree). Rigor lens integration is deferred to the `v0.1.0` goal.
+Version 0.0.2 provides hierarchical monorepo documentation with `zard-doc build --config zard-doc.yml`. Named scopes separate applications; namespace or file layouts, direct documentation dependencies, and managed output updates are described in the [usage guide](https://github.com/rigortype/zard/blob/master/docs/usage.md#build-a-documentation-tree). Optional experimental Rigor lens integration is provided by the separate `zard-rigor` gem.
 
 `zard-doc build --config zard-doc.yml --format json` exports one experimental JSON document to stdout instead of publishing Markdown. It includes public declarations with or without prose, unparsed contracts, source provenance and digests, and scoped page assignments and links. See the [JSON export contract](https://github.com/rigortype/zard/blob/master/docs/json-export.md). The export needs no Rigor installation and is not a Rigor lens result.
 
-Repository builds also provide annotation formatting (not included in the published 0.0.1 gems):
+Version 0.0.2 also provides annotation formatting:
 
 ```console
 zard-doc format lib/example.rb

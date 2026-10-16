@@ -46,24 +46,24 @@ end
 
 ## Architecture & Packages
 
-The published parser and documentation gems are accompanied by an optional adapter in this checkout:
+The 0.0.2 release candidate contains parser, documentation and optional adapter gems:
 
 | Gem | Role | Description |
 | --- | --- | --- |
 | [`zard`](.) | Parser & Model | Parses Ruby source into a versioned, static document model (`Zard::Model::V1`) with source spans and provenance. |
 | [`zard-doc`](zard-doc) | Renderer & CLI | Renders API documentation from the ZARD model into Markdown, and provides the `zard-doc` CLI tool. |
-| [`zard-rigor`](zard-rigor) | Optional adapter | Enriches JSON exports through the released Rigor 0.4.3 CLI (`lens/v0` revision 1), without loading analyzer internals. Not yet published. |
+| [`zard-rigor`](zard-rigor) | Optional adapter | Enriches JSON exports through reviewed Rigor 0.4.3/0.4.4 CLI releases (`lens/v0` revision 1), without loading analyzer internals. |
 
 ---
 
 ## Installation
 
-Both gems are available on RubyGems: [zard](https://rubygems.org/gems/zard) and [zard-doc](https://rubygems.org/gems/zard-doc). Add the released pair to your Gemfile:
+The release candidate targets [zard](https://rubygems.org/gems/zard) and [zard-doc](https://rubygems.org/gems/zard-doc) 0.0.2. After publication, add the pair to your Gemfile; before publication, build and install the local packages with `bundle exec rake`:
 
 ```ruby
 # Gemfile
-gem "zard", "~> 0.0.1"
-gem "zard-doc", "~> 0.0.1"
+gem "zard", "~> 0.0.2"
+gem "zard-doc", "~> 0.0.2"
 ```
 
 Run `bundle install` after adding the gems to your Gemfile.
@@ -120,7 +120,7 @@ markdown = Zard::Doc.render(document)
 
 The renderer emits documented public declarations and supports class, module, constant, attribute, and method prose, as well as `@param`, `@return`, `@yieldparam`, `@yieldreturn`, `@option`, `@raise`, `@note`, `@see`, `@deprecated`, and `@example`. Contracts remain in the model and are not duplicated into API prose.
 
-Repository builds also provide `zard-doc build --config zard-doc.yml --format json` for static-site consumers. It exports public declarations, documentation, unparsed contracts, source provenance, and scoped page/link metadata to stdout without publishing files. This experimental [JSON export](docs/json-export.md) is separate from Rigor lens and is not included in the released 0.0.1 gems.
+Version 0.0.2 provides `zard-doc build --config zard-doc.yml --format json` for static-site consumers. It exports public declarations, documentation, unparsed contracts, source provenance, and scoped page/link metadata to stdout without publishing files. This experimental [JSON export](docs/json-export.md) works independently of Rigor; install the optional `zard-rigor` gem to enrich it with reviewed lens facts.
 
 The experimental [`zard-doc-astro`](zard-doc-astro/README.md) JavaScript package owns unstyled API presentation and a separate Starlight adapter. Consumer sites own CSS, source acquisition, localization and publication; the Ruby gems do not depend on Astro.
 

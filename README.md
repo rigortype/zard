@@ -1,33 +1,35 @@
 # ZARD
 
-**ZARD** is an AI-friendly Ruby self-documentation notation built around RBS and Rigor extensions. It keeps human-facing API documentation separate from type contracts.
+**ZARD** is a simple Ruby documentation notation, orthogonal to types. Describe what your API does, how to use it, and why it behaves that way without repeating type signatures.
 
-> **Status**: Under active design (pre-1.0). The current release slice parses Ruby source into a versioned model (`Zard::Model::V1`) and renders public API documentation as Markdown.
+Use it on its own or alongside RBS and a type checker. Documentation and type contracts stay separate, so each can evolve without duplicating the other.
+
+> **Status**: Under active design (pre-1.0). Version 0.0.2 parses Ruby source into a versioned model (`Zard::Model::V1`), generates Markdown documentation, and exports experimental JSON for static sites.
 
 ---
 
 ## Why ZARD?
 
-In traditional Ruby documentation tools (such as YARD or RDoc), type annotations and descriptive prose are often mixed within comment tags (e.g. `@param [String] path The path`). This creates redundant, easily desynchronized type definitions alongside modern Ruby type checkers.
+API documentation explains meaning, usage, and intent. Type contracts describe the types a program accepts and returns. Keeping these concerns separate lets you document an API without choosing a type checker or maintaining a second copy of its signatures.
 
-ZARD separates contracts from API documentation:
+ZARD keeps the notation small:
 
-- **Type Contracts (`@rbs`, `#:`, `@extrbs`)**: Plain RBS expresses contracts for the Ruby type ecosystem. Rigor-specific refinements use `@extrbs`.
-- **API Documentation (`@param`, `@return`, etc.)**: Human- and AI-facing prose explains *what* and *why* without repeating type signatures.
-- **Structured Declaration Model**: The parser captures declarations, contracts, documentation, and diagnostics with precise source spans and provenance—ideal for IDEs, automated tooling, and AI agents.
+- **Write prose in Ruby comments.** Familiar tags such as `@param`, `@return`, and `@example` describe your API without requiring types.
+- **Keep types in contracts.** Existing `@rbs`, `#:`, and `@extrbs` annotations remain separate from API prose.
+- **Generate documentation without a type checker.** Parsing, linting, formatting, and documentation generation work independently of Rigor. The optional `zard-rigor` adapter adds type information to JSON exports when needed.
 
-The current release preserves contract payloads as text. It does not parse or validate their types or check documentation claims against contracts. The development checkout also provides an optional experimental Rigor lens adapter, described below.
+Being AI-friendly is also a design goal. ZARD captures declarations, documentation, contracts, and diagnostics in a structured model with precise source spans and provenance, so editors, automated tools, and AI agents can work with the same information people read in the source.
+
+The core parser preserves contract payloads as text. It does not parse or validate their types or check documentation claims against contracts.
 
 ---
 
 ## Syntax at a Glance
 
-ZARD separates type contracts from API prose:
+Document an API with plain prose and a few tags:
 
 ```ruby
-# @extrbs return: non-empty-string
-# @rbs path: String
-# @rbs return: String
+# Read the stored name from a file.
 # @param path — Path to the name file.
 # @return The stored name.
 # @raise IOError — If the file cannot be read.
@@ -35,6 +37,8 @@ def read_name(path)
   File.read(path).strip
 end
 ```
+
+This documentation stands on its own. If the method also has type contracts, keep them in their own annotations; the prose does not need to repeat them.
 
 - **Contracts**: Plain RBS uses `@rbs` or `#:`. Advanced Rigor-only refinements use `@extrbs`. Contract payloads are not copied into API documentation. Inline RBS trailing prose after `--` is stored as a contract note, not API prose.
 - **Documentation Marker**: An em dash (`—`) separates named documentation tags (`@param`, `@yieldparam`, `@raise`, `@option`) or optional type claims from descriptions.
@@ -46,13 +50,14 @@ end
 
 ## Architecture & Packages
 
-The 0.0.2 release contains parser, documentation and optional adapter gems:
+ZARD separates parsing, documentation generation, optional type enrichment, and site presentation into packages. The three Ruby gems are released as 0.0.2; the Astro package is not yet released.
 
-| Gem | Role | Description |
+| Package | Role | Description |
 | --- | --- | --- |
 | [`zard`](.) | Parser & Model | Parses Ruby source into a versioned, static document model (`Zard::Model::V1`) with source spans and provenance. |
 | [`zard-doc`](zard-doc) | Renderer & CLI | Renders API documentation from the ZARD model into Markdown, and provides the `zard-doc` CLI tool. |
 | [`zard-rigor`](zard-rigor) | Optional adapter | Enriches JSON exports through the released Rigor 0.4.5 CLI (`lens/v0` revision 1), without loading analyzer internals. |
+| [`zard-doc-astro`](zard-doc-astro/README.md) (unreleased) | Astro presentation | Consumes JSON exports to produce unstyled API HTML and Starlight page data. Consumer sites own CSS and publication. Not yet published to npm. |
 
 ---
 

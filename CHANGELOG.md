@@ -6,11 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-### Changed
-
-- Require Rigor 0.4.5 for experimental lens exports, including readable declared block types; older producer versions are no longer accepted.
-
-## [0.0.2] - 2026-10-17
+## [0.0.2] - 2026-10-19
 
 Generate scoped API documentation and versioned JSON for static sites, optionally enriched by released Rigor lens facts. This release also adds annotation formatting and an unstyled Astro presentation package; consumer sites own styling and publication.
 
@@ -21,8 +17,8 @@ Generate scoped API documentation and versioned JSON for static sites, optionall
 - Link BitClust Markdown and RD-compatible references in prose and documentation tags while preserving code regions, existing Markdown links, and source provenance.
 - Format annotation layout through `Zard.format` and `zard-doc format`, with safe contract ordering, redundant-marker removal, check/write modes, and reparsed source provenance.
 - Export experimental `zard-doc/v0` revision 1 JSON with public declarations, exact Ruby parameter syntax, source snapshots, scoped links and written superclass/mixin relationships ([#22](https://github.com/rigortype/zard/pull/22), [#23](https://github.com/rigortype/zard/pull/23), [#25](https://github.com/rigortype/zard/pull/25)).
-- Enrich exports through the optional `zard-rigor` gem and reviewed Rigor 0.4.3/0.4.4 CLI releases, preserving shared signatures, per-definition returns, provenance and explicit unavailable reasons without loading analyzer internals ([#24](https://github.com/rigortype/zard/pull/24)).
-- Consume Rigor 0.4.4 constant value types, aliases and module functions with exact source matching and separate instance/singleton member bindings.
+- Enrich exports through the optional `zard-rigor` gem and released Rigor 0.4.5 CLI, preserving shared signatures, per-definition returns, provenance and explicit unavailable reasons without loading analyzer internals ([#24](https://github.com/rigortype/zard/pull/24), [#27](https://github.com/rigortype/zard/pull/27)).
+- Consume constant value types, aliases, module functions and readable declared block types with exact source matching and separate instance/singleton member bindings; only Rigor 0.4.5 is supported.
 - Provide the experimental, unpublished `zard-doc-astro` package with unstyled accessible HTML, Starlight routes, grouped member navigation, definition/name sorting, native documentation disclosures and class/module relationship browsing.
 
 ## [0.0.1] - 2026-10-11

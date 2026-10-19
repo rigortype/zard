@@ -2,7 +2,7 @@
 
 `zard-doc` renders API documentation from the versioned model produced by `zard`.
 
-See the [ZARD usage guide](https://github.com/rigortype/zard/blob/master/docs/usage.md) for installation, canonical tag syntax, model access, limitations, and exit codes. The 0.0.2 release candidate supports this Bundler configuration after publication; before publication, use path gems or locally built packages:
+See the [ZARD usage guide](https://github.com/rigortype/zard/blob/master/docs/usage.md) for installation, canonical tag syntax, model access, limitations, and exit codes. Install the 0.0.2 pair with Bundler:
 
 ```ruby
 gem "zard", "~> 0.0.2"

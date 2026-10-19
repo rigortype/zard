@@ -1,6 +1,6 @@
 # ZARD 0.0.2 usage
 
-ZARD parses Ruby source into a versioned model. The separate `zard-doc` gem renders human-facing API documentation. This guide describes the 0.0.2 release candidate; use path gems or locally built packages until publication, then install the pair with Bundler:
+ZARD parses Ruby source into a versioned model. The separate `zard-doc` gem renders human-facing API documentation. Install the 0.0.2 pair with Bundler:
 
 ```ruby
 gem "zard", "~> 0.0.2"

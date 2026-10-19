@@ -4,8 +4,7 @@ Optional, experimental adapter from the **released Rigor 0.4.5 CLI** to
 `zard-doc/v0` revision 1. It accepts only `lens/v0` revision 1; this is not
 the future stable lens protocol. Neither `zard` nor `zard-doc` loads Rigor.
 
-Version 0.0.2 is the first release candidate for this gem. Use the monorepo's path gems or build the
-packages with `bundle exec rake build build_doc build_rigor`.
+Version 0.0.2 is the first release of this optional gem. Add `gem "zard-rigor", "~> 0.0.2"` to your Gemfile alongside `zard-doc`.
 Install `zard-rigor` alongside `zard-doc`, and install `rigortype` 0.4.5 in
 the environment used by the executable. Projects using `rigor-rbs-inline`
 also need `rbs-inline` (the shared fixture uses 0.14.0). The child process

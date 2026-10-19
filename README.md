@@ -46,7 +46,7 @@ end
 
 ## Architecture & Packages
 
-The 0.0.2 release candidate contains parser, documentation and optional adapter gems:
+The 0.0.2 release contains parser, documentation and optional adapter gems:
 
 | Gem | Role | Description |
 | --- | --- | --- |
@@ -58,7 +58,7 @@ The 0.0.2 release candidate contains parser, documentation and optional adapter 
 
 ## Installation
 
-The release candidate targets [zard](https://rubygems.org/gems/zard) and [zard-doc](https://rubygems.org/gems/zard-doc) 0.0.2. After publication, add the pair to your Gemfile; before publication, build and install the local packages with `bundle exec rake`:
+Install [zard](https://rubygems.org/gems/zard) and [zard-doc](https://rubygems.org/gems/zard-doc) 0.0.2 from RubyGems by adding the pair to your Gemfile:
 
 ```ruby
 # Gemfile

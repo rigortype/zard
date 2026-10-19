@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Require Rigor 0.4.5 for experimental lens exports, including readable declared block types; older producer versions are no longer accepted.
+
 ## [0.0.2] - 2026-10-17
 
 Generate scoped API documentation and versioned JSON for static sites, optionally enriched by released Rigor lens facts. This release also adds annotation formatting and an unstyled Astro presentation package; consumer sites own styling and publication.

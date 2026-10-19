@@ -2,8 +2,8 @@
   "schema": "zard-doc/v0",
   "revision": 1,
   "producer": {
-    "zard": "0.0.1",
-    "zard_doc": "0.0.1"
+    "zard": "0.0.2",
+    "zard_doc": "0.0.2"
   },
   "layout": "namespace",
   "scopes": [
@@ -53,6 +53,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/order.rb",
             "start_line": 1,
@@ -90,6 +91,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/order.rb",
             "start_line": 2,
@@ -239,6 +241,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/order.rb",
             "start_line": 4,
@@ -276,6 +279,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/order.rb",
             "start_line": 6,
@@ -313,6 +317,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/order.rb",
             "start_line": 10,
@@ -350,6 +355,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/shop.rb",
             "start_line": 4,
@@ -414,6 +420,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/shop.rb",
             "start_line": 5,
@@ -470,6 +477,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/shop.rb",
             "start_line": 9,
@@ -569,6 +577,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/shop.rb",
             "start_line": 12,
@@ -630,6 +639,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/shop.rb",
             "start_line": 14,
@@ -686,6 +696,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/shop.rb",
             "start_line": 16,
@@ -723,6 +734,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/shop.rb",
             "start_line": 18,
@@ -760,6 +772,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/shop.rb",
             "start_line": 18,
@@ -805,6 +818,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/shop.rb",
             "start_line": 20,
@@ -843,6 +857,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/shop.rb",
             "start_line": 22,
@@ -888,6 +903,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/shop.rb",
             "start_line": 25,
@@ -927,6 +943,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/shop.rb",
             "start_line": 28,
@@ -964,6 +981,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/util.rb",
             "start_line": 1,
@@ -1001,6 +1019,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/util.rb",
             "start_line": 4,
@@ -1038,6 +1057,7 @@
           "container_builder": null,
           "container_builder_span": null,
           "mixins": [],
+          "relationships": [],
           "span": {
             "path": "lib/util.rb",
             "start_line": 7,
@@ -1103,7 +1123,7 @@
     "revision": 1,
     "producer": {
       "name": "rigor",
-      "version": "0.4.3",
+      "version": "0.4.5",
       "engine_source": null
     },
     "context": {
@@ -1117,17 +1137,21 @@
       "plugins": [
         {
           "id": "rbs-inline",
-          "version": "0.4.3"
+          "version": "0.4.5"
         }
       ],
       "lockfiles": [],
-      "digest": "xxh3-64:7e496a29c9715fde"
+      "digest": "xxh3-64:55a90c162c58629d"
     },
     "capabilities": [
       "class",
       "module",
       "method",
       "attribute",
+      "constant",
+      "module_function",
+      "builder",
+      "alias",
       "body_return",
       "diagnostics",
       "inputs"
@@ -1150,6 +1174,8 @@
             "scope": null,
             "attribute": null,
             "members": [],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 1,
@@ -1165,7 +1191,9 @@
             "contract": null,
             "params": null,
             "block": null,
-            "body_return": null
+            "body_return": null,
+            "value": null,
+            "alias_of": null
           },
           {
             "key": "lib/order.rb:14-29:0",
@@ -1177,6 +1205,8 @@
             "members": [
               "amount"
             ],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 2,
@@ -1198,7 +1228,9 @@
               "provenance": "inferred",
               "path": null,
               "from_site": null
-            }
+            },
+            "value": null,
+            "alias_of": null
           },
           {
             "key": "lib/order.rb:33-94:0",
@@ -1210,6 +1242,8 @@
             "members": [
               "note"
             ],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 4,
@@ -1261,7 +1295,9 @@
               "path": null,
               "from_site": null,
               "cause": "inferred_return_untyped"
-            }
+            },
+            "value": null,
+            "alias_of": null
           },
           {
             "key": "lib/order.rb:98-134:0",
@@ -1273,6 +1309,8 @@
             "members": [
               "each_line"
             ],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 6,
@@ -1298,7 +1336,9 @@
               "path": null,
               "from_site": null,
               "cause": null
-            }
+            },
+            "value": null,
+            "alias_of": null
           },
           {
             "key": "lib/order.rb:138-164:0",
@@ -1310,6 +1350,8 @@
             "members": [
               "broken"
             ],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 10,
@@ -1332,7 +1374,9 @@
               "path": null,
               "from_site": null,
               "cause": "unsupported_syntax"
-            }
+            },
+            "value": null,
+            "alias_of": null
           }
         ],
         "diagnostics": [
@@ -1352,39 +1396,8 @@
         "status": "ok",
         "reason": null,
         "digest": "xxh3-64:af24c3087206d10d",
-        "complete": false,
-        "omissions": [
-          {
-            "kind": "constant",
-            "owner": null,
-            "scope": null,
-            "name": "Shop::LIMIT",
-            "span": {
-              "start_line": 5,
-              "start_column": 2,
-              "end_line": 5,
-              "end_column": 12,
-              "start_offset": 46,
-              "end_offset": 56
-            },
-            "reason": "unsupported_kind"
-          },
-          {
-            "kind": "alias",
-            "owner": "Shop",
-            "scope": "instance",
-            "name": "title",
-            "span": {
-              "start_line": 28,
-              "start_column": 2,
-              "end_line": 28,
-              "end_column": 29,
-              "start_offset": 391,
-              "end_offset": 418
-            },
-            "reason": "unsupported_kind"
-          }
-        ],
+        "complete": true,
+        "omissions": [],
         "sites": [
           {
             "key": "lib/shop.rb:33-451:0",
@@ -1394,6 +1407,8 @@
             "scope": null,
             "attribute": null,
             "members": [],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 4,
@@ -1409,7 +1424,44 @@
             "contract": null,
             "params": null,
             "block": null,
-            "body_return": null
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shop.rb:46-56:0",
+            "kind": "constant",
+            "name": "Shop::LIMIT",
+            "owner": "Shop",
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 5,
+              "start_column": 2,
+              "end_line": 5,
+              "end_column": 12,
+              "start_offset": 46,
+              "end_offset": 56
+            },
+            "contract_span": null,
+            "anchor": "5:8b07",
+            "visibility": "public",
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": {
+              "state": "typed",
+              "type": "10",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "alias_of": null
           },
           {
             "key": "lib/shop.rb:122-143:0",
@@ -1421,6 +1473,8 @@
             "members": [
               "label"
             ],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 9,
@@ -1455,7 +1509,9 @@
               "provenance": "inferred",
               "path": null,
               "from_site": null
-            }
+            },
+            "value": null,
+            "alias_of": null
           },
           {
             "key": "lib/shop.rb:167-191:0",
@@ -1467,6 +1523,8 @@
             "members": [
               "scale"
             ],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 12,
@@ -1501,7 +1559,9 @@
               "provenance": "inferred",
               "path": null,
               "from_site": null
-            }
+            },
+            "value": null,
+            "alias_of": null
           },
           {
             "key": "lib/shop.rb:195-223:0",
@@ -1513,6 +1573,8 @@
             "members": [
               "total"
             ],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 14,
@@ -1534,7 +1596,9 @@
               "provenance": "inferred",
               "path": null,
               "from_site": null
-            }
+            },
+            "value": null,
+            "alias_of": null
           },
           {
             "key": "lib/shop.rb:227-245:0",
@@ -1546,6 +1610,8 @@
             "members": [
               "fetch"
             ],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 16,
@@ -1574,7 +1640,9 @@
               "path": null,
               "from_site": null,
               "cause": "inferred_return_untyped"
-            }
+            },
+            "value": null,
+            "alias_of": null
           },
           {
             "key": "lib/shop.rb:249-273:0",
@@ -1586,6 +1654,8 @@
             "members": [
               "name"
             ],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 18,
@@ -1608,7 +1678,9 @@
             "contract": "inline",
             "params": null,
             "block": null,
-            "body_return": null
+            "body_return": null,
+            "value": null,
+            "alias_of": null
           },
           {
             "key": "lib/shop.rb:249-273:1",
@@ -1620,6 +1692,8 @@
             "members": [
               "code"
             ],
+            "module_function": false,
+            "builder": null,
             "ordinal": 1,
             "span": {
               "start_line": 18,
@@ -1642,7 +1716,9 @@
             "contract": "inline",
             "params": null,
             "block": null,
-            "body_return": null
+            "body_return": null,
+            "value": null,
+            "alias_of": null
           },
           {
             "key": "lib/shop.rb:287-307:0",
@@ -1654,6 +1730,8 @@
             "members": [
               "build"
             ],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 20,
@@ -1675,7 +1753,9 @@
               "provenance": "inferred",
               "path": null,
               "from_site": null
-            }
+            },
+            "value": null,
+            "alias_of": null
           },
           {
             "key": "lib/shop.rb:311-331:0",
@@ -1688,6 +1768,8 @@
               "price",
               "price="
             ],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 22,
@@ -1710,7 +1792,9 @@
             "contract": "inline",
             "params": null,
             "block": null,
-            "body_return": null
+            "body_return": null,
+            "value": null,
+            "alias_of": null
           },
           {
             "key": "lib/shop.rb:364-381:0",
@@ -1722,6 +1806,8 @@
             "members": [
               "registry"
             ],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 25,
@@ -1743,7 +1829,52 @@
               "provenance": "inferred",
               "path": null,
               "from_site": null
-            }
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shop.rb:391-418:0",
+            "kind": "method",
+            "name": "title",
+            "owner": "Shop",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "title"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 28,
+              "start_column": 2,
+              "end_line": 28,
+              "end_column": 29,
+              "start_offset": 391,
+              "end_offset": 418
+            },
+            "contract_span": null,
+            "anchor": "28:bc16",
+            "visibility": "public",
+            "contract": null,
+            "params": [
+              {
+                "name": "n",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "String",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": "label"
           }
         ],
         "diagnostics": [],
@@ -1764,24 +1895,8 @@
         "status": "ok",
         "reason": null,
         "digest": "xxh3-64:8bb9bdd3c71159e9",
-        "complete": false,
-        "omissions": [
-          {
-            "kind": "module_function",
-            "owner": "Util",
-            "scope": "instance",
-            "name": "helper",
-            "span": {
-              "start_line": 4,
-              "start_column": 2,
-              "end_line": 4,
-              "end_column": 16,
-              "start_offset": 33,
-              "end_offset": 47
-            },
-            "reason": "unsupported_kind"
-          }
-        ],
+        "complete": true,
+        "omissions": [],
         "sites": [
           {
             "key": "lib/util.rb:0-51:0",
@@ -1791,6 +1906,8 @@
             "scope": null,
             "attribute": null,
             "members": [],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 1,
@@ -1806,7 +1923,46 @@
             "contract": null,
             "params": null,
             "block": null,
-            "body_return": null
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/util.rb:33-47:0",
+            "kind": "method",
+            "name": "helper",
+            "owner": "Util",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "helper"
+            ],
+            "module_function": true,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 4,
+              "start_column": 2,
+              "end_line": 4,
+              "end_column": 16,
+              "start_offset": 33,
+              "end_offset": 47
+            },
+            "contract_span": null,
+            "anchor": "4:428d",
+            "visibility": "private",
+            "contract": null,
+            "params": [],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "1",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
           },
           {
             "key": "lib/util.rb:53-73:0",
@@ -1818,6 +1974,8 @@
             "members": [
               "top_helper"
             ],
+            "module_function": false,
+            "builder": null,
             "ordinal": 0,
             "span": {
               "start_line": 7,
@@ -1839,7 +1997,9 @@
               "provenance": "inferred",
               "path": null,
               "from_site": null
-            }
+            },
+            "value": null,
+            "alias_of": null
           }
         ],
         "diagnostics": [],
@@ -2340,6 +2500,57 @@
         "key": "[\"Shop\",\"singleton\",\"registry\"]"
       },
       {
+        "owner": "Shop",
+        "scope": "instance",
+        "name": "title",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/shop.rb:391-418:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": null,
+            "params": null,
+            "block": null,
+            "return": {
+              "state": "unavailable",
+              "reason": "not_computed"
+            }
+          }
+        ],
+        "key": "[\"Shop\",\"instance\",\"title\"]"
+      },
+      {
+        "owner": "Util",
+        "scope": "singleton",
+        "name": "helper",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/util.rb:33-47:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": "() -> 1",
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "1",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": "lib/util.rb:33-47:0"
+            }
+          }
+        ],
+        "key": "[\"Util\",\"singleton\",\"helper\"]"
+      },
+      {
         "owner": "Object",
         "scope": "instance",
         "name": "top_helper",
@@ -2369,7 +2580,7 @@
     ],
     "adapter": {
       "name": "zard-rigor",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "grammar": "rigor:v1"
     },
     "project": ".",
@@ -2434,14 +2645,9 @@
         "scope": "app",
         "declaration_id": "app:zard-636f6e7374616e740053686f703a3a4c494d495400",
         "file": "lib/shop.rb",
-        "site_key": null,
+        "site_key": "lib/shop.rb:46-56:0",
         "member_keys": [],
-        "status": "unavailable",
-        "reason": "unsupported_declaration",
-        "omission": {
-          "kind": "constant",
-          "reason": "unsupported_kind"
-        }
+        "status": "matched"
       },
       {
         "scope": "app",
@@ -2538,14 +2744,11 @@
         "scope": "app",
         "declaration_id": "app:zard-696e7374616e63655f6d6574686f640053686f70237469746c6500",
         "file": "lib/shop.rb",
-        "site_key": null,
-        "member_keys": [],
-        "status": "unavailable",
-        "reason": "unsupported_declaration",
-        "omission": {
-          "kind": "alias",
-          "reason": "unsupported_kind"
-        }
+        "site_key": "lib/shop.rb:391-418:0",
+        "member_keys": [
+          "[\"Shop\",\"instance\",\"title\"]"
+        ],
+        "status": "matched"
       },
       {
         "scope": "app",
@@ -2559,14 +2762,11 @@
         "scope": "app",
         "declaration_id": "app:zard-73696e676c65746f6e5f6d6574686f64005574696c2e68656c70657200",
         "file": "lib/util.rb",
-        "site_key": null,
-        "member_keys": [],
-        "status": "unavailable",
-        "reason": "unsupported_declaration",
-        "omission": {
-          "kind": "module_function",
-          "reason": "unsupported_kind"
-        }
+        "site_key": "lib/util.rb:33-47:0",
+        "member_keys": [
+          "[\"Util\",\"singleton\",\"helper\"]"
+        ],
+        "status": "matched"
       },
       {
         "scope": "app",
@@ -2579,10 +2779,6 @@
         "status": "matched"
       }
     ],
-    "warnings": [
-      "app:Shop::LIMIT: lens unsupported_declaration",
-      "app:Shop#title: lens unsupported_declaration",
-      "app:Util.helper: lens unsupported_declaration"
-    ]
+    "warnings": []
   }
 }

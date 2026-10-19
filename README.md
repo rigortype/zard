@@ -52,7 +52,7 @@ The 0.0.2 release candidate contains parser, documentation and optional adapter 
 | --- | --- | --- |
 | [`zard`](.) | Parser & Model | Parses Ruby source into a versioned, static document model (`Zard::Model::V1`) with source spans and provenance. |
 | [`zard-doc`](zard-doc) | Renderer & CLI | Renders API documentation from the ZARD model into Markdown, and provides the `zard-doc` CLI tool. |
-| [`zard-rigor`](zard-rigor) | Optional adapter | Enriches JSON exports through reviewed Rigor 0.4.3/0.4.4 CLI releases (`lens/v0` revision 1), without loading analyzer internals. |
+| [`zard-rigor`](zard-rigor) | Optional adapter | Enriches JSON exports through the released Rigor 0.4.5 CLI (`lens/v0` revision 1), without loading analyzer internals. |
 
 ---
 

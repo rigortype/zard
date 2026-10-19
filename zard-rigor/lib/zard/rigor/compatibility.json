@@ -2,6 +2,6 @@
   "schema": "lens/v0",
   "revision": 1,
   "producer": "rigor",
-  "versions": ["0.4.3", "0.4.4"],
-  "default_version": "0.4.4"
+  "versions": ["0.4.5"],
+  "default_version": "0.4.5"
 }

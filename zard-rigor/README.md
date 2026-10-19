@@ -1,12 +1,12 @@
 # zard-rigor
 
-Optional, experimental adapter from the **released Rigor 0.4.4 CLI** to
+Optional, experimental adapter from the **released Rigor 0.4.5 CLI** to
 `zard-doc/v0` revision 1. It accepts only `lens/v0` revision 1; this is not
 the future stable lens protocol. Neither `zard` nor `zard-doc` loads Rigor.
 
 Version 0.0.2 is the first release candidate for this gem. Use the monorepo's path gems or build the
 packages with `bundle exec rake build build_doc build_rigor`.
-Install `zard-rigor` alongside `zard-doc`, and install `rigortype` 0.4.4 in
+Install `zard-rigor` alongside `zard-doc`, and install `rigortype` 0.4.5 in
 the environment used by the executable. Projects using `rigor-rbs-inline`
 also need `rbs-inline` (the shared fixture uses 0.14.0). The child process
 runs outside the caller's Bundler environment, so its executable must have
@@ -48,10 +48,10 @@ definition body returns separately, escaping Rigor's display text verbatim.
 Consumer applications own all CSS. Revision 1 does not provide type-reference
 links, plugin-synthesized members, or the reserved `@extrbs`
 semantics. Missing capabilities and omissions are not empty type sets.
-Rigor 0.4.4 supplies constant value slots and alias/module-function sites. The
+Rigor 0.4.5 supplies constant value slots and alias/module-function sites. The
 adapter preserves these facts; a module function's public singleton binding
 does not expose its private instance signature or relabel its body return.
-Rigor 0.4.3 remains accepted for existing exports, with its original omissions.
+Only Rigor 0.4.5 is supported; regenerate older exports with that executable.
 Unavailable bindings carry explicit reasons for unsupported constructs or
 capabilities, target failures, ambiguous sites and unmatched declarations.
 Producer omission explanations are attached only after exact byte-span/name
@@ -66,7 +66,7 @@ Set `ZARD_RIGOR_COMMAND` to an executable for the opt-in released-CLI test.
 `default_version` selects the released executable tested in CI. Versions are
 explicitly reviewed; sharing a schema revision does not automatically admit an
 untested producer. After verifying a new released executable with the shared
-fixture and real project, add its version and update the default, then run
+fixture and real project, replace the supported version and default, then run
 `node scripts/sync-lens-compatibility.mjs` from the repository root. The Astro
 package ships the generated manifest and tests/packing reject a stale copy.
 Its notice renders the validated producer version from the actual artifact.

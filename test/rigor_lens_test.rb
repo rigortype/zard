@@ -24,12 +24,7 @@ class RigorLensTest < Minitest::Test
   end
 
   def fixture_document
-    data = JSON.parse(File.read(File.join(FIXTURE, "expected.json")))
-    data["producer"]["version"] = Zard::Rigor::Compatibility::DATA.fetch("default_version")
-    data["files"].select! { |file| file["status"] == "ok" }
-    data["files"].sort_by! { |file| file.fetch("path") }
-    data["files"].each { |file| file["argument"] = "./#{file.fetch("path")}" }
-    data
+    JSON.parse(File.read(File.join(FIXTURE, "expected.json")))
   end
 
   def adapter(root, document = fixture_document, status: 0, &before_return)
@@ -61,8 +56,23 @@ class RigorLensTest < Minitest::Test
       assert_equal "contested", fetch.fetch("basis")
       assert_empty fetch.fetch("overloads")
       refute lens.fetch("members").any? { |member| member.fetch("name") == "secret" }
-      omitted = lens.fetch("bindings").select { |binding| binding["reason"] == "unsupported_declaration" }
-      assert_equal %w[alias constant module_function], omitted.map { |binding| binding.fetch("omission").fetch("kind") }.sort
+      assert lens.fetch("bindings").all? { |binding| binding.fetch("status") == "matched" }
+    end
+  end
+
+  def test_explains_an_exact_producer_omission_without_attaching_other_facts
+    with_project do |root, export|
+      data = fixture_document
+      file = data.fetch("files").find { |item| item.fetch("path") == "lib/shop.rb" }
+      site = file.fetch("sites").find { |item| item.fetch("kind") == "constant" }
+      file.fetch("sites").delete(site)
+      file["complete"] = false
+      file["omissions"] = [{"kind" => "constant", "name" => site.fetch("name"), "reason" => "unsupported", "span" => site.fetch("span")}]
+      lens = adapter(root, data).enrich(export, base: root).fetch("lens")
+      binding = lens.fetch("bindings").find { |item| item["reason"] == "unsupported_declaration" }
+      assert_equal({"kind" => "constant", "reason" => "unsupported"}, binding.fetch("omission"))
+      assert_nil binding.fetch("site_key")
+      assert_empty binding.fetch("member_keys")
     end
   end
 
@@ -81,7 +91,11 @@ class RigorLensTest < Minitest::Test
       bad.fetch("files").first.fetch("sites").first.fetch("span")["start_line"] += 1
       assert_raises(Zard::Rigor::Error) { adapter(root, bad).enrich(export, base: root) }
       bad = fixture_document
-      bad.fetch("files").find { |file| !file.fetch("omissions").empty? }.fetch("omissions").first.fetch("span")["end_offset"] += 1
+      file = bad.fetch("files").first
+      span = file.fetch("sites").first.fetch("span").dup
+      span["end_offset"] += 1
+      file["complete"] = false
+      file["omissions"] = [{"kind" => "method", "name" => "amount", "reason" => "unsupported", "span" => span}]
       assert_raises(Zard::Rigor::Error) { adapter(root, bad).enrich(export, base: root) }
       assert_raises(Zard::Rigor::Error) do
         adapter(root) { File.write(File.join(root, "lib/shop.rb"), "# changed\n") }.enrich(export, base: root)
@@ -93,7 +107,8 @@ class RigorLensTest < Minitest::Test
     with_project do |root, export|
       mutations = [
         ->(data) { data["revision"] = 2 },
-        ->(data) { data.fetch("producer")["version"] = "0.4.2" },
+        ->(data) { data.fetch("producer")["version"] = "0.4.3" },
+        ->(data) { data.fetch("producer")["version"] = "0.4.4" },
         ->(data) { data.fetch("files").pop },
         ->(data) { data.fetch("members").first["sites"] = ["missing"] },
         ->(data) { data.fetch("members").find { |member| member["basis"] == "contested" }["overloads"] = [{}] }
@@ -130,8 +145,8 @@ class RigorLensTest < Minitest::Test
 
     with_project do |root, export|
       lens = Zard::Rigor::Lens.new(root: root, command: command).enrich(export, base: root).fetch("lens")
-      version = lens.fetch("producer").fetch("version")
-      expected = (version == "0.4.3") ? fixture_document : JSON.parse(File.read(File.join(FIXTURE, "expected-#{version}.json")))
+      assert_equal "0.4.5", lens.fetch("producer").fetch("version")
+      expected = fixture_document
       assert_equal expected.fetch("files").map { |file| file.fetch("digest") }, lens.fetch("files").map { |file| file.fetch("digest") }
       expected_members = expected.fetch("members").select do |member|
         lens.fetch("members").any? { |actual| actual.values_at("owner", "scope", "name") == member.values_at("owner", "scope", "name") }
@@ -140,18 +155,16 @@ class RigorLensTest < Minitest::Test
       actual_members = lens.fetch("members").map { |member| member.except("key") }
       assert_equal expected_members.sort_by(&identity), actual_members.sort_by(&identity)
       assert_equal 20, lens.fetch("bindings").size
-      if version == "0.4.4"
-        rows = export.fetch("scopes").first.fetch("declarations")
-        %w[LIMIT title helper].each do |name|
-          row = rows.find { |item| item.fetch("name") == name }
-          binding = lens.fetch("bindings").find { |item| item.fetch("declaration_id") == row.fetch("id") }
-          assert_equal "matched", binding.fetch("status"), name
-          if name == "helper"
-            assert_equal ["singleton"], binding.fetch("member_keys").map { |key| JSON.parse(key)[1] }
-          end
+      rows = export.fetch("scopes").first.fetch("declarations")
+      %w[LIMIT title helper].each do |name|
+        row = rows.find { |item| item.fetch("name") == name }
+        binding = lens.fetch("bindings").find { |item| item.fetch("declaration_id") == row.fetch("id") }
+        assert_equal "matched", binding.fetch("status"), name
+        if name == "helper"
+          assert_equal ["singleton"], binding.fetch("member_keys").map { |key| JSON.parse(key)[1] }
         end
-        refute lens.fetch("members").any? { |member| member.values_at("owner", "scope") == ["Util", "instance"] }
       end
+      refute lens.fetch("members").any? { |member| member.values_at("owner", "scope") == ["Util", "instance"] }
     end
   end
 

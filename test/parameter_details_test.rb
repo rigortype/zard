@@ -80,4 +80,19 @@ class ParameterDetailsTest < Minitest::Test
     assert_nil parameter.default_span
     assert_equal ["parameter.unsupported-default"], document.diagnostics.map(&:code)
   end
+
+  def test_diagnoses_nested_heredoc_defaults_instead_of_exporting_a_partial_default
+    document = parse("def call(value = [<<~TEXT]); end\n  hello\nTEXT\n")
+    parameter = document.declarations.first.parameter_details.first
+    assert_equal "value = [<<~TEXT]", parameter.source
+    assert_nil parameter.default
+    assert_nil parameter.default_span
+    assert_equal ["parameter.unsupported-default"], document.diagnostics.map(&:code)
+  end
+
+  def test_diagnoses_implicit_block_parameters_without_inventing_a_method_signature
+    document = parse("class Example; define_method(:numbered) { _1 }; define_singleton_method(:implicit) { it }; end")
+    assert_equal ["Example"], document.declarations.map(&:name)
+    assert_equal ["parameter.unsupported-form", "parameter.unsupported-form"], document.diagnostics.map(&:code)
+  end
 end

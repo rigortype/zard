@@ -16,6 +16,8 @@ const categories = [['Classes', 'class'], ['Modules', 'module'], ['Constants', '
 const isMember = (row) => ['attribute', 'instance method', 'singleton method'].includes(declarationKind(row.kind));
 const memberData = (row) => `data-api-name="${escapeHtml(row.name)}" data-api-path="${escapeHtml(row.source.path)}" data-api-line="${row.source.line}" data-api-anchor="${row.anchor}"`;
 const definitionOrder = (rows) => rows.toSorted((a, b) => compareMembers({name:a.name, path:a.source.path, line:a.source.line, anchor:a.anchor}, {name:b.name, path:b.source.path, line:b.source.line, anchor:b.anchor}));
+const parameterSyntax = (row) => row.parameterDetails?.map((parameter, index) =>
+  `${index && parameter.kind !== 'implicit_rest' ? ', ' : ''}${parameter.source}`).join('') ?? row.parameters.join(', ');
 
 function memberIndex(rows, basePath) {
   const groups = categories.filter(([, kind]) => ['attribute', 'instance method', 'singleton method'].includes(kind));
@@ -23,8 +25,7 @@ function memberIndex(rows, basePath) {
     const members = definitionOrder(rows.filter((row) => declarationKind(row.kind) === kind));
     if (!members.length) return '';
     const items = members.map((row) => {
-      const parameters = row.parameterDetails?.map((parameter) => parameter.source) ?? row.parameters;
-      const signature = kind.includes('method') ? `${row.name}(${parameters.join(', ')})` : row.displayName;
+      const signature = kind.includes('method') ? `${row.name}(${parameterSyntax(row)})` : row.displayName;
       const preview = row.tags.find((tag) => tag.name === 'text')?.description.split('\n')[0] ?? '';
       return `<li ${memberData(row)}><a class="api-index-link" href="${escapeHtml(`${pageUrl(row.page, basePath)}#${row.anchor}`)}">${code(signature)}</a><span class="api-meta">public · ${escapeHtml(`${row.source.path}:${row.source.line}`)}</span>${preview ? `<span class="api-member-preview">${escapeHtml(preview)}</span>` : ''}</li>`;
     });
@@ -43,8 +44,7 @@ function indexEntries(rows, basePath) {
 
 function entry(row, model, basePath, sourceLinks) {
   const kind = declarationKind(row.kind);
-  const parameters = row.parameterDetails?.map((parameter) => parameter.source) ?? row.parameters;
-  const signature = kind.includes('method') ? `${row.displayName}(${parameters.join(', ')})` : row.displayName;
+  const signature = kind.includes('method') ? `${row.displayName}(${parameterSyntax(row)})` : row.displayName;
   const location = `${row.source.path}:${row.source.line}`;
   const source = Object.hasOwn(sourceLinks, row.id) ? link(location, sourceLinks[row.id]) : code(location);
   const member = isMember(row);

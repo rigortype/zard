@@ -137,6 +137,17 @@ test('rejects incompatible schemas, private members, escaping paths and missing 
   }
 });
 
+test('renders a block trailing comma without adding another separator', () => {
+  const data = fixture();
+  data.scopes[0].declarations[0].parameter_details = [
+    { kind: 'required', source: 'input', span: { path: 'lib/example.rb', start_line: 2 } },
+    { kind: 'implicit_rest', source: ',', span: { path: 'lib/example.rb', start_line: 2 } },
+  ];
+  const page = createReference(data).pages.find((page) => page.slug.endsWith('/example'));
+  assert.match(page.body, /<code>call\(input,\)<\/code>/);
+  assert.match(page.body, /<code>Example#call\(input,\)<\/code>/);
+});
+
 test('rejects route collisions introduced by slug normalization', () => {
   const data = fixture();
   const other = structuredClone(data.scopes[0]);

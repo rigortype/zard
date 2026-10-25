@@ -514,6 +514,12 @@ module Zard
       end
 
       def collect_call_method_declaration(node, name)
+        case node.block&.parameters
+        when Prism::NumberedParametersNode, Prism::ItParametersNode
+          @diagnostics << Model::V1::Diagnostic.new(code: "parameter.unsupported-form", severity: :warning,
+            message: "Implicit block parameters are not supported for method declarations.", span: span(node.block.parameters.location))
+          return
+        end
         parameters = parameter_names(node.block&.parameters&.parameters).freeze
         singleton = node.name == :define_singleton_method
         kind = singleton ? :singleton_method : current_method_kind
@@ -1364,9 +1370,9 @@ module Zard
         else kind
         end
         value = parameter.value if parameter.is_a?(Prism::OptionalParameterNode) || parameter.is_a?(Prism::OptionalKeywordParameterNode)
-        if value.respond_to?(:heredoc?) && value.heredoc?
+        if (heredoc = value&.breadth_first_search { |node| node.respond_to?(:heredoc?) && node.heredoc? })
           @diagnostics << Model::V1::Diagnostic.new(code: "parameter.unsupported-default", severity: :warning,
-            message: "Heredoc parameter defaults retain their header; a contiguous default expression is unavailable.", span: span(value.location))
+            message: "Heredoc parameter defaults retain their header; a contiguous default expression is unavailable.", span: span(heredoc.location))
           value = nil
         end
         Model::V1::Parameter.new(kind: kind,

@@ -66,6 +66,8 @@ Documentation entries carry `name`, `owner`, `subject`, optional `claim`, `descr
 
 Contract entries carry `channel`, `payload`, `note`, `raw`, and `span`. They are source text, not parsed or validated types. A documentation claim does not become a contract, signature or Rigor fact.
 
+Implicit numbered and `it` block parameters in `define_method` and `define_singleton_method` are currently unsupported: the declaration is omitted and `parameter.unsupported-form` is emitted instead of fabricating a parameter list. Heredocs nested inside default expressions also emit `parameter.unsupported-default` and leave `default`/`default_span` unavailable.
+
 ## Source provenance and diagnostics
 
 Each selected source file has `path`, its full SHA-256 `digest` over the bytes parsed, and structured parser `diagnostics` with `code`, `severity`, `message` and `span`. Files without public declarations remain listed for provenance and diagnostics.

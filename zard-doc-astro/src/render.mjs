@@ -14,7 +14,10 @@ const declarationKind = (kind) => {
 const titleFor = (scope, page) => page.path.slice(scope.destination.length + 1).replace(/\.md$/, '').split('/').join('::');
 const categories = [['Classes', 'class'], ['Modules', 'module'], ['Constants', 'constant'], ['Attributes', 'attribute'], ['Instance methods', 'instance method'], ['Singleton methods', 'singleton method'], ['Ruby refinements', 'refinement']];
 const isMember = (row) => ['attribute', 'instance method', 'singleton method'].includes(declarationKind(row.kind));
-const memberData = (row) => `data-api-name="${escapeHtml(row.name)}" data-api-path="${escapeHtml(row.source.path)}" data-api-line="${row.source.line}" data-api-anchor="${row.anchor}"`;
+const publicationData = (row) => `data-api-publication="${row.publication}" data-api-visibility="${row.visibility}" data-api-deprecated="${row.tags.some((tag) => tag.name === 'deprecated')}"`;
+const badges = (row) => `${row.publication === 'internal' ? '<span class="api-badge api-badge-internal">Internal</span>' : ''}${row.tags.some((tag) => tag.name === 'deprecated') ? '<span class="api-badge api-badge-deprecated">Deprecated</span>' : ''}`;
+const publicationControls = (rows) => rows.some((row) => row.publication === 'internal' || row.visibility !== 'public') ? `<div class="api-publication-controls" hidden><label>Ruby visibility <select data-api-visibility-filter><option value="all">All published visibilities</option><option value="public">Public</option><option value="protected">Protected</option><option value="private">Private</option></select></label> <label><input type="checkbox" data-api-internal-filter checked> Show internal APIs</label><p>Filters change this view only. Build-time publication settings determine which APIs are included in this site.</p><p data-api-filter-status role="status" aria-live="polite"></p></div>\n\n` : '';
+const memberData = (row) => `${publicationData(row)} data-api-name="${escapeHtml(row.name)}" data-api-path="${escapeHtml(row.source.path)}" data-api-line="${row.source.line}" data-api-anchor="${row.anchor}"`;
 const definitionOrder = (rows) => rows.toSorted((a, b) => compareMembers({name:a.name, path:a.source.path, line:a.source.line, anchor:a.anchor}, {name:b.name, path:b.source.path, line:b.source.line, anchor:b.anchor}));
 const parameterSyntax = (row) => row.parameterDetails?.map((parameter, index) =>
   `${index && parameter.kind !== 'implicit_rest' ? ', ' : ''}${parameter.source}`).join('') ?? row.parameters.join(', ');
@@ -27,7 +30,7 @@ function memberIndex(rows, basePath) {
     const items = members.map((row) => {
       const signature = kind.includes('method') ? `${row.name}(${parameterSyntax(row)})` : row.displayName;
       const preview = row.tags.find((tag) => tag.name === 'text')?.description.split('\n')[0] ?? '';
-      return `<li ${memberData(row)}><a class="api-index-link" href="${escapeHtml(`${pageUrl(row.page, basePath)}#${row.anchor}`)}">${code(signature)}</a><span class="api-meta">public · ${escapeHtml(`${row.source.path}:${row.source.line}`)}</span>${preview ? `<span class="api-member-preview">${escapeHtml(preview)}</span>` : ''}</li>`;
+      return `<li ${memberData(row)}><a class="api-index-link" href="${escapeHtml(`${pageUrl(row.page, basePath)}#${row.anchor}`)}">${code(signature)}</a>${badges(row)}<span class="api-meta">${row.visibility} · ${escapeHtml(`${row.source.path}:${row.source.line}`)}</span>${preview ? `<span class="api-member-preview">${escapeHtml(preview)}</span>` : ''}</li>`;
     });
     return `<details open><summary>${title} (${members.length})</summary><ul data-api-member-list>${items.join('\n')}</ul></details>`;
   }).join('\n');
@@ -38,7 +41,7 @@ function indexEntries(rows, basePath) {
   return categories.map(([title, kind]) => {
     const matches = rows.filter((row) => declarationKind(row.kind) === kind);
     if (!matches.length) return '';
-    return `## ${title}\n\n${matches.map((row) => `- ${link(row.displayName, `${pageUrl(row.page, basePath)}#${row.anchor}`, true)}`).join('\n')}\n\n`;
+    return `## ${title}\n\n<ul>${matches.map((row) => `<li ${publicationData(row)}>${link(row.displayName, `${pageUrl(row.page, basePath)}#${row.anchor}`, true)} ${badges(row)} <span class="api-meta">${row.visibility}</span></li>`).join('\n')}</ul>\n\n`;
   }).join('');
 }
 
@@ -50,8 +53,8 @@ function entry(row, model, basePath, sourceLinks) {
   const member = isMember(row);
   const heading = `<h3 id="${row.anchor}" class="api-signature">${code(signature)}</h3>`;
   let result = member
-    ? `<details open class="api-declaration api-member" ${memberData(row)}><summary>${heading}<span class="api-meta">public · ${escapeHtml(kind)} · ${escapeHtml(location)}</span></summary>\n\n<p class="api-meta">Source: ${source}</p>\n\n`
-    : `<section class="api-declaration" aria-labelledby="${row.anchor}">\n\n${heading}\n\n<p class="api-meta">${escapeHtml(kind)} · ${source}</p>\n\n`;
+    ? `<details open class="api-declaration api-member" ${memberData(row)}><summary>${heading}${badges(row)}<span class="api-meta">${row.visibility} · ${escapeHtml(kind)} · ${escapeHtml(location)}</span></summary>\n\n<p class="api-meta">Source: ${source}</p>\n\n`
+    : `<section class="api-declaration" ${publicationData(row)} aria-labelledby="${row.anchor}">\n\n${heading}\n\n${badges(row)}<p class="api-meta">${row.visibility} · ${escapeHtml(kind)} · ${source}</p>\n\n`;
   result += renderRelationships(row, model.relationshipIndex, basePath);
   const texts = row.tags.filter((tag) => tag.name === 'text');
   const description = texts.map((tag, i) => {
@@ -62,7 +65,7 @@ function entry(row, model, basePath, sourceLinks) {
   result += renderLens(row, model.lens);
   result += prose(description, row.page, model, basePath);
   for (const tag of row.tags.filter((tag) => !['text', 'raw'].includes(tag.name))) {
-    const names = { param: 'Parameter', return: 'Returns', yieldparam: 'Block parameter', yieldreturn: 'Block returns', raise: 'Raises', note: 'Note', see: 'See also', deprecated: 'Deprecated', example: 'Example', option: 'Option' };
+    const names = { param: 'Parameter', return: 'Returns', yieldparam: 'Block parameter', yieldreturn: 'Block returns', raise: 'Raises', note: 'Note', see: 'See also', deprecated: 'Deprecated', example: 'Example', option: 'Option', api: 'Documentation publication' };
     result += `\n**${names[tag.name] || markdownText(tag.name)}${tag.subject ? ` ${code(tag.subject)}` : ''}**\n\n`;
     result += tag.name === 'example'
       ? `<pre class="api-example"><code>${escapeHtml(tag.description)}</code></pre>\n`
@@ -72,7 +75,7 @@ function entry(row, model, basePath, sourceLinks) {
 }
 
 export function renderReference(model, options = {}) {
-  const { basePath = 'api', title = 'API Reference', description = 'Public API declarations.',
+  const { basePath = 'api', title = 'API Reference', description = 'Published API declarations.',
     introduction = '', provenance = [], sourceLinks = {} } = options;
   if (!/^[a-z0-9_-]+(?:\/[a-z0-9_-]+)*$/.test(basePath)) throw new Error('Invalid API basePath');
   routePages(model, basePath);
@@ -92,7 +95,7 @@ export function renderReference(model, options = {}) {
       return url ? link(label, url) : escapeHtml(label);
     }).join(' · ')}</p>\n\n` : '');
   let root = provenanceHtml + (introduction ? prose(introduction, '', model, basePath) + '\n' : '');
-  root += model.scopes.length ? model.scopes.map((scope) => `- ${link(scope.name, scopeUrl(scope, basePath), true)} — ${scope.pages.length} namespace pages, ${scope.declarations.length} public declarations`).join('\n') : 'No public declarations were exported. Check the selected source mappings before publishing.';
+  root += model.scopes.length ? model.scopes.map((scope) => `- ${link(scope.name, scopeUrl(scope, basePath), true)} — ${scope.pages.length} namespace pages, ${scope.declarations.length} published declarations`).join('\n') : 'No published declarations were exported. Check the selected source mappings before publishing.';
   add(basePath, title, description, root + '\n');
   for (const scope of model.scopes) {
     let index = crumbs([[title, `/${basePath}/`], [scope.name]]) + provenanceHtml;
@@ -101,8 +104,9 @@ export function renderReference(model, options = {}) {
       index += `${link('Hierarchy and module usage', `/${hierarchy}/`, true)}\n\n`;
       add(hierarchy, `${scope.name} hierarchy`, `Written class and module relationships in ${scope.name}.`, crumbs([[title, `/${basePath}/`], [scope.name, scopeUrl(scope, basePath)], ['Hierarchy and module usage']]) + renderHierarchy(scope, relationships, basePath));
     }
-    index += indexEntries(scope.declarations, basePath) || 'No public declarations were exported for this documentation scope.\n';
-    add(scopeSlug(scope, basePath), `${scope.name} API`, `Public API declarations in the ${scope.name} documentation scope.`, index);
+    index += publicationControls(scope.declarations);
+    index += indexEntries(scope.declarations, basePath) || 'No published declarations were exported for this documentation scope.\n';
+    add(scopeSlug(scope, basePath), `${scope.name} API`, `Published API declarations in the ${scope.name} documentation scope.`, index);
     for (const page of scope.pages) {
       const pageTitle = titleFor(scope, page);
       const segments = pageTitle.split('::');
@@ -111,6 +115,7 @@ export function renderReference(model, options = {}) {
         return scope.pages.some((item) => item.path === candidate) ? [[segments[i], pageUrl(candidate, basePath)]] : [];
       });
       let content = crumbs([[title, `/${basePath}/`], [scope.name, scopeUrl(scope, basePath)], ...ancestors, [segments.at(-1)]]) + provenanceHtml;
+      content += publicationControls(page.declarations);
       content += renderLensSummary(page.declarations, model.lens);
       content += memberIndex(page.declarations, basePath);
       for (const [category, kind] of categories) {
@@ -120,7 +125,7 @@ export function renderReference(model, options = {}) {
           content += `## ${category}\n\n${member ? '<div data-api-member-list>\n\n' : ''}${(member ? definitionOrder(rows) : rows).map((row) => entry(row, model, basePath, sourceLinks)).join('')}${member ? '</div>\n\n' : ''}`;
         }
       }
-      add(pageSlug(page.path, basePath), pageTitle, `Public declarations and source documentation for ${pageTitle}.`, content);
+      add(pageSlug(page.path, basePath), pageTitle, `Published declarations and source documentation for ${pageTitle}.`, content);
     }
   }
   return { title, url: `/${basePath}/`, pages, diagnostics: relationships.diagnostics, navigation: model.scopes.map((scope) => ({

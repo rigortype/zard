@@ -1552,6 +1552,9 @@ module Zard
           elsif body.match?(/\A@see(?:\s|\z)/)
             pending = pending_documentation(parse_description_tag(body, raw, comment.location, :see, "@see"), comment)
             seen_non_extrbs_annotation = true
+          elsif body.match?(/\A@api(?:\s|\z)/)
+            pending = pending_documentation(parse_api(body, raw, comment.location), comment)
+            seen_non_extrbs_annotation = true
           elsif body.match?(/\A@deprecated(?:\s|\z)/)
             pending = pending_documentation(parse_description_tag(body, raw, comment.location, :deprecated, "@deprecated"), comment)
             seen_non_extrbs_annotation = true
@@ -1568,6 +1571,10 @@ module Zard
 
         flush_pending(documentation, pending)
 
+        intents = documentation.select { |tag| tag.name == :api }.map(&:subject).uniq
+        if intents.length > 1
+          add_diagnostic("documentation.conflicting-api", :error, "Use only one documentation publication intent per declaration.", @comments.first.location)
+        end
         {documentation: documentation, contracts: contracts}
       end
 
@@ -1585,7 +1592,7 @@ module Zard
         return if raw.start_with?("# @")
 
         candidate = body.lstrip[/\A@[^\s]*/]
-        return unless %w[@extrbs @rbs @param @yieldparam @option @raise @return @yieldreturn @note @see @deprecated @example].include?(candidate)
+        return unless %w[@extrbs @rbs @param @yieldparam @option @raise @return @yieldreturn @note @see @deprecated @example @api].include?(candidate)
 
         candidate
       end
@@ -1692,6 +1699,15 @@ module Zard
         end
 
         documentation_tag(name, subject, claim, description, raw, location)
+      end
+
+      def parse_api(body, raw, location)
+        tag = parse_named_tag(body, raw, location, :api, "@api")
+        return tag if tag.name == :raw
+        return tag if %w[public internal].include?(tag.subject) && tag.claim.nil?
+
+        add_diagnostic("documentation.invalid-api", :error, "Use @api public — description or @api internal — description, without a type claim.", location)
+        raw_tag(body, raw, location)
       end
 
       def parse_option(body, raw, location)

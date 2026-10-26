@@ -1,0 +1,9 @@
+docroot: docs/api
+publication:
+  visibility: [public, protected, private]
+  intent: [public, internal]
+scopes:
+  example:
+    destination: example
+    sources:
+      - root: lib

@@ -92,7 +92,7 @@ class ZardDocJSONBuildTest < Minitest::Test
       assert_equal 0, status, errors
       assert_empty errors
       data = JSON.parse(output)
-      assert_equal ["zard-doc/v0", 1], data.values_at("schema", "revision")
+      assert_equal ["zard-doc/v0", 2], data.values_at("schema", "revision")
       assert_equal Zard::VERSION, data.fetch("producer").fetch("zard")
       app = data.fetch("scopes").first
       assert_equal %w[API value run], app.fetch("declarations").map { |item| item.fetch("name") }

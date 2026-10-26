@@ -137,6 +137,30 @@ test('rejects incompatible schemas, private members, escaping paths and missing 
   }
 });
 
+test('revision 2 keeps publication intent separate from Ruby visibility and renders status safely', () => {
+  const data = fixture();
+  data.revision = 2;
+  for (const row of data.scopes[0].declarations) row.publication = 'public';
+  const privateInternal = data.scopes[0].declarations[0];
+  privateInternal.visibility = 'private';
+  privateInternal.publication = 'internal';
+  privateInternal.documentation = [{ name: 'api', subject: 'internal', rendered_description: 'For **maintainers** only.',
+    span: { path: 'lib/example.rb', start_line: 1, end_line: 1 } }];
+  const deprecated = data.scopes[0].declarations[1];
+  deprecated.documentation = [{ name: 'deprecated', rendered_description: 'Use **new_call** instead. <script>bad()</script>',
+    span: { path: 'lib/example.rb', start_line: 2, end_line: 2 } }];
+  const page = createReference(data).pages.find((entry) => entry.slug === 'api/app/example').body;
+  assert.match(page, /data-api-publication="internal" data-api-visibility="private"/);
+  assert.match(page, /class="api-badge api-badge-internal">Internal/);
+  assert.match(page, /class="api-badge api-badge-deprecated">Deprecated/);
+  assert.match(page, /For \*\*maintainers\*\* only/);
+  assert.match(page, /Use \*\*new\\_call\*\* instead/);
+  assert.doesNotMatch(page, /<script>bad\(\)<\/script>/);
+  assert.match(page, /class="api-publication-controls" hidden/);
+  privateInternal.publication = 'undocumented';
+  assert.throws(() => createReference(data), /publication intent/);
+});
+
 test('renders a block trailing comma without adding another separator', () => {
   const data = fixture();
   data.scopes[0].declarations[0].parameter_details = [

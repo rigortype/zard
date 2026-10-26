@@ -1,6 +1,6 @@
 # zard-doc-astro
 
-An experimental, unstyled presentation package for Astro content sites consuming ZARD's `zard-doc/v0`, revision 1 JSON export. It is developed alongside the Ruby producer but has no Ruby or Rigor runtime dependency. It is not published to npm yet.
+An experimental, unstyled presentation package for Astro content sites consuming ZARD's `zard-doc/v0` revision 2 JSON export (and legacy revision 1). It is developed alongside the Ruby producer but has no Ruby or Rigor runtime dependency. It is not published to npm yet.
 
 ## Responsibilities
 
@@ -30,7 +30,7 @@ const files = starlightPages(reference); // Map<relative Markdown path, content>
 const topic = starlightTopic(reference, { id: 'api', label: 'API Reference' });
 ```
 
-`createReference` is synchronous and does not mutate the export. It returns `{ title, url, pages, navigation }`; each page contains `{ slug, title, description, body }`, where body is Markdown with semantic HTML. Navigation contains documentation scopes and namespace trees. Unsupported schema/revision, non-public declarations, unsafe logical output paths, unmatched declarations, missing reference targets and normalized route collisions throw before publication. Only namespace layout is supported initially.
+`createReference` is synchronous and does not mutate the export. It returns `{ title, url, pages, navigation }`; each page contains `{ slug, title, description, body }`, where body is Markdown with semantic HTML. Navigation contains documentation scopes and namespace trees. Unsupported schema/revision, invalid visibility or publication intent, unsafe logical output paths, unmatched declarations, missing reference targets and normalized route collisions throw before publication. Revision 1 accepts public Ruby declarations and defaults documentation intent to public; revision 2 requires explicit `visibility` and `publication` values on every published declaration. Only namespace layout is supported initially.
 
 Signatures use additive `parameter_details[].source` when supplied by the producer, retaining Ruby defaults, forwarding and anonymous/destructured parameter patterns. Older exports fall back to `parameters`. These are syntax labels, not inferred types. An optional `sourceLinks` object maps declaration IDs to HTTP(S) URLs; the renderer checks IDs and protocols and displays each declaration's own source link. The consumer owns URL templates, commit pinning and repository-path policy. With no link, the recorded source location remains readable text.
 
@@ -51,6 +51,8 @@ Consumers style these hooks with their own stylesheet:
 - `.api-member-index`: per-page member navigation with native disclosure groups and exact definition anchors.
 - `.api-provenance`: optional source/build attribution.
 - `.api-declaration`: a declaration `section` labelled by its heading.
+- `.api-badge`, `.api-badge-internal`, `.api-badge-deprecated`: declaration status labels.
+- `.api-publication-controls`: optional client-side filters for already published entries; controls stay hidden without JavaScript.
 - `.api-signature`: declaration heading containing escaped source parameter labels.
 - `.api-meta`: declaration kind and source location.
 - `.api-example`: literal example `pre`/`code`.
@@ -87,6 +89,6 @@ pnpm pack --pack-destination /tmp/zard-doc-astro
 Until registry publication, a consumer can check in the packed archive and install it with a relative `file:` dependency. The archive contains only this package's source, README, license and manifest. This explicit snapshot keeps consumer builds reproducible without relying on a developer's sibling checkout or installing the Ruby repository as an npm package. Refresh the archive from a reviewed package revision when changing the renderer.
 ## Member browsing
 
-Member indexes and declaration disclosures use native `details` elements, initially open, and remain readable without JavaScript. Public visibility, instance/singleton groups, exact parameter syntax, source locations and stable definition anchors remain visible. Index previews show the first source documentation line as escaped plain text; the complete documentation retains the existing Markdown handling.
+Member indexes and declaration disclosures use native `details` elements, initially open, and remain readable without JavaScript. Ruby visibility, documentation intent, deprecation, instance/singleton groups, exact parameter syntax, source locations and stable definition anchors remain visible. Index previews show the first source documentation line as escaped plain text; the complete documentation retains the existing Markdown handling.
 
-Optionally import `enhanceMembers` from `zard-doc-astro/members` in a browser script and call it after page load (and after framework page transitions). It reveals a native order selector and sorts both index and declaration groups without replacing nodes or losing disclosure state. Definition order compares source path, source line and anchor; name order compares the Ruby name first, then those same tie-breakers. Text comparisons are locale-independent. Consumers own all styling, including the `.api-member-controls`, `.api-member-preview` and `.api-member` hooks.
+Optionally import `enhanceMembers` from `zard-doc-astro/members` in a browser script and call it after page load (and after framework page transitions). It reveals native order and publication filters and updates lists without replacing nodes or losing disclosure state. These filters affect only entries already selected into the export; a direct declaration fragment remains reachable. Definition order compares source path, source line and anchor; name order compares the Ruby name first, then those same tie-breakers. Text comparisons are locale-independent. Consumers own all styling, including the `.api-member-controls`, `.api-member-preview`, `.api-member` and `.api-publication-controls` hooks.

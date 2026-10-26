@@ -87,7 +87,7 @@ end
 
 For example, `@param path [String] — The file path.` carries an optional documentation claim. It is not a substitute for `@rbs path: String` and is not checked by this project: there is no Rigor claim checking in this release. The parser may diagnose malformed or noncanonical documentation syntax, but does not validate claims against contracts.
 
-Tags without a name or type write their description directly: `@return Normalized value.`, `@note Keep this in mind.`, and `@example Call the method.` Named tags such as `@param`, `@yieldparam`, `@raise`, and `@option` require the marker. `@option options :format — Output format.` documents an option. `@yieldreturn yielded value.` describes a yielded result. Supported tags include `@param`, `@return`, `@yieldparam`, `@yieldreturn`, `@option`, `@raise`, `@note`, `@see`, `@deprecated`, and `@example`.
+Tags without a name or type write their description directly: `@return Normalized value.`, `@note Keep this in mind.`, and `@example Call the method.` Named tags such as `@param`, `@yieldparam`, `@raise`, `@option`, and `@api` require the marker. `@option options :format — Output format.` documents an option. `@api internal — For maintainers.` marks the attached declaration as documentation-internal; `@api public — Extension point.` marks it public. Unmarked declarations default to public documentation intent, independent of Ruby visibility. `@yieldreturn yielded value.` describes a yielded result. Supported tags include `@param`, `@return`, `@yieldparam`, `@yieldreturn`, `@option`, `@raise`, `@note`, `@see`, `@deprecated`, `@api`, and `@example`.
 
 ### See also references
 
@@ -130,7 +130,7 @@ ZARD documentation requires UTF-8 source text. Ruby source encoding declarations
 
 ## Visibility and analysis boundaries
 
-Declarations carry `:public`, `:protected`, or `:private` visibility. `zard-doc` renders only public declarations. The parser statically models supported Ruby declaration forms; it does not execute the program. Runtime-generated declarations, dynamic names, and effects that cannot be determined from supported syntax are not resolved. Superclass, mixin, receiver, and refinement expressions are retained as source references; runtime ancestry and object identity are not inferred.
+Declarations carry `:public`, `:protected`, or `:private` Ruby visibility. The ordinary renderer uses public visibility and public documentation intent; the build configuration can select either axis independently. The parser statically models supported Ruby declaration forms; it does not execute the program. Runtime-generated declarations, dynamic names, and effects that cannot be determined from supported syntax are not resolved. Superclass, mixin, receiver, and refinement expressions are retained as source references; runtime ancestry and object identity are not inferred.
 
 Visibility forms supported by the parser include bare visibility calls, inline forms such as `private def` and `private attr_reader`, named method modifiers such as `private :read`, and `private_class_method` / `public_class_method`. Named attribute modifiers produce a diagnostic because an attribute declaration can generate more than one method. See the [supported Ruby syntax guide](supported-ruby-syntax.md) for detailed coverage.
 
@@ -143,6 +143,9 @@ Version 0.0.2 provides `zard-doc build`. Define named documentation scopes in a 
 ```yaml
 docroot: docs/api
 layout: namespace
+publication:
+  visibility: [public]
+  intent: [public]
 scopes:
   core:
     destination: core
@@ -168,7 +171,9 @@ Paths are relative to the configuration file. The default layout is `namespace`:
 
 CLI layout overrides configuration. With no `--scope`, all scopes are built; repeat `--scope` to select several. Selected scopes include their recursive documentation dependencies for generation. References search the current scope first, then only directly declared dependencies. Separate scopes do not merge declarations even when Ruby namespace names match. Ambiguous references remain text with warnings; local shadowing prevents fallback to unrelated dependency declarations.
 
-The default `--format markdown` publishes managed Markdown pages. `--format json` instead prints one experimental, versioned JSON document after validation and leaves `docroot` untouched. JSON includes public declarations even without prose, their original documentation and unparsed contracts, source spans and digests, page assignments, stable anchors, and resolved documentation links. Private and protected declarations are excluded. See the [JSON export contract](json-export.md) for the schema, path conventions, and differences from Markdown publication. This export does not require Rigor or a Rigor lens result.
+The optional `publication` mapping selects Ruby `visibility` and documentation `intent` independently; both default to `[public]`. A scope may override either list while inheriting the other. `@api internal` applies only to its attached declaration, without hiding members of a container automatically. To publish selected internal documentation or private Ruby declarations, include `internal` under `intent` or `private` under `visibility` explicitly. An empty list omits all declarations on that axis. Excluded declarations do not gain a page, navigation item, or link target, though their source files remain recorded for provenance.
+
+The default `--format markdown` publishes managed Markdown pages for selected declarations with documentation. `--format json` instead prints one experimental, versioned JSON document after validation and leaves `docroot` untouched. JSON includes selected declarations even without prose, their original documentation and unparsed contracts, source spans and digests, page assignments, stable anchors, and resolved documentation links. See the [JSON export contract](json-export.md) for the schema, path conventions, and differences from Markdown publication. This export does not require Rigor or a Rigor lens result.
 
 `Declaration#parameter_details` additionally records ordered Ruby parameter syntax and default-expression provenance. `Declaration#parameters` retains its existing labels for compatibility, and the Markdown renderer remains unchanged. Astro presentation uses the richer syntax when available, without assigning parameter types or evaluating defaults.
 

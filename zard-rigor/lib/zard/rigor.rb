@@ -25,7 +25,7 @@ module Zard
 
       def enrich(export, base:)
         data = JSON.parse(JSON.generate(export))
-        raise Error, "Expected zard-doc/v0 revision 1" unless data.values_at("schema", "revision") == ["zard-doc/v0", 1]
+        raise Error, "Expected zard-doc/v0 revision 1 or 2" unless data["schema"] == "zard-doc/v0" && [1, 2].include?(data["revision"])
 
         base = File.realpath(base)
         selected = data.fetch("scopes").flat_map { |scope| scope.fetch("files") }.to_h do |file|

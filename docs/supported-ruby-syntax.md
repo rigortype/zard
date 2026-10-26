@@ -4,7 +4,7 @@ The ZARD parser models modern Ruby declarations statically without executing cod
 
 ### Visibility & Modifiers
 
-- Declarations record `public`, `protected`, or `private` visibility. Markdown output includes public declarations only.
+- Declarations record `public`, `protected`, or `private` Ruby visibility. Build publication selects visibility independently from the attached documentation intent (`@api public` or `@api internal`); both default to public. The ordinary Markdown renderer keeps the public defaults.
 - Bare visibility calls, inline forms (`private def`, `private attr_reader`), named method modifiers (`private :read`), and `private_class_method` / `public_class_method` are supported.
 - Visibility calls received by `self` belong to the current scope (method scope for instance visibility, singleton method scope for class methods).
 - `module_function` records its private instance method and public singleton copy as separate declarations with shared provenance. Bare, named, inline, and splatted forms (`module_function(*attr_accessor(:name))`) are supported.

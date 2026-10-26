@@ -23,7 +23,7 @@ Source errors return 1; invalid configuration or invocation, unreadable inputs, 
 | Field | Meaning |
 | --- | --- |
 | `schema` | Exactly `zard-doc/v0`. |
-| `revision` | Integer `1` for this experimental representation. |
+| `revision` | Integer `2` for exports with the publication policy and declaration intent. Revision 1 remains readable by compatible consumers. |
 | `producer` | `zard` and `zard_doc` gem versions. |
 | `layout` | `namespace` or `file`. |
 | `scopes` | Selected documentation scopes, ordered by name. |
@@ -38,16 +38,18 @@ Each scope has `name`, `destination`, its explicit direct documentation dependen
 
 Each page has a `path` and an ordered array of declaration `id` values. Reopened classes/modules share a namespace page while retaining distinct source declarations. Namespace pages can exist for members of an undocumented container. Top-level declarations use the existing `_top-level.md` assignment. File organization uses source mappings and prefixes. Page paths are logical paths relative to `docroot`, with Markdown extensions, not a promise of emitted Markdown files or final website URLs. Website consumers map these paths to their routes.
 
-The site can derive scope landing pages and navigation from this metadata. Generated Markdown index pages are not included in `pages` because they own no declarations. A file without public declarations produces no page.
+The site can derive scope landing pages and navigation from this metadata. Generated Markdown index pages are not included in `pages` because they own no declarations. A file without selected declarations produces no page.
 
-JSON exports all public declarations, including those without API prose, so a site can present the selected API surface before documentation is complete. Private/protected declarations remain available to internal reference lookup but are not exported or linked. The Markdown format continues to publish only documented public declarations. This publication distinction is intentional and is not an inference that a Ruby-public declaration is a stable supported product API.
+The build configuration accepts a root `publication` mapping and per-scope overrides with independent `visibility` (`public`, `protected`, `private`) and `intent` (`public`, `internal`) allowlists. Each axis defaults to `['public']`; an empty list excludes all declarations on that axis. An omitted scope axis inherits the root value. Ruby visibility and documentation intent are separate: a private method may be a documented extension point, and a Ruby-public method may be documentation-internal. JSON exports all selected declarations, including those without prose; Markdown publishes selected declarations with documentation. Excluded declarations remain available to local reference resolution but have no page, navigation entry or resolved link target.
+
+The canonical attached marker is `@api internal — explanation` or `@api public — explanation`. Its intent applies only to that declaration, not its lexical container or members. Unmarked declarations have public documentation intent. Invalid or conflicting markers are errors; arbitrary YARD-like `@internal` and `@private` comments remain raw text. The original marker text, description and source span remain in `documentation`. A consumer-side visibility filter can hide already published entries, but cannot restore declarations omitted by the build policy.
 
 ## Declarations
 
 | Fields | Meaning |
 | --- | --- |
 | `id`, `page`, `anchor` | Scope-specific identity and logical page destination; `id` combines the documentation scope with the existing stable anchor. |
-| `kind`, `name`, `namespace`, `display_name`, `visibility` | Original declaration kind/name, lexical namespace, display/reference name and visibility. |
+| `kind`, `name`, `namespace`, `display_name`, `visibility`, `publication` | Original declaration kind/name, lexical namespace, display/reference name, Ruby visibility and documentation intent (`public` or `internal`). |
 | `parameters` | Existing source parameter labels, not a structured typed signature. |
 | `parameter_details` | Additive Ruby syntax metadata: ordered `kind`, nullable `name`, exact `source`, source `span`, nullable default-expression `default` and `default_span`. No types or evaluated values. |
 | `references` | Names by which this declaration participates in documentation reference lookup. |
@@ -60,7 +62,7 @@ JSON exports all public declarations, including those without API prose, so a si
 
 Absent optional fields are `null`; arrays remain arrays. A repeated method definition has its own identity/anchor. Nothing chooses a runtime-winning definition, resolves dynamic receivers, or asserts effective ancestry. Attribute accessors remain a source declaration with multiple reference names, rather than separate inferred getter/setter signatures.
 
-`parameter_details` is additive within revision 1; older exports may omit it and consumers fall back to `parameters`. It is `null` when no source-backed parameter list is available (including aliases and generated attributes), and `[]` for an explicit parameterless method. Kinds are `required`, `optional`, `rest`, `post`, `required_keyword`, `optional_keyword`, `keyword_rest`, `block`, `forwarding`, `no_keywords` and `implicit_rest`. Anonymous and destructured forms retain their exact source patterns with a nullable name; destructured required/post parameters keep their positional kind. Visibility changes and module-function copies retain metadata. Default expressions are never executed. A heredoc default's body is not contiguous with its parameter header: its header remains in `source`, `default`/`default_span` are unavailable and `parameter.unsupported-default` is emitted rather than presenting the opener as a complete expression.
+`parameter_details` was additive within revision 1; older exports may omit it and consumers fall back to `parameters`. It is `null` when no source-backed parameter list is available (including aliases and generated attributes), and `[]` for an explicit parameterless method. Kinds are `required`, `optional`, `rest`, `post`, `required_keyword`, `optional_keyword`, `keyword_rest`, `block`, `forwarding`, `no_keywords` and `implicit_rest`. Anonymous and destructured forms retain their exact source patterns with a nullable name; destructured required/post parameters keep their positional kind. Visibility changes and module-function copies retain metadata. Default expressions are never executed. A heredoc default's body is not contiguous with its parameter header: its header remains in `source`, `default`/`default_span` are unavailable and `parameter.unsupported-default` is emitted rather than presenting the opener as a complete expression.
 
 Documentation entries carry `name`, `owner`, `subject`, optional `claim`, `description`, `raw`, and `span`, matching the source model. `rendered_description` contains Markdown with resolvable ZARD references linked, using the same resolution rules as a documentation build. Original descriptions remain unchanged. Examples, raw text and inline/fenced code preserve literal reference syntax. Consumers must use their normal safe Markdown rendering policy; strings in JSON are not trusted HTML.
 
@@ -70,7 +72,7 @@ Implicit numbered and `it` block parameters in `define_method` and `define_singl
 
 ## Source provenance and diagnostics
 
-Each selected source file has `path`, its full SHA-256 `digest` over the bytes parsed, and structured parser `diagnostics` with `code`, `severity`, `message` and `span`. Files without public declarations remain listed for provenance and diagnostics.
+Each selected source file has `path`, its full SHA-256 `digest` over the bytes parsed, and structured parser `diagnostics` with `code`, `severity`, `message` and `span`. Files without published declarations remain listed for provenance and diagnostics.
 
 All generated source paths are relative to the real directory containing the build configuration. Explicit source roots outside that directory can produce `../` paths; these are source identifiers, not output destinations. No absolute checkout paths are generated in provenance or reference warnings. Source-authored prose and raw text are preserved, including any paths the author wrote.
 

@@ -13,18 +13,20 @@ module Zard
         text = File.read(path)
         validate_yaml_keys(Psych.parse_stream(text))
         raw = YAML.safe_load(text, permitted_classes: [], permitted_symbols: [], aliases: false)
-        mapping(raw, %w[docroot layout scopes], "configuration")
+        mapping(raw, %w[docroot layout scopes publication], "configuration")
         @docroot = File.expand_path(string(raw["docroot"], "docroot"), base)
         @layout = layout || raw.fetch("layout", "namespace")
         fail_build("layout must be namespace or file") unless %w[namespace file].include?(@layout)
+        publication = publication_policy(raw.fetch("publication", {}), PublicationPolicy::DEFAULT)
         definitions = raw["scopes"]
         fail_build("scopes must be a nonempty mapping") unless definitions.is_a?(Hash) && !definitions.empty?
         @scopes = definitions.to_h do |name, definition|
           string(name, "scope name")
-          mapping(definition, %w[destination references sources], "scope #{name}")
+          mapping(definition, %w[destination references sources publication], "scope #{name}")
           sources = definition["sources"]
           fail_build("scope #{name} sources must be a nonempty array") unless sources.is_a?(Array) && !sources.empty?
-          [name, {destination: relative(definition["destination"], "destination"),
+          [name, {publication: publication_policy(definition.fetch("publication", {}), publication),
+                  destination: relative(definition["destination"], "destination"),
                   references: strings(definition.fetch("references", []), "references"),
                   sources: sources.map { |source| source_mapping(source, base) }}]
         end
@@ -83,6 +85,15 @@ module Zard
           fail_build("duplicate or invalid YAML mapping key") if values.include?(nil) || values.uniq.length != values.length
         end
         node.children&.each { |child| validate_yaml_keys(child) }
+      end
+
+      def publication_policy(value, defaults)
+        mapping(value, %w[visibility intent], "publication")
+        {visibility: %w[public protected private], intent: %w[public internal]}.to_h do |key, allowed|
+          entries = strings(value.fetch(key.to_s, defaults.fetch(key)), "publication #{key}")
+          fail_build("publication #{key} must contain only #{allowed.join(", ")}") unless (entries - allowed).empty?
+          [key, entries.uniq.freeze]
+        end.freeze
       end
 
       def source_mapping(source, base)

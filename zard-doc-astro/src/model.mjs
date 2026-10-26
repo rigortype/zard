@@ -29,14 +29,17 @@ function sourceSpan(value) {
   if (span.end_line != null && (!Number.isInteger(span.end_line) || span.end_line < span.start_line)) fail('invalid source end line');
   return { path, line: span.start_line, endLine: span.end_line ?? span.start_line };
 }
-function declaration(value) {
+function declaration(value, revision) {
   const row = object(value, 'declaration');
   const kinds = ['class', 'module', 'constant', 'refinement', 'instance_method', 'singleton_method',
     ...['instance', 'singleton'].flatMap((scope) => ['reader', 'writer', 'accessor'].map((kind) => `${scope}_attribute_${kind}`))];
   if (!kinds.includes(row.kind)) fail(`unsupported declaration kind ${row.kind}`);
   const anchor = text(row.anchor, 'anchor');
   if (!/^zard-[0-9a-f]+$/.test(anchor)) fail('invalid declaration anchor');
-  if (row.visibility !== 'public') fail('non-public declaration');
+  if (!['public', 'protected', 'private'].includes(row.visibility)) fail('invalid Ruby visibility');
+  if (revision === 1 && row.visibility !== 'public') fail('non-public declaration in revision 1');
+  const publication = revision === 1 ? 'public' : row.publication;
+  if (!['public', 'internal'].includes(publication)) fail('invalid documentation publication intent');
   const tags = list(row.documentation, 'documentation').map((entry) => {
     object(entry, 'documentation tag');
     const line = sourceSpan(entry.span).line;
@@ -56,7 +59,7 @@ function declaration(value) {
   return { id: text(row.id, 'declaration id'), kind: text(row.kind, 'kind'), name: text(row.name, 'name'),
     displayName: text(row.display_name, 'display name'), page: outputPath(row.page), anchor,
     parameters: list(row.parameters, 'parameters').map((item) => text(item, 'parameter')),
-    parameterDetails,
+    parameterDetails, visibility: row.visibility, publication,
     relationships: row.relationships == null ? null : list(row.relationships, 'relationships').map((relationship) => {
       object(relationship, 'relationship');
       if (!['superclass', 'include', 'prepend', 'extend', 'container_builder'].includes(relationship.kind)) fail('unknown relationship kind');
@@ -74,14 +77,14 @@ function declaration(value) {
 
 export function parseExport(value) {
   const data = object(value, 'document');
-  if (data.schema !== 'zard-doc/v0' || data.revision !== 1) fail(`unsupported schema/revision ${data.schema}/${data.revision}`);
+  if (data.schema !== 'zard-doc/v0' || ![1, 2].includes(data.revision)) fail(`unsupported schema/revision ${data.schema}/${data.revision}`);
   const producer = object(data.producer, 'producer');
   if (data.layout !== 'namespace') fail('the site currently requires namespace layout');
   const scopes = list(data.scopes, 'scopes').map((value) => {
     const scope = object(value, 'scope');
     const name = text(scope.name, 'scope name');
     const destination = outputPath(scope.destination);
-    const declarations = list(scope.declarations, 'declarations').map(declaration);
+    const declarations = list(scope.declarations, 'declarations').map((row) => declaration(row, data.revision));
     unique(declarations.map((row) => row.id), 'declaration id');
     const byId = new Map(declarations.map((row) => [row.id, row]));
     const pages = list(scope.pages, 'pages').map((value) => {

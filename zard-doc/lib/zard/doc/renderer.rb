@@ -67,6 +67,9 @@ module Zard
         deprecated = documentation.select { |tag| tag.name == :deprecated }
         parts << "### Deprecated\n\n#{deprecated.map(&description).join("\n\n")}" unless deprecated.empty?
 
+        intents = documentation.select { |tag| tag.name == :api }
+        parts << "### Documentation publication\n\n#{intents.map { |tag| "**#{tag.subject.capitalize}** — #{description.call(tag)}" }.join("\n\n")}" unless intents.empty?
+
         notes = documentation.select { |tag| tag.name == :note }
         parts << "### Notes\n\n#{notes.map(&description).join("\n\n")}" unless notes.empty?
 
@@ -164,7 +167,7 @@ module Zard
       end
 
       def renderable?(declaration)
-        declaration.visibility == :public && declaration.documentation.any? { |tag| tag.name != :raw }
+        PublicationPolicy.new.include?(declaration) && declaration.documentation.any? { |tag| tag.name != :raw }
       end
 
       def reference_names(declaration)

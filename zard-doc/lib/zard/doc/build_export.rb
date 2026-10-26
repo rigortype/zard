@@ -14,7 +14,7 @@ module Zard
 
       def render(renderer, enricher: nil)
         declarations = renderer.export_declarations
-        data = {schema: "zard-doc/v0", revision: 1,
+        data = {schema: "zard-doc/v0", revision: 2,
                 producer: {zard: Zard::VERSION, zard_doc: Zard::Doc::VERSION},
                 layout: @configuration.layout,
                 scopes: @configuration.selected_scopes.map { |name| scope(name, declarations.fetch(name)) },
@@ -52,7 +52,7 @@ module Zard
         item = entry.fetch(:declaration)
         {id: "#{scope}:#{entry.fetch(:anchor)}", kind: item.kind, name: item.name,
          namespace: item.namespace, display_name: entry.fetch(:display_name),
-         visibility: item.visibility, parameters: item.parameters,
+         visibility: item.visibility, publication: PublicationPolicy.intent(item), parameters: item.parameters,
          parameter_details: item.parameter_details&.map do |parameter|
            {kind: parameter.kind, name: parameter.name, source: parameter.source, span: span(parameter.span),
             default: parameter.default, default_span: span(parameter.default_span)}

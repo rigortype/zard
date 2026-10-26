@@ -67,6 +67,7 @@ module Zard
           @layout = layout
           @destination = config.fetch(:destination)
           @include_undocumented = include_undocumented
+          @publication = PublicationPolicy.new(config.fetch(:publication, PublicationPolicy::DEFAULT))
           @index_path = join_path("index.md")
           @declarations = documents.sort_by(&:path).flat_map(&:declarations)
           @container_names = @declarations.select { |declaration| %i[class module constant].include?(declaration.kind) }.map { |declaration| qualified_name(declaration) }
@@ -181,7 +182,7 @@ module Zard
         private
 
         def renderable?(declaration)
-          declaration.visibility == :public && (@include_undocumented || super)
+          @publication.include?(declaration) && (@include_undocumented || declaration.documentation.any? { |tag| tag.name != :raw })
         end
 
         def join_path(path)

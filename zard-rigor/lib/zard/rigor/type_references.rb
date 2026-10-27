@@ -29,7 +29,7 @@ module Zard
 
             occurrences, error = @parsed[text] ||= occurrences(text)
             if error
-              diagnostics << "#{binding.fetch("scope")}:#{member.fetch("owner")}#{member.fetch("scope") == "singleton" ? "." : "#"}#{member.fetch("name")}: type references unavailable for overload #{index}: #{error}"
+              diagnostics << "#{binding.fetch("scope")}:#{member.fetch("owner")}#{(member.fetch("scope") == "singleton") ? "." : "#"}#{member.fetch("name")}: type references unavailable for overload #{index}: #{error}"
               next
             end
             occurrences.each do |occurrence|

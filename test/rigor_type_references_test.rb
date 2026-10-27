@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "zard/rigor"
+require "json"
+require "zard/rigor/type_references"
 
 class RigorTypeReferencesTest < Minitest::Test
   KEY = JSON.generate(["Box", "instance", "call"])

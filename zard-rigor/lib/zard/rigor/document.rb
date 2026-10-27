@@ -50,6 +50,9 @@ module Zard
           member = @members.fetch(key)
           member.merge("key" => key, "sites" => member.fetch("sites").select { |site| retained.include?(site) })
         end
+        resolver = TypeReferences.new(export, members)
+        bindings = bindings.map { |binding| resolver.attach(binding) }
+        warnings.concat(bindings.flat_map { |binding| binding.fetch("type_reference_diagnostics") })
         @data.merge("adapter" => {"name" => "zard-rigor", "version" => VERSION, "grammar" => Compatibility::DATA.fetch("grammar")},
           "project" => project, "files" => files, "members" => members, "bindings" => bindings, "warnings" => warnings)
       end

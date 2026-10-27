@@ -79,7 +79,7 @@ export function parseExport(value) {
   const data = object(value, 'document');
   if (data.schema !== 'zard-doc/v0' || ![1, 2].includes(data.revision)) fail(`unsupported schema/revision ${data.schema}/${data.revision}`);
   const producer = object(data.producer, 'producer');
-  if (data.layout !== 'namespace') fail('the site currently requires namespace layout');
+  if (!['namespace', 'file'].includes(data.layout)) fail('unsupported documentation layout');
   const scopes = list(data.scopes, 'scopes').map((value) => {
     const scope = object(value, 'scope');
     const name = text(scope.name, 'scope name');
@@ -118,5 +118,5 @@ export function parseExport(value) {
       if (!page?.declarations.some((row) => row.anchor === target.anchor)) fail('link to missing declaration');
     }
   }
-  return { scopes, lens: parseLens(data.lens, scopes), producer: { zard: text(producer.zard, 'ZARD version'), zardDoc: text(producer.zard_doc, 'zard-doc version') } };
+  return { layout: data.layout, scopes, lens: parseLens(data.lens, scopes), producer: { zard: text(producer.zard, 'ZARD version'), zardDoc: text(producer.zard_doc, 'zard-doc version') } };
 }

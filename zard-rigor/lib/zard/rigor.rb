@@ -7,6 +7,7 @@ require "open3"
 require "pathname"
 require_relative "rigor/version"
 require_relative "rigor/compatibility"
+require_relative "rigor/type_references"
 require_relative "rigor/document"
 
 module Zard

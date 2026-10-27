@@ -1450,7 +1450,9 @@
         "file": "lib/boundaries.rb",
         "site_key": "lib/boundaries.rb:23-74:0",
         "member_keys": [],
-        "status": "matched"
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
       },
       {
         "scope": "app",
@@ -1460,7 +1462,9 @@
         "member_keys": [
           "[\"Target\",\"singleton\",\"identity\"]"
         ],
-        "status": "matched"
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
       },
       {
         "scope": "app",
@@ -1468,7 +1472,9 @@
         "file": "lib/boundaries.rb",
         "site_key": "lib/boundaries.rb:76-290:0",
         "member_keys": [],
-        "status": "matched"
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
       },
       {
         "scope": "app",
@@ -1481,7 +1487,9 @@
         "omission": {
           "kind": "method",
           "reason": "unsupported_kind"
-        }
+        },
+        "type_references": [],
+        "type_reference_diagnostics": []
       },
       {
         "scope": "app",
@@ -1491,7 +1499,9 @@
         "member_keys": [
           "[\"Boundary\",\"singleton\",\"identity\"]"
         ],
-        "status": "matched"
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
       },
       {
         "scope": "app",
@@ -1501,7 +1511,9 @@
         "member_keys": [],
         "status": "unavailable",
         "reason": "unsupported_capability",
-        "capability": "refinement"
+        "capability": "refinement",
+        "type_references": [],
+        "type_reference_diagnostics": []
       },
       {
         "scope": "app",
@@ -1510,7 +1522,9 @@
         "site_key": null,
         "member_keys": [],
         "status": "unavailable",
-        "reason": "unmatched_declaration"
+        "reason": "unmatched_declaration",
+        "type_references": [],
+        "type_reference_diagnostics": []
       },
       {
         "scope": "app",
@@ -1520,7 +1534,9 @@
         "member_keys": [],
         "status": "unavailable",
         "reason": "unsupported_capability",
-        "capability": "refinement"
+        "capability": "refinement",
+        "type_references": [],
+        "type_reference_diagnostics": []
       },
       {
         "scope": "app",
@@ -1529,7 +1545,9 @@
         "site_key": null,
         "member_keys": [],
         "status": "unavailable",
-        "reason": "unmatched_declaration"
+        "reason": "unmatched_declaration",
+        "type_references": [],
+        "type_reference_diagnostics": []
       },
       {
         "scope": "app",
@@ -1537,7 +1555,9 @@
         "file": "lib/boundaries.rb",
         "site_key": "lib/boundaries.rb:292-462:0",
         "member_keys": [],
-        "status": "matched"
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
       },
       {
         "scope": "app",
@@ -1547,7 +1567,49 @@
         "member_keys": [
           "[\"Signatures\",\"instance\",\"convert\"]"
         ],
-        "status": "matched"
+        "status": "matched",
+        "type_references": [
+          {
+            "name": "::String",
+            "start_offset": 1,
+            "end_offset": 9,
+            "member_key": "[\"Signatures\",\"instance\",\"convert\"]",
+            "overload": 0,
+            "status": "unresolved",
+            "targets": []
+          },
+          {
+            "name": "::String",
+            "start_offset": 20,
+            "end_offset": 28,
+            "member_key": "[\"Signatures\",\"instance\",\"convert\"]",
+            "overload": 0,
+            "status": "unresolved",
+            "targets": []
+          },
+          {
+            "name": "::Integer",
+            "start_offset": 1,
+            "end_offset": 10,
+            "member_key": "[\"Signatures\",\"instance\",\"convert\"]",
+            "overload": 1,
+            "status": "unresolved",
+            "targets": []
+          },
+          {
+            "name": "::Integer",
+            "start_offset": 21,
+            "end_offset": 30,
+            "member_key": "[\"Signatures\",\"instance\",\"convert\"]",
+            "overload": 1,
+            "status": "unresolved",
+            "targets": []
+          }
+        ],
+        "type_reference_diagnostics": [
+          "app:Signatures#convert: unresolved type reference ::String (no documented declaration)",
+          "app:Signatures#convert: unresolved type reference ::Integer (no documented declaration)"
+        ]
       },
       {
         "scope": "app",
@@ -1557,7 +1619,30 @@
         "member_keys": [
           "[\"Signatures\",\"instance\",\"transform\"]"
         ],
-        "status": "matched"
+        "status": "matched",
+        "type_references": [
+          {
+            "name": "::String",
+            "start_offset": 61,
+            "end_offset": 69,
+            "member_key": "[\"Signatures\",\"instance\",\"transform\"]",
+            "overload": 0,
+            "status": "unresolved",
+            "targets": []
+          },
+          {
+            "name": "::String",
+            "start_offset": 75,
+            "end_offset": 83,
+            "member_key": "[\"Signatures\",\"instance\",\"transform\"]",
+            "overload": 0,
+            "status": "unresolved",
+            "targets": []
+          }
+        ],
+        "type_reference_diagnostics": [
+          "app:Signatures#transform: unresolved type reference ::String (no documented declaration)"
+        ]
       },
       {
         "scope": "app",
@@ -1567,7 +1652,9 @@
         "member_keys": [
           "[\"Signatures\",\"instance\",\"reserved\"]"
         ],
-        "status": "matched"
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
       }
     ],
     "warnings": [
@@ -1575,7 +1662,10 @@
       "app:Boundary#String: lens unsupported_capability",
       "app:Boundary[String]#identity: lens unmatched_declaration",
       "app:Boundary#Integer: lens unsupported_capability",
-      "app:Boundary[Integer]#identity: lens unmatched_declaration"
+      "app:Boundary[Integer]#identity: lens unmatched_declaration",
+      "app:Signatures#convert: unresolved type reference ::String (no documented declaration)",
+      "app:Signatures#convert: unresolved type reference ::Integer (no documented declaration)",
+      "app:Signatures#transform: unresolved type reference ::String (no documented declaration)"
     ]
   }
 }

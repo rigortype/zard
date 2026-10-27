@@ -30,7 +30,7 @@ const files = starlightPages(reference); // Map<relative Markdown path, content>
 const topic = starlightTopic(reference, { id: 'api', label: 'API Reference' });
 ```
 
-`createReference` is synchronous and does not mutate the export. It returns `{ title, url, pages, navigation }`; each page contains `{ slug, title, description, body }`, where body is Markdown with semantic HTML. Navigation contains documentation scopes and namespace trees. Unsupported schema/revision, invalid visibility or publication intent, unsafe logical output paths, unmatched declarations, missing reference targets and normalized route collisions throw before publication. Revision 1 accepts public Ruby declarations and defaults documentation intent to public; revision 2 requires explicit `visibility` and `publication` values on every published declaration. Only namespace layout is supported initially.
+`createReference` is synchronous and does not mutate the export. It returns `{ title, url, pages, navigation }`; each page contains `{ slug, title, description, body }`, where body is Markdown with semantic HTML. Navigation contains documentation scopes and namespace trees. Unsupported schema/revision, invalid visibility or publication intent, unsafe logical output paths, unmatched declarations, missing reference targets and normalized route collisions throw before publication. Revision 1 accepts public Ruby declarations and defaults documentation intent to public; revision 2 requires explicit `visibility` and `publication` values on every published declaration. Namespace and file layouts are accepted; file-layout page titles are source paths.
 
 Signatures use additive `parameter_details[].source` when supplied by the producer, retaining Ruby defaults, forwarding and anonymous/destructured parameter patterns. Older exports fall back to `parameters`. These are syntax labels, not inferred types. An optional `sourceLinks` object maps declaration IDs to HTTP(S) URLs; the renderer checks IDs and protocols and displays each declaration's own source link. The consumer owns URL templates, commit pinning and repository-path policy. With no link, the recorded source location remains readable text.
 
@@ -71,6 +71,18 @@ The shared compatibility manifest declares `rigor:v1` as the supported type
 grammar. Enriched exports must carry that exact value in `lens.adapter.grammar`;
 missing or unsupported grammar values, incompatible revisions and dangling
 bindings are rejected before publication. Plain exports need no lens metadata.
+
+Bindings may carry the additive `type_references` described in the
+[`zard-rigor` README](../zard-rigor/README.md#signature-type-references). The
+renderer does not find or resolve type names. It checks each reference against
+the signature text (UTF-8 byte range, exact spelling, no overlaps), status and
+candidate counts, visibility of every scope from the binding's scope and its
+direct dependencies, and the exported declaration, page, anchor, source span and
+name of every target. Then it wraps only `resolved` names in a link to the
+declaration anchor. Ambiguous and unresolved names, and bindings without the
+fields, stay literal, and the signature's characters are unchanged. Invalid
+metadata throws. `type_reference_diagnostics` are included in
+`reference.diagnostics`.
 
 Additive producer `relationships` enable a per-scope hierarchy page and forward/
 reverse links. Only validated targets in the current scope or its explicit direct

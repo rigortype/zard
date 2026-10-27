@@ -41,6 +41,7 @@ jobs:
       - run: |
           ZARD_RIGOR_COMMAND="$RUNNER_TEMP/rigor-cli" bundle exec ruby -Itest test/rigor_lens_test.rb
           ZARD_RIGOR_COMMAND="$RUNNER_TEMP/rigor-cli" bundle exec ruby -Itest test/rigor_lens_boundaries_test.rb
+          ZARD_RIGOR_COMMAND="$RUNNER_TEMP/rigor-cli" bundle exec ruby -Itest test/rigor_type_reference_links_test.rb
 
   astro:
     runs-on: ubuntu-latest

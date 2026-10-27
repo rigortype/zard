@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Link named class and module types in Rigor lens signatures to their documented declarations, within the binding's documentation scope and then its direct documentation dependencies. Ambiguous and excluded declarations stay literal with diagnostics ([#17](https://github.com/rigortype/zard/issues/17), [#32](https://github.com/rigortype/zard/pull/32)).
+- Accept file-layout exports in `zard-doc-astro`.
+
 ## [0.0.2] - 2026-10-19
 
 Generate scoped API documentation and versioned JSON for static sites, optionally enriched by released Rigor lens facts. This release also adds annotation formatting and an unstyled Astro presentation package; consumer sites own styling and publication.

@@ -20,7 +20,10 @@ module Zard
                 scopes: @configuration.selected_scopes.map { |name| scope(name, declarations.fetch(name)) },
                 links: renderer.links.sort.to_h,
                 warnings: renderer.diagnostics.map { |message| relative_message(message) }}
-        data = enricher.call(data, base: @configuration.base) if enricher
+        if enricher
+          resolve = ->(scope, name) { renderer.resolve_constant(scope, name).map { |owner, item| constant(owner, item) } }
+          data = enricher.call(data, base: @configuration.base, resolve_constant: resolve)
+        end
         JSON.pretty_generate(data) + "\n"
       rescue JSON::GeneratorError => error
         raise BuildError, "cannot export documentation JSON: #{error.message}"
@@ -67,6 +70,14 @@ module Zard
          span: span(item.span), comment_span: span(item.comment_span),
          documentation: item.documentation.map { |tag| documentation(tag, entry.fetch(:descriptions).fetch(tag)) },
          contracts: item.contracts.map { |contract| contract(contract) }}
+      end
+
+      # A declaration excluded from publication has no identity in the export, only its location.
+      def constant(owner, item)
+        id = "#{owner.name}:#{owner.destination(item).last}" if owner.published?(item)
+        {"scope" => owner.name, "declaration_id" => id, "kind" => item.kind.to_s,
+         "container_builder" => !item.container_builder.nil?,
+         "span" => {"path" => relative_path(item.span.path), "start_line" => item.span.start_line, "end_line" => item.span.end_line}}
       end
 
       def documentation(tag, rendered)

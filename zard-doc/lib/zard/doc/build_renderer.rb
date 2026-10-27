@@ -33,6 +33,15 @@ module Zard
         @renderers.transform_values(&:export_declarations)
       end
 
+      # Declarations named by an absolute constant path: the scope's own, otherwise those of its
+      # direct documentation dependencies. Transitive dependencies are never searched.
+      def resolve_constant(scope, name)
+        local = @renderers.fetch(scope).constant_candidates(name)
+        return local unless local.empty?
+
+        dependencies(scope).flat_map { |renderer| renderer.constant_candidates(name) }
+      end
+
       def record_link(from, path, anchor)
         targets = (@links[from] ||= [])
         target = {"path" => path, "anchor" => anchor}
@@ -147,6 +156,16 @@ module Zard
 
         def destination(declaration)
           [@paths.fetch(declaration), @anchors.fetch(declaration)]
+        end
+
+        # Reopened definitions of one class or module are one constant, represented by its first
+        # published definition in source order.
+        def constant_candidates(name)
+          targets = @targets.fetch(name.delete_prefix("::"), []).uniq
+          if targets.length > 1 && targets.map(&:kind).uniq.one? && %i[class module].include?(targets.first.kind)
+            targets = [targets.find { |target| renderable?(target) } || targets.first]
+          end
+          targets.map { |target| [self, target] }
         end
 
         def export_declarations

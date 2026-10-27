@@ -1,4 +1,5 @@
 import { code, escapeHtml } from './prose.mjs';
+import { parseTypeReferences, renderSignature } from './type-references.mjs';
 import compatibility from './lens-compatibility.json' with { type: 'json' };
 
 const fail = (message) => { throw new Error(`Invalid ZARD lens data: ${message}`); };
@@ -57,10 +58,11 @@ export function parseLens(data, scopes) {
     for (const key of array(binding.member_keys)) {
       if (!members.get(key)?.sites.includes(binding.site_key)) fail('missing bound member');
     }
-    bindings.set(binding.declaration_id, binding);
+    const types = parseTypeReferences(binding, members, scopes);
+    bindings.set(binding.declaration_id, { ...binding, typeReferences: types.references, typeReferenceDiagnostics: types.diagnostics });
   }
   if (bindings.size !== declarations.size) fail('declaration missing from bindings');
-  return { bindings, sites, members, files: data.files, capabilities: array(data.capabilities), producer: data.producer, schema: data.schema, revision: data.revision };
+  return { diagnostics: [...bindings.values()].flatMap((binding) => binding.typeReferenceDiagnostics), bindings, sites, members, files: data.files, capabilities: array(data.capabilities), producer: data.producer, schema: data.schema, revision: data.revision };
 }
 
 const bindingReasons = {
@@ -105,7 +107,7 @@ function slotText(value, lens) {
   return text;
 }
 
-export function renderLens(row, lens) {
+export function renderLens(row, lens, basePath = 'api') {
   if (!lens) return '';
   const binding = lens.bindings.get(row.id);
   if (binding.status === 'unavailable') {
@@ -124,8 +126,8 @@ export function renderLens(row, lens) {
     const name = `${member.owner}${member.scope === 'singleton' ? '.' : '#'}${member.name}`;
     content += `<p><strong>Member signature ${code(name)}</strong><br>Shared across its definitions · ${escapeHtml(member.basis.replaceAll('_', ' '))} · visibility: ${escapeHtml(member.visibility || 'unknown')}</p>\n`;
     if (member.basis === 'contested') content += '<p>Signature unavailable: multiple definitions; no runtime winner is selected.</p>\n';
-    for (const overload of member.overloads) {
-      if (overload.rbs != null) content += `<pre class="api-lens-signature"><code>${escapeHtml(overload.rbs)}</code></pre>\n`;
+    for (const [index, overload] of member.overloads.entries()) {
+      if (overload.rbs != null) content += `<pre class="api-lens-signature"><code>${renderSignature(overload.rbs, binding.typeReferences, key, index, basePath)}</code></pre>\n`;
       content += '<dl>\n';
       if (overload.params == null) content += '<dt>Parameters</dt><dd>Details unavailable</dd>\n';
       for (const parameter of overload.params || []) content += `<dt>Parameter ${code(parameter.name || '(anonymous)')} (${escapeHtml(parameter.kind)})</dt><dd>${slotText(parameter.type, lens)}</dd>\n`;

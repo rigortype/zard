@@ -6,7 +6,7 @@ Repository builds support an experimental static-site producer:
 zard-doc build --config zard-doc.yml --format json > api.json
 ```
 
-This is ZARD documentation data, not a Rigor lens result. Plain generation does not execute Ruby source, parse contract types, infer signatures, or require Rigor. The optional `zard-rigor` adapter can associate facts with source declarations without replacing their documentation or provenance.
+This is ZARD documentation data, not a Rigor lens result. Plain generation does not execute Ruby source, parse contract types, infer signatures, or require Rigor. The optional `zard-rigor` adapter can associate facts with source declarations without replacing their documentation or provenance. With `--lens-root`, it can also link named types in Rigor signatures, using the same scope and direct-dependency lookup as reference links; see [Signature type references](../zard-rigor/README.md#signature-type-references).
 
 Framework-specific HTML lives in [`zard-doc-astro`](../zard-doc-astro/README.md), with Starlight conventions isolated in its adapter. Styling, source acquisition and publication belong to each consumer. This export does not embed an Astro component or stylesheet.
 

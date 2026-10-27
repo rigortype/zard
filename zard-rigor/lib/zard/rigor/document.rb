@@ -16,7 +16,7 @@ module Zard
         validate(arguments, status)
       end
 
-      def bind(export, base:, project:)
+      def bind(export, base:, project:, resolve_constant: nil)
         bindings = []
         retained = []
         warnings = []
@@ -49,6 +49,11 @@ module Zard
         members = used_members.map do |key|
           member = @members.fetch(key)
           member.merge("key" => key, "sites" => member.fetch("sites").select { |site| retained.include?(site) })
+        end
+        if resolve_constant
+          resolver = TypeReferences.new(export, members, resolve_constant)
+          bindings = bindings.map { |binding| resolver.attach(binding) }
+          warnings.concat(bindings.flat_map { |binding| binding.fetch("type_reference_diagnostics") })
         end
         @data.merge("adapter" => {"name" => "zard-rigor", "version" => VERSION, "grammar" => Compatibility::DATA.fetch("grammar")},
           "project" => project, "files" => files, "members" => members, "bindings" => bindings, "warnings" => warnings)

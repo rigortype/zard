@@ -81,8 +81,8 @@ module Zard
       def lens_enricher(root, command, workers, config)
         require "zard/rigor"
         adapter = Zard::Rigor::Lens.new(root: root, command: command, workers: workers, config: config)
-        lambda do |data, base:|
-          adapter.enrich(data, base: base)
+        lambda do |data, base:, resolve_constant:|
+          adapter.enrich(data, base: base, resolve_constant: resolve_constant)
         rescue Zard::Rigor::Error => error
           raise BuildError, error.message
         end

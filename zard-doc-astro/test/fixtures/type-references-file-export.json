@@ -1,0 +1,4842 @@
+{
+  "schema": "zard-doc/v0",
+  "revision": 2,
+  "producer": {
+    "zard": "0.0.2",
+    "zard_doc": "0.0.2"
+  },
+  "layout": "file",
+  "scopes": [
+    {
+      "name": "app",
+      "destination": "app",
+      "references": [
+        "left",
+        "right",
+        "shared"
+      ],
+      "files": [
+        {
+          "path": "lib/app/reopened.rb",
+          "digest": "3ceb48e6b801035f2abc17c9d957e9ef829ee16c7fd8fd9b9f8f53be3ee3c550",
+          "diagnostics": []
+        },
+        {
+          "path": "lib/app/service.rb",
+          "digest": "803f797b208539c8a7467fe0c0f7fff7c134454c6bbdfbd8e3f0d8900cd2c780",
+          "diagnostics": []
+        },
+        {
+          "path": "lib/app/types.rb",
+          "digest": "b3874e0bc22d4e39eb16a12a8b6052c1ab708a7c868b2122d1d4691590e1522f",
+          "diagnostics": []
+        }
+      ],
+      "declarations": [
+        {
+          "id": "app:zard-6d6f64756c6500417070000072656f70656e65642e6d640031",
+          "kind": "module",
+          "name": "App",
+          "namespace": null,
+          "display_name": "App",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/reopened.md",
+          "anchor": "zard-6d6f64756c6500417070000072656f70656e65642e6d640031",
+          "references": [
+            "App"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/reopened.rb",
+            "start_line": 3,
+            "end_line": 10,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 23,
+            "end_offset": 181
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+          "kind": "class",
+          "name": "Foo",
+          "namespace": "App",
+          "display_name": "App::Foo",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/reopened.md",
+          "anchor": "zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+          "references": [
+            "App::Foo"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/reopened.rb",
+            "start_line": 5,
+            "end_line": 9,
+            "start_column": 2,
+            "end_column": 5,
+            "start_offset": 89,
+            "end_offset": 177
+          },
+          "comment_span": {
+            "path": "lib/app/reopened.rb",
+            "start_line": 4,
+            "end_line": 4,
+            "start_column": 2,
+            "end_column": 52,
+            "start_offset": 36,
+            "end_offset": 86
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "The local value type, reopened in a second file.",
+              "rendered_description": "The local value type, reopened in a second file.",
+              "raw": "# The local value type, reopened in a second file.",
+              "span": {
+                "path": "lib/app/reopened.rb",
+                "start_line": 4,
+                "end_line": 4,
+                "start_column": 2,
+                "end_column": 52,
+                "start_offset": 36,
+                "end_offset": 86
+              }
+            }
+          ],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a466f6f23697473656c665f76616c756500",
+          "kind": "instance_method",
+          "name": "itself_value",
+          "namespace": "App::Foo",
+          "display_name": "App::Foo#itself_value",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": [],
+          "page": "app/reopened.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64004170703a3a466f6f23697473656c665f76616c756500",
+          "references": [
+            "App::Foo#itself_value"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/reopened.rb",
+            "start_line": 8,
+            "end_line": 8,
+            "start_column": 4,
+            "end_column": 27,
+            "start_offset": 148,
+            "end_offset": 171
+          },
+          "comment_span": {
+            "path": "lib/app/reopened.rb",
+            "start_line": 6,
+            "end_line": 7,
+            "start_column": 4,
+            "end_column": 16,
+            "start_offset": 103,
+            "end_offset": 143
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Returns the receiver.",
+              "rendered_description": "Returns the receiver.",
+              "raw": "# Returns the receiver.",
+              "span": {
+                "path": "lib/app/reopened.rb",
+                "start_line": 6,
+                "end_line": 6,
+                "start_column": 4,
+                "end_column": 27,
+                "start_offset": 103,
+                "end_offset": 126
+              }
+            }
+          ],
+          "contracts": [
+            {
+              "channel": "rbs",
+              "payload": "() -> Foo",
+              "note": null,
+              "raw": "#: () -> Foo",
+              "span": {
+                "path": "lib/app/reopened.rb",
+                "start_line": 7,
+                "end_line": 7,
+                "start_column": 4,
+                "end_column": 16,
+                "start_offset": 131,
+                "end_offset": 143
+              }
+            }
+          ]
+        },
+        {
+          "id": "app:zard-6d6f64756c65004170700000736572766963652e6d640031",
+          "kind": "module",
+          "name": "App",
+          "namespace": null,
+          "display_name": "App",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/service.md",
+          "anchor": "zard-6d6f64756c65004170700000736572766963652e6d640031",
+          "references": [
+            "App"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/service.rb",
+            "start_line": 3,
+            "end_line": 24,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 23,
+            "end_offset": 761
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-636c617373004170703a3a5365727669636500",
+          "kind": "class",
+          "name": "Service",
+          "namespace": "App",
+          "display_name": "App::Service",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/service.md",
+          "anchor": "zard-636c617373004170703a3a5365727669636500",
+          "references": [
+            "App::Service"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/service.rb",
+            "start_line": 5,
+            "end_line": 23,
+            "start_column": 2,
+            "end_column": 5,
+            "start_offset": 96,
+            "end_offset": 757
+          },
+          "comment_span": {
+            "path": "lib/app/service.rb",
+            "start_line": 4,
+            "end_line": 4,
+            "start_column": 2,
+            "end_column": 59,
+            "start_offset": 36,
+            "end_offset": 93
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Signatures naming local, dependency and external types.",
+              "rendered_description": "Signatures naming local, dependency and external types.",
+              "raw": "# Signatures naming local, dependency and external types.",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 4,
+                "end_line": 4,
+                "start_column": 2,
+                "end_column": 59,
+                "start_offset": 36,
+                "end_offset": 93
+              }
+            }
+          ],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a536572766963652363616c6c00",
+          "kind": "instance_method",
+          "name": "call",
+          "namespace": "App::Service",
+          "display_name": "App::Service#call",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [
+            "items",
+            "&block"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "items",
+              "source": "items",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 8,
+                "end_line": 8,
+                "start_column": 13,
+                "end_column": 18,
+                "start_offset": 252,
+                "end_offset": 257
+              },
+              "default": null,
+              "default_span": null
+            },
+            {
+              "kind": "block",
+              "name": "block",
+              "source": "&block",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 8,
+                "end_line": 8,
+                "start_column": 20,
+                "end_column": 26,
+                "start_offset": 259,
+                "end_offset": 265
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/service.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64004170703a3a536572766963652363616c6c00",
+          "references": [
+            "App::Service#call"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/service.rb",
+            "start_line": 8,
+            "end_line": 8,
+            "start_column": 4,
+            "end_column": 33,
+            "start_offset": 243,
+            "end_offset": 272
+          },
+          "comment_span": {
+            "path": "lib/app/service.rb",
+            "start_line": 6,
+            "end_line": 7,
+            "start_column": 4,
+            "end_column": 76,
+            "start_offset": 114,
+            "end_offset": 238
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Nested generics, a block and a UTF-8 literal.",
+              "rendered_description": "Nested generics, a block and a UTF-8 literal.",
+              "raw": "# Nested generics, a block and a UTF-8 literal.",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 6,
+                "end_line": 6,
+                "start_column": 4,
+                "end_column": 51,
+                "start_offset": 114,
+                "end_offset": 161
+              }
+            }
+          ],
+          "contracts": [
+            {
+              "channel": "rbs",
+              "payload": "(Array[Hash[Symbol, Foo]] items) { (Foo) -> Common } -> (Foo | \"ä\")?",
+              "note": null,
+              "raw": "#: (Array[Hash[Symbol, Foo]] items) { (Foo) -> Common } -> (Foo | \"ä\")?",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 7,
+                "end_line": 7,
+                "start_column": 4,
+                "end_column": 76,
+                "start_offset": 166,
+                "end_offset": 238
+              }
+            }
+          ]
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a53657276696365236163726f737300",
+          "kind": "instance_method",
+          "name": "across",
+          "namespace": "App::Service",
+          "display_name": "App::Service#across",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [
+            "thing",
+            "far",
+            "twin",
+            "text"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "thing",
+              "source": "thing",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 12,
+                "end_line": 12,
+                "start_column": 15,
+                "end_column": 20,
+                "start_offset": 429,
+                "end_offset": 434
+              },
+              "default": null,
+              "default_span": null
+            },
+            {
+              "kind": "required",
+              "name": "far",
+              "source": "far",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 12,
+                "end_line": 12,
+                "start_column": 22,
+                "end_column": 25,
+                "start_offset": 436,
+                "end_offset": 439
+              },
+              "default": null,
+              "default_span": null
+            },
+            {
+              "kind": "required",
+              "name": "twin",
+              "source": "twin",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 12,
+                "end_line": 12,
+                "start_column": 27,
+                "end_column": 31,
+                "start_offset": 441,
+                "end_offset": 445
+              },
+              "default": null,
+              "default_span": null
+            },
+            {
+              "kind": "required",
+              "name": "text",
+              "source": "text",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 12,
+                "end_line": 12,
+                "start_column": 33,
+                "end_column": 37,
+                "start_offset": 447,
+                "end_offset": 451
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/service.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64004170703a3a53657276696365236163726f737300",
+          "references": [
+            "App::Service#across"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/service.rb",
+            "start_line": 12,
+            "end_line": 12,
+            "start_column": 4,
+            "end_column": 43,
+            "start_offset": 418,
+            "end_offset": 457
+          },
+          "comment_span": {
+            "path": "lib/app/service.rb",
+            "start_line": 10,
+            "end_line": 11,
+            "start_column": 4,
+            "end_column": 69,
+            "start_offset": 278,
+            "end_offset": 413
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Direct, transitive and competing dependencies and an interface.",
+              "rendered_description": "Direct, transitive and competing dependencies and an interface.",
+              "raw": "# Direct, transitive and competing dependencies and an interface.",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 10,
+                "end_line": 10,
+                "start_column": 4,
+                "end_column": 69,
+                "start_offset": 278,
+                "end_offset": 343
+              }
+            }
+          ],
+          "contracts": [
+            {
+              "channel": "rbs",
+              "payload": "(Shared::Thing thing, Far far, Twin twin, _ToS text) -> String",
+              "note": null,
+              "raw": "#: (Shared::Thing thing, Far far, Twin twin, _ToS text) -> String",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 11,
+                "end_line": 11,
+                "start_column": 4,
+                "end_column": 69,
+                "start_offset": 348,
+                "end_offset": 413
+              }
+            }
+          ]
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a5365727669636523656c7365776865726500",
+          "kind": "instance_method",
+          "name": "elsewhere",
+          "namespace": "App::Service",
+          "display_name": "App::Service#elsewhere",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [
+            "hidden",
+            "lonely"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "hidden",
+              "source": "hidden",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 16,
+                "end_line": 16,
+                "start_column": 18,
+                "end_column": 24,
+                "start_offset": 602,
+                "end_offset": 608
+              },
+              "default": null,
+              "default_span": null
+            },
+            {
+              "kind": "required",
+              "name": "lonely",
+              "source": "lonely",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 16,
+                "end_line": 16,
+                "start_column": 26,
+                "end_column": 32,
+                "start_offset": 610,
+                "end_offset": 616
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/service.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64004170703a3a5365727669636523656c7365776865726500",
+          "references": [
+            "App::Service#elsewhere"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/service.rb",
+            "start_line": 16,
+            "end_line": 16,
+            "start_column": 4,
+            "end_column": 51,
+            "start_offset": 588,
+            "end_offset": 635
+          },
+          "comment_span": {
+            "path": "lib/app/service.rb",
+            "start_line": 14,
+            "end_line": 15,
+            "start_column": 4,
+            "end_column": 46,
+            "start_offset": 463,
+            "end_offset": 583
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "An excluded declaration, an unrelated scope and a Data.define constant.",
+              "rendered_description": "An excluded declaration, an unrelated scope and a Data.define constant.",
+              "raw": "# An excluded declaration, an unrelated scope and a Data.define constant.",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 14,
+                "end_line": 14,
+                "start_column": 4,
+                "end_column": 77,
+                "start_offset": 463,
+                "end_offset": 536
+              }
+            }
+          ],
+          "contracts": [
+            {
+              "channel": "rbs",
+              "payload": "(Hidden hidden, Lonely lonely) -> Point",
+              "note": null,
+              "raw": "#: (Hidden hidden, Lonely lonely) -> Point",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 15,
+                "end_line": 15,
+                "start_column": 4,
+                "end_column": 46,
+                "start_offset": 541,
+                "end_offset": 583
+              }
+            }
+          ]
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a53657276696365236d616b6500",
+          "kind": "instance_method",
+          "name": "make",
+          "namespace": "App::Service",
+          "display_name": "App::Service#make",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": [],
+          "page": "app/service.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64004170703a3a53657276696365236d616b6500",
+          "references": [
+            "App::Service#make"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/service.rb",
+            "start_line": 19,
+            "end_line": 19,
+            "start_column": 4,
+            "end_column": 22,
+            "start_offset": 664,
+            "end_offset": 682
+          },
+          "comment_span": {
+            "path": "lib/app/service.rb",
+            "start_line": 18,
+            "end_line": 18,
+            "start_column": 4,
+            "end_column": 22,
+            "start_offset": 641,
+            "end_offset": 659
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Inferred return.",
+              "rendered_description": "Inferred return.",
+              "raw": "# Inferred return.",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 18,
+                "end_line": 18,
+                "start_column": 4,
+                "end_column": 22,
+                "start_offset": 641,
+                "end_offset": 659
+              }
+            }
+          ],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a5365727669636523636f6e7665727400",
+          "kind": "instance_method",
+          "name": "convert",
+          "namespace": "App::Service",
+          "display_name": "App::Service#convert",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [
+            "value"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "value",
+              "source": "value",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 22,
+                "end_line": 22,
+                "start_column": 16,
+                "end_column": 21,
+                "start_offset": 737,
+                "end_offset": 742
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/service.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64004170703a3a5365727669636523636f6e7665727400",
+          "references": [
+            "App::Service#convert"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/service.rb",
+            "start_line": 22,
+            "end_line": 22,
+            "start_column": 4,
+            "end_column": 30,
+            "start_offset": 725,
+            "end_offset": 751
+          },
+          "comment_span": {
+            "path": "lib/app/service.rb",
+            "start_line": 21,
+            "end_line": 21,
+            "start_column": 4,
+            "end_column": 36,
+            "start_offset": 688,
+            "end_offset": 720
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Overloaded in sig/service.rbs.",
+              "rendered_description": "Overloaded in sig/service.rbs.",
+              "raw": "# Overloaded in sig/service.rbs.",
+              "span": {
+                "path": "lib/app/service.rb",
+                "start_line": 21,
+                "end_line": 21,
+                "start_column": 4,
+                "end_column": 36,
+                "start_offset": 688,
+                "end_offset": 720
+              }
+            }
+          ],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-6d6f64756c6500417070000074797065732e6d640031",
+          "kind": "module",
+          "name": "App",
+          "namespace": null,
+          "display_name": "App",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/types.md",
+          "anchor": "zard-6d6f64756c6500417070000074797065732e6d640031",
+          "references": [
+            "App"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/types.rb",
+            "start_line": 3,
+            "end_line": 31,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 23,
+            "end_offset": 530
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-636c617373004170703a3a466f6f000074797065732e6d640031",
+          "kind": "class",
+          "name": "Foo",
+          "namespace": "App",
+          "display_name": "App::Foo",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/types.md",
+          "anchor": "zard-636c617373004170703a3a466f6f000074797065732e6d640031",
+          "references": [
+            "App::Foo"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/types.rb",
+            "start_line": 5,
+            "end_line": 6,
+            "start_column": 2,
+            "end_column": 5,
+            "start_offset": 62,
+            "end_offset": 77
+          },
+          "comment_span": {
+            "path": "lib/app/types.rb",
+            "start_line": 4,
+            "end_line": 4,
+            "start_column": 2,
+            "end_column": 25,
+            "start_offset": 36,
+            "end_offset": 59
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "The local value type.",
+              "rendered_description": "The local value type.",
+              "raw": "# The local value type.",
+              "span": {
+                "path": "lib/app/types.rb",
+                "start_line": 4,
+                "end_line": 4,
+                "start_column": 2,
+                "end_column": 25,
+                "start_offset": 36,
+                "end_offset": 59
+              }
+            }
+          ],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-636c617373004170703a3a436f6d6d6f6e00",
+          "kind": "class",
+          "name": "Common",
+          "namespace": "App",
+          "display_name": "App::Common",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/types.md",
+          "anchor": "zard-636c617373004170703a3a436f6d6d6f6e00",
+          "references": [
+            "App::Common"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/types.rb",
+            "start_line": 9,
+            "end_line": 10,
+            "start_column": 2,
+            "end_column": 5,
+            "start_offset": 129,
+            "end_offset": 147
+          },
+          "comment_span": {
+            "path": "lib/app/types.rb",
+            "start_line": 8,
+            "end_line": 8,
+            "start_column": 2,
+            "end_column": 47,
+            "start_offset": 81,
+            "end_offset": 126
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Declared here and in the shared dependency.",
+              "rendered_description": "Declared here and in the shared dependency.",
+              "raw": "# Declared here and in the shared dependency.",
+              "span": {
+                "path": "lib/app/types.rb",
+                "start_line": 8,
+                "end_line": 8,
+                "start_column": 2,
+                "end_column": 47,
+                "start_offset": 81,
+                "end_offset": 126
+              }
+            }
+          ],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-636c617373004170703a3a506f696e7400",
+          "kind": "class",
+          "name": "Point",
+          "namespace": "App",
+          "display_name": "App::Point",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/types.md",
+          "anchor": "zard-636c617373004170703a3a506f696e7400",
+          "references": [
+            "App::Point"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": "Data.define(:x)",
+          "container_builder_span": {
+            "path": "lib/app/types.rb",
+            "start_line": 17,
+            "end_line": 17,
+            "start_column": 10,
+            "end_column": 25,
+            "start_offset": 272,
+            "end_offset": 287
+          },
+          "mixins": [],
+          "relationships": [
+            {
+              "kind": "container_builder",
+              "expression": "Data.define(:x)",
+              "span": {
+                "path": "lib/app/types.rb",
+                "start_line": 17,
+                "end_line": 17,
+                "start_column": 10,
+                "end_column": 25,
+                "start_offset": 272,
+                "end_offset": 287
+              },
+              "status": "expression",
+              "targets": []
+            }
+          ],
+          "span": {
+            "path": "lib/app/types.rb",
+            "start_line": 17,
+            "end_line": 17,
+            "start_column": 2,
+            "end_column": 25,
+            "start_offset": 264,
+            "end_offset": 287
+          },
+          "comment_span": {
+            "path": "lib/app/types.rb",
+            "start_line": 16,
+            "end_line": 16,
+            "start_column": 2,
+            "end_column": 41,
+            "start_offset": 222,
+            "end_offset": 261
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "A value class built from Data.define.",
+              "rendered_description": "A value class built from Data.define.",
+              "raw": "# A value class built from Data.define.",
+              "span": {
+                "path": "lib/app/types.rb",
+                "start_line": 16,
+                "end_line": 16,
+                "start_column": 2,
+                "end_column": 41,
+                "start_offset": 222,
+                "end_offset": 261
+              }
+            }
+          ],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6174747269627574655f726561646572004170703a3a506f696e74237800",
+          "kind": "instance_attribute_reader",
+          "name": "x",
+          "namespace": "App::Point",
+          "display_name": "App::Point#x",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/types.md",
+          "anchor": "zard-696e7374616e63655f6174747269627574655f726561646572004170703a3a506f696e74237800",
+          "references": [
+            "App::Point#x"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/types.rb",
+            "start_line": 17,
+            "end_line": 17,
+            "start_column": 22,
+            "end_column": 24,
+            "start_offset": 284,
+            "end_offset": 286
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-636c617373004170703a3a426f7800",
+          "kind": "class",
+          "name": "Box",
+          "namespace": "App",
+          "display_name": "App::Box",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/types.md",
+          "anchor": "zard-636c617373004170703a3a426f7800",
+          "references": [
+            "App::Box"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/types.rb",
+            "start_line": 22,
+            "end_line": 30,
+            "start_column": 2,
+            "end_column": 5,
+            "start_offset": 339,
+            "end_offset": 526
+          },
+          "comment_span": {
+            "path": "lib/app/types.rb",
+            "start_line": 19,
+            "end_line": 21,
+            "start_column": 2,
+            "end_column": 18,
+            "start_offset": 291,
+            "end_offset": 336
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "A generic container.",
+              "rendered_description": "A generic container.",
+              "raw": "# A generic container.",
+              "span": {
+                "path": "lib/app/types.rb",
+                "start_line": 19,
+                "end_line": 19,
+                "start_column": 2,
+                "end_column": 24,
+                "start_offset": 291,
+                "end_offset": 313
+              }
+            }
+          ],
+          "contracts": [
+            {
+              "channel": "rbs",
+              "payload": "generic T",
+              "note": null,
+              "raw": "# @rbs generic T",
+              "span": {
+                "path": "lib/app/types.rb",
+                "start_line": 21,
+                "end_line": 21,
+                "start_column": 2,
+                "end_column": 18,
+                "start_offset": 320,
+                "end_offset": 336
+              }
+            }
+          ]
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a426f782367657400",
+          "kind": "instance_method",
+          "name": "get",
+          "namespace": "App::Box",
+          "display_name": "App::Box#get",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": [],
+          "page": "app/types.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64004170703a3a426f782367657400",
+          "references": [
+            "App::Box#get"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/types.rb",
+            "start_line": 25,
+            "end_line": 25,
+            "start_column": 4,
+            "end_column": 17,
+            "start_offset": 398,
+            "end_offset": 411
+          },
+          "comment_span": {
+            "path": "lib/app/types.rb",
+            "start_line": 23,
+            "end_line": 24,
+            "start_column": 4,
+            "end_column": 14,
+            "start_offset": 353,
+            "end_offset": 393
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Returns the held value.",
+              "rendered_description": "Returns the held value.",
+              "raw": "# Returns the held value.",
+              "span": {
+                "path": "lib/app/types.rb",
+                "start_line": 23,
+                "end_line": 23,
+                "start_column": 4,
+                "end_column": 29,
+                "start_offset": 353,
+                "end_offset": 378
+              }
+            }
+          ],
+          "contracts": [
+            {
+              "channel": "rbs",
+              "payload": "() -> T",
+              "note": null,
+              "raw": "#: () -> T",
+              "span": {
+                "path": "lib/app/types.rb",
+                "start_line": 24,
+                "end_line": 24,
+                "start_column": 4,
+                "end_column": 14,
+                "start_offset": 383,
+                "end_offset": 393
+              }
+            }
+          ]
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a426f78236d617000",
+          "kind": "instance_method",
+          "name": "map",
+          "namespace": "App::Box",
+          "display_name": "App::Box#map",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [
+            "seed"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "seed",
+              "source": "seed",
+              "span": {
+                "path": "lib/app/types.rb",
+                "start_line": 29,
+                "end_line": 29,
+                "start_column": 12,
+                "end_column": 16,
+                "start_offset": 510,
+                "end_offset": 514
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/types.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64004170703a3a426f78236d617000",
+          "references": [
+            "App::Box#map"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/app/types.rb",
+            "start_line": 29,
+            "end_line": 29,
+            "start_column": 4,
+            "end_column": 22,
+            "start_offset": 502,
+            "end_offset": 520
+          },
+          "comment_span": {
+            "path": "lib/app/types.rb",
+            "start_line": 27,
+            "end_line": 28,
+            "start_column": 4,
+            "end_column": 57,
+            "start_offset": 417,
+            "end_offset": 497
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Maps the held value.",
+              "rendered_description": "Maps the held value.",
+              "raw": "# Maps the held value.",
+              "span": {
+                "path": "lib/app/types.rb",
+                "start_line": 27,
+                "end_line": 27,
+                "start_column": 4,
+                "end_column": 26,
+                "start_offset": 417,
+                "end_offset": 439
+              }
+            }
+          ],
+          "contracts": [
+            {
+              "channel": "rbs",
+              "payload": "[U] (U seed) { (T) -> U } -> Hash[Symbol, Foo | U]",
+              "note": null,
+              "raw": "#: [U] (U seed) { (T) -> U } -> Hash[Symbol, Foo | U]",
+              "span": {
+                "path": "lib/app/types.rb",
+                "start_line": 28,
+                "end_line": 28,
+                "start_column": 4,
+                "end_column": 57,
+                "start_offset": 444,
+                "end_offset": 497
+              }
+            }
+          ]
+        }
+      ],
+      "pages": [
+        {
+          "path": "app/reopened.md",
+          "declarations": [
+            "app:zard-6d6f64756c6500417070000072656f70656e65642e6d640031",
+            "app:zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+            "app:zard-696e7374616e63655f6d6574686f64004170703a3a466f6f23697473656c665f76616c756500"
+          ]
+        },
+        {
+          "path": "app/service.md",
+          "declarations": [
+            "app:zard-6d6f64756c65004170700000736572766963652e6d640031",
+            "app:zard-636c617373004170703a3a5365727669636500",
+            "app:zard-696e7374616e63655f6d6574686f64004170703a3a536572766963652363616c6c00",
+            "app:zard-696e7374616e63655f6d6574686f64004170703a3a53657276696365236163726f737300",
+            "app:zard-696e7374616e63655f6d6574686f64004170703a3a5365727669636523656c7365776865726500",
+            "app:zard-696e7374616e63655f6d6574686f64004170703a3a53657276696365236d616b6500",
+            "app:zard-696e7374616e63655f6d6574686f64004170703a3a5365727669636523636f6e7665727400"
+          ]
+        },
+        {
+          "path": "app/types.md",
+          "declarations": [
+            "app:zard-6d6f64756c6500417070000074797065732e6d640031",
+            "app:zard-636c617373004170703a3a466f6f000074797065732e6d640031",
+            "app:zard-636c617373004170703a3a436f6d6d6f6e00",
+            "app:zard-636c617373004170703a3a506f696e7400",
+            "app:zard-696e7374616e63655f6174747269627574655f726561646572004170703a3a506f696e74237800",
+            "app:zard-636c617373004170703a3a426f7800",
+            "app:zard-696e7374616e63655f6d6574686f64004170703a3a426f782367657400",
+            "app:zard-696e7374616e63655f6d6574686f64004170703a3a426f78236d617000"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "far",
+      "destination": "far",
+      "references": [],
+      "files": [
+        {
+          "path": "lib/far/far.rb",
+          "digest": "f3a4bf6033d0a3d4af0142fe46cfb94cec2df5aee3eb15482d2ad93f0ec96163",
+          "diagnostics": []
+        }
+      ],
+      "declarations": [
+        {
+          "id": "far:zard-636c6173730046617200",
+          "kind": "class",
+          "name": "Far",
+          "namespace": null,
+          "display_name": "Far",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "far/far.md",
+          "anchor": "zard-636c6173730046617200",
+          "references": [
+            "Far"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/far/far.rb",
+            "start_line": 2,
+            "end_line": 3,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 53,
+            "end_offset": 66
+          },
+          "comment_span": {
+            "path": "lib/far/far.rb",
+            "start_line": 1,
+            "end_line": 1,
+            "start_column": 0,
+            "end_column": 52,
+            "start_offset": 0,
+            "end_offset": 52
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Documented only by a transitive dependency of app.",
+              "rendered_description": "Documented only by a transitive dependency of app.",
+              "raw": "# Documented only by a transitive dependency of app.",
+              "span": {
+                "path": "lib/far/far.rb",
+                "start_line": 1,
+                "end_line": 1,
+                "start_column": 0,
+                "end_column": 52,
+                "start_offset": 0,
+                "end_offset": 52
+              }
+            }
+          ],
+          "contracts": []
+        }
+      ],
+      "pages": [
+        {
+          "path": "far/far.md",
+          "declarations": [
+            "far:zard-636c6173730046617200"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "left",
+      "destination": "left",
+      "references": [],
+      "files": [
+        {
+          "path": "lib/left/twin.rb",
+          "digest": "1fbc0cfb8ef01041ceb79dcd0b3c4742d343632637a5989846dd2fe59aa0471a",
+          "diagnostics": []
+        }
+      ],
+      "declarations": [
+        {
+          "id": "left:zard-636c617373005477696e00",
+          "kind": "class",
+          "name": "Twin",
+          "namespace": null,
+          "display_name": "Twin",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "left/twin.md",
+          "anchor": "zard-636c617373005477696e00",
+          "references": [
+            "Twin"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/left/twin.rb",
+            "start_line": 2,
+            "end_line": 3,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 37,
+            "end_offset": 51
+          },
+          "comment_span": {
+            "path": "lib/left/twin.rb",
+            "start_line": 1,
+            "end_line": 1,
+            "start_column": 0,
+            "end_column": 36,
+            "start_offset": 0,
+            "end_offset": 36
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Documented by the left dependency.",
+              "rendered_description": "Documented by the left dependency.",
+              "raw": "# Documented by the left dependency.",
+              "span": {
+                "path": "lib/left/twin.rb",
+                "start_line": 1,
+                "end_line": 1,
+                "start_column": 0,
+                "end_column": 36,
+                "start_offset": 0,
+                "end_offset": 36
+              }
+            }
+          ],
+          "contracts": []
+        }
+      ],
+      "pages": [
+        {
+          "path": "left/twin.md",
+          "declarations": [
+            "left:zard-636c617373005477696e00"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "right",
+      "destination": "right",
+      "references": [],
+      "files": [
+        {
+          "path": "lib/right/twin.rb",
+          "digest": "235adb7f42ef12c23bb81468ed2bbcc4eab14d9a457b92532091a220a0f75871",
+          "diagnostics": []
+        }
+      ],
+      "declarations": [
+        {
+          "id": "right:zard-636c617373005477696e00",
+          "kind": "class",
+          "name": "Twin",
+          "namespace": null,
+          "display_name": "Twin",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "right/twin.md",
+          "anchor": "zard-636c617373005477696e00",
+          "references": [
+            "Twin"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/right/twin.rb",
+            "start_line": 2,
+            "end_line": 3,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 38,
+            "end_offset": 52
+          },
+          "comment_span": {
+            "path": "lib/right/twin.rb",
+            "start_line": 1,
+            "end_line": 1,
+            "start_column": 0,
+            "end_column": 37,
+            "start_offset": 0,
+            "end_offset": 37
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Documented by the right dependency.",
+              "rendered_description": "Documented by the right dependency.",
+              "raw": "# Documented by the right dependency.",
+              "span": {
+                "path": "lib/right/twin.rb",
+                "start_line": 1,
+                "end_line": 1,
+                "start_column": 0,
+                "end_column": 37,
+                "start_offset": 0,
+                "end_offset": 37
+              }
+            }
+          ],
+          "contracts": []
+        }
+      ],
+      "pages": [
+        {
+          "path": "right/twin.md",
+          "declarations": [
+            "right:zard-636c617373005477696e00"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "shared",
+      "destination": "shared",
+      "references": [
+        "app",
+        "far"
+      ],
+      "files": [
+        {
+          "path": "lib/shared/thing.rb",
+          "digest": "99f047368454ff0608bcf6de5b334207468619d2f23ace2f3b2867bb0bbc6e8e",
+          "diagnostics": []
+        }
+      ],
+      "declarations": [
+        {
+          "id": "shared:zard-6d6f64756c650053686172656400",
+          "kind": "module",
+          "name": "Shared",
+          "namespace": null,
+          "display_name": "Shared",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "shared/thing.md",
+          "anchor": "zard-6d6f64756c650053686172656400",
+          "references": [
+            "Shared"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shared/thing.rb",
+            "start_line": 3,
+            "end_line": 10,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 23,
+            "end_offset": 237
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "shared:zard-636c617373005368617265643a3a5468696e6700",
+          "kind": "class",
+          "name": "Thing",
+          "namespace": "Shared",
+          "display_name": "Shared::Thing",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "shared/thing.md",
+          "anchor": "zard-636c617373005368617265643a3a5468696e6700",
+          "references": [
+            "Shared::Thing"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shared/thing.rb",
+            "start_line": 5,
+            "end_line": 9,
+            "start_column": 2,
+            "end_column": 5,
+            "start_offset": 87,
+            "end_offset": 233
+          },
+          "comment_span": {
+            "path": "lib/shared/thing.rb",
+            "start_line": 4,
+            "end_line": 4,
+            "start_column": 2,
+            "end_column": 47,
+            "start_offset": 39,
+            "end_offset": 84
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "A type documented by the shared dependency.",
+              "rendered_description": "A type documented by the shared dependency.",
+              "raw": "# A type documented by the shared dependency.",
+              "span": {
+                "path": "lib/shared/thing.rb",
+                "start_line": 4,
+                "end_line": 4,
+                "start_column": 2,
+                "end_column": 47,
+                "start_offset": 39,
+                "end_offset": 84
+              }
+            }
+          ],
+          "contracts": []
+        },
+        {
+          "id": "shared:zard-696e7374616e63655f6d6574686f64005368617265643a3a5468696e67236c696e6b00",
+          "kind": "instance_method",
+          "name": "link",
+          "namespace": "Shared::Thing",
+          "display_name": "Shared::Thing#link",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [
+            "far"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "far",
+              "source": "far",
+              "span": {
+                "path": "lib/shared/thing.rb",
+                "start_line": 8,
+                "end_line": 8,
+                "start_column": 13,
+                "end_column": 16,
+                "start_offset": 208,
+                "end_offset": 211
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "shared/thing.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64005368617265643a3a5468696e67236c696e6b00",
+          "references": [
+            "Shared::Thing#link"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shared/thing.rb",
+            "start_line": 8,
+            "end_line": 8,
+            "start_column": 4,
+            "end_column": 32,
+            "start_offset": 199,
+            "end_offset": 227
+          },
+          "comment_span": {
+            "path": "lib/shared/thing.rb",
+            "start_line": 6,
+            "end_line": 7,
+            "start_column": 4,
+            "end_column": 28,
+            "start_offset": 103,
+            "end_offset": 194
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Names its own direct dependency and, through the cycle, app.",
+              "rendered_description": "Names its own direct dependency and, through the cycle, app.",
+              "raw": "# Names its own direct dependency and, through the cycle, app.",
+              "span": {
+                "path": "lib/shared/thing.rb",
+                "start_line": 6,
+                "end_line": 6,
+                "start_column": 4,
+                "end_column": 66,
+                "start_offset": 103,
+                "end_offset": 165
+              }
+            }
+          ],
+          "contracts": [
+            {
+              "channel": "rbs",
+              "payload": "(Far far) -> App::Foo",
+              "note": null,
+              "raw": "#: (Far far) -> App::Foo",
+              "span": {
+                "path": "lib/shared/thing.rb",
+                "start_line": 7,
+                "end_line": 7,
+                "start_column": 4,
+                "end_column": 28,
+                "start_offset": 170,
+                "end_offset": 194
+              }
+            }
+          ]
+        },
+        {
+          "id": "shared:zard-6d6f64756c650041707000",
+          "kind": "module",
+          "name": "App",
+          "namespace": null,
+          "display_name": "App",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "shared/thing.md",
+          "anchor": "zard-6d6f64756c650041707000",
+          "references": [
+            "App"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shared/thing.rb",
+            "start_line": 12,
+            "end_line": 16,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 239,
+            "end_offset": 320
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "shared:zard-636c617373004170703a3a436f6d6d6f6e00",
+          "kind": "class",
+          "name": "Common",
+          "namespace": "App",
+          "display_name": "App::Common",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "shared/thing.md",
+          "anchor": "zard-636c617373004170703a3a436f6d6d6f6e00",
+          "references": [
+            "App::Common"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/shared/thing.rb",
+            "start_line": 14,
+            "end_line": 15,
+            "start_column": 2,
+            "end_column": 5,
+            "start_offset": 298,
+            "end_offset": 316
+          },
+          "comment_span": {
+            "path": "lib/shared/thing.rb",
+            "start_line": 13,
+            "end_line": 13,
+            "start_column": 2,
+            "end_column": 45,
+            "start_offset": 252,
+            "end_offset": 295
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Shares its name with the app declaration.",
+              "rendered_description": "Shares its name with the app declaration.",
+              "raw": "# Shares its name with the app declaration.",
+              "span": {
+                "path": "lib/shared/thing.rb",
+                "start_line": 13,
+                "end_line": 13,
+                "start_column": 2,
+                "end_column": 45,
+                "start_offset": 252,
+                "end_offset": 295
+              }
+            }
+          ],
+          "contracts": []
+        }
+      ],
+      "pages": [
+        {
+          "path": "shared/thing.md",
+          "declarations": [
+            "shared:zard-6d6f64756c650053686172656400",
+            "shared:zard-636c617373005368617265643a3a5468696e6700",
+            "shared:zard-696e7374616e63655f6d6574686f64005368617265643a3a5468696e67236c696e6b00",
+            "shared:zard-6d6f64756c650041707000",
+            "shared:zard-636c617373004170703a3a436f6d6d6f6e00"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "unrelated",
+      "destination": "unrelated",
+      "references": [],
+      "files": [
+        {
+          "path": "lib/unrelated/lonely.rb",
+          "digest": "adda5666e92bb9a342a6ebd37c5b927dfcab3bc3d278d4879efb3ed555c83305",
+          "diagnostics": []
+        }
+      ],
+      "declarations": [
+        {
+          "id": "unrelated:zard-636c617373004c6f6e656c7900",
+          "kind": "class",
+          "name": "Lonely",
+          "namespace": null,
+          "display_name": "Lonely",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "unrelated/lonely.md",
+          "anchor": "zard-636c617373004c6f6e656c7900",
+          "references": [
+            "Lonely"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/unrelated/lonely.rb",
+            "start_line": 2,
+            "end_line": 3,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 53,
+            "end_offset": 69
+          },
+          "comment_span": {
+            "path": "lib/unrelated/lonely.rb",
+            "start_line": 1,
+            "end_line": 1,
+            "start_column": 0,
+            "end_column": 52,
+            "start_offset": 0,
+            "end_offset": 52
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Documented by a scope that app does not reference.",
+              "rendered_description": "Documented by a scope that app does not reference.",
+              "raw": "# Documented by a scope that app does not reference.",
+              "span": {
+                "path": "lib/unrelated/lonely.rb",
+                "start_line": 1,
+                "end_line": 1,
+                "start_column": 0,
+                "end_column": 52,
+                "start_offset": 0,
+                "end_offset": 52
+              }
+            }
+          ],
+          "contracts": []
+        },
+        {
+          "id": "unrelated:zard-6d6f64756c650041707000",
+          "kind": "module",
+          "name": "App",
+          "namespace": null,
+          "display_name": "App",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "unrelated/lonely.md",
+          "anchor": "zard-6d6f64756c650041707000",
+          "references": [
+            "App"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/unrelated/lonely.rb",
+            "start_line": 5,
+            "end_line": 9,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 71,
+            "end_offset": 162
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "unrelated:zard-636c617373004170703a3a466f6f00",
+          "kind": "class",
+          "name": "Foo",
+          "namespace": "App",
+          "display_name": "App::Foo",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "unrelated/lonely.md",
+          "anchor": "zard-636c617373004170703a3a466f6f00",
+          "references": [
+            "App::Foo"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/unrelated/lonely.rb",
+            "start_line": 7,
+            "end_line": 8,
+            "start_column": 2,
+            "end_column": 5,
+            "start_offset": 143,
+            "end_offset": 158
+          },
+          "comment_span": {
+            "path": "lib/unrelated/lonely.rb",
+            "start_line": 6,
+            "end_line": 6,
+            "start_column": 2,
+            "end_column": 58,
+            "start_offset": 84,
+            "end_offset": 140
+          },
+          "documentation": [
+            {
+              "name": "text",
+              "owner": null,
+              "subject": null,
+              "claim": null,
+              "description": "Shares its name with app's type in an unrelated scope.",
+              "rendered_description": "Shares its name with app's type in an unrelated scope.",
+              "raw": "# Shares its name with app's type in an unrelated scope.",
+              "span": {
+                "path": "lib/unrelated/lonely.rb",
+                "start_line": 6,
+                "end_line": 6,
+                "start_column": 2,
+                "end_column": 58,
+                "start_offset": 84,
+                "end_offset": 140
+              }
+            }
+          ],
+          "contracts": []
+        }
+      ],
+      "pages": [
+        {
+          "path": "unrelated/lonely.md",
+          "declarations": [
+            "unrelated:zard-636c617373004c6f6e656c7900",
+            "unrelated:zard-6d6f64756c650041707000",
+            "unrelated:zard-636c617373004170703a3a466f6f00"
+          ]
+        }
+      ]
+    }
+  ],
+  "links": {},
+  "warnings": [
+    "warning: unresolved container_builder documentation relationship \"Data.define(:x)\" at lib/app/types.rb:17"
+  ],
+  "lens": {
+    "schema": "lens/v0",
+    "revision": 1,
+    "producer": {
+      "name": "rigor",
+      "version": "0.4.5",
+      "engine_source": null
+    },
+    "context": {
+      "config": ".rigor.yml",
+      "target_ruby": "3.4",
+      "rbs_version": "4.2.0",
+      "signature_roots": [
+        "sig"
+      ],
+      "signature_digest": "xxh3-64:9724aaa017b96da4",
+      "plugins": [
+        {
+          "id": "rbs-inline",
+          "version": "0.4.5"
+        }
+      ],
+      "lockfiles": [],
+      "digest": "xxh3-64:d0c72ffa9983273b"
+    },
+    "capabilities": [
+      "class",
+      "module",
+      "method",
+      "attribute",
+      "constant",
+      "module_function",
+      "builder",
+      "alias",
+      "body_return",
+      "diagnostics",
+      "inputs"
+    ],
+    "files": [
+      {
+        "argument": "./lib/app/reopened.rb",
+        "path": "lib/app/reopened.rb",
+        "status": "ok",
+        "reason": null,
+        "digest": "xxh3-64:80a2d13f85e1d1d9",
+        "complete": true,
+        "omissions": [],
+        "sites": [
+          {
+            "key": "lib/app/reopened.rb:23-181:0",
+            "kind": "module",
+            "name": "App",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 3,
+              "start_column": 0,
+              "end_line": 10,
+              "end_column": 3,
+              "start_offset": 23,
+              "end_offset": 181
+            },
+            "contract_span": null,
+            "anchor": "3:dffb",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/reopened.rb:89-177:0",
+            "kind": "class",
+            "name": "App::Foo",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 5,
+              "start_column": 2,
+              "end_line": 9,
+              "end_column": 5,
+              "start_offset": 89,
+              "end_offset": 177
+            },
+            "contract_span": null,
+            "anchor": "5:515b",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/reopened.rb:148-171:0",
+            "kind": "method",
+            "name": "itself_value",
+            "owner": "App::Foo",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "itself_value"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 8,
+              "start_column": 4,
+              "end_line": 8,
+              "end_column": 27,
+              "start_offset": 148,
+              "end_offset": 171
+            },
+            "contract_span": {
+              "start_line": 7,
+              "start_column": 4,
+              "end_line": 7,
+              "end_column": 16,
+              "start_offset": 131,
+              "end_offset": 143
+            },
+            "anchor": "7:6566",
+            "visibility": "public",
+            "contract": "inline",
+            "params": [],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "App::Foo",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          }
+        ],
+        "diagnostics": [],
+        "inputs": [
+          {
+            "path": "lib/app/types.rb",
+            "digest": "xxh3-64:4a601d1ddd44fc06"
+          },
+          {
+            "path": "lib/unrelated/lonely.rb",
+            "digest": "xxh3-64:af66185b51a870c2"
+          }
+        ]
+      },
+      {
+        "argument": "./lib/app/service.rb",
+        "path": "lib/app/service.rb",
+        "status": "ok",
+        "reason": null,
+        "digest": "xxh3-64:f6b37f05dbf6184c",
+        "complete": true,
+        "omissions": [],
+        "sites": [
+          {
+            "key": "lib/app/service.rb:23-761:0",
+            "kind": "module",
+            "name": "App",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 3,
+              "start_column": 0,
+              "end_line": 24,
+              "end_column": 3,
+              "start_offset": 23,
+              "end_offset": 761
+            },
+            "contract_span": null,
+            "anchor": "3:da1e",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/service.rb:96-757:0",
+            "kind": "class",
+            "name": "App::Service",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 5,
+              "start_column": 2,
+              "end_line": 23,
+              "end_column": 5,
+              "start_offset": 96,
+              "end_offset": 757
+            },
+            "contract_span": null,
+            "anchor": "5:f94c",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/service.rb:243-272:0",
+            "kind": "method",
+            "name": "call",
+            "owner": "App::Service",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "call"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 8,
+              "start_column": 4,
+              "end_line": 8,
+              "end_column": 33,
+              "start_offset": 243,
+              "end_offset": 272
+            },
+            "contract_span": {
+              "start_line": 7,
+              "start_column": 4,
+              "end_line": 7,
+              "end_column": 76,
+              "start_offset": 166,
+              "end_offset": 238
+            },
+            "anchor": "7:73b6",
+            "visibility": "public",
+            "contract": "inline",
+            "params": [
+              {
+                "name": "items",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": {
+              "required": false,
+              "type": null
+            },
+            "body_return": {
+              "state": "typed",
+              "type": "nil",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/service.rb:418-457:0",
+            "kind": "method",
+            "name": "across",
+            "owner": "App::Service",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "across"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 12,
+              "start_column": 4,
+              "end_line": 12,
+              "end_column": 43,
+              "start_offset": 418,
+              "end_offset": 457
+            },
+            "contract_span": {
+              "start_line": 11,
+              "start_column": 4,
+              "end_line": 11,
+              "end_column": 69,
+              "start_offset": 348,
+              "end_offset": 413
+            },
+            "anchor": "11:d870",
+            "visibility": "public",
+            "contract": "inline",
+            "params": [
+              {
+                "name": "thing",
+                "kind": "required",
+                "type": null
+              },
+              {
+                "name": "far",
+                "kind": "required",
+                "type": null
+              },
+              {
+                "name": "twin",
+                "kind": "required",
+                "type": null
+              },
+              {
+                "name": "text",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "\"\"",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/service.rb:588-635:0",
+            "kind": "method",
+            "name": "elsewhere",
+            "owner": "App::Service",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "elsewhere"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 16,
+              "start_column": 4,
+              "end_line": 16,
+              "end_column": 51,
+              "start_offset": 588,
+              "end_offset": 635
+            },
+            "contract_span": {
+              "start_line": 15,
+              "start_column": 4,
+              "end_line": 15,
+              "end_column": 46,
+              "start_offset": 541,
+              "end_offset": 583
+            },
+            "anchor": "15:ad50",
+            "visibility": "public",
+            "contract": "inline",
+            "params": [
+              {
+                "name": "hidden",
+                "kind": "required",
+                "type": null
+              },
+              {
+                "name": "lonely",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "App::Point",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/service.rb:664-682:0",
+            "kind": "method",
+            "name": "make",
+            "owner": "App::Service",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "make"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 19,
+              "start_column": 4,
+              "end_line": 19,
+              "end_column": 22,
+              "start_offset": 664,
+              "end_offset": 682
+            },
+            "contract_span": null,
+            "anchor": "19:f5c3",
+            "visibility": "public",
+            "contract": null,
+            "params": [],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "App::Foo",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/service.rb:725-751:0",
+            "kind": "method",
+            "name": "convert",
+            "owner": "App::Service",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "convert"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 22,
+              "start_column": 4,
+              "end_line": 22,
+              "end_column": 30,
+              "start_offset": 725,
+              "end_offset": 751
+            },
+            "contract_span": null,
+            "anchor": "22:55e2",
+            "visibility": "public",
+            "contract": null,
+            "params": [
+              {
+                "name": "value",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "Integer | String",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          }
+        ],
+        "diagnostics": [
+          {
+            "rule": "def.return-type-mismatch",
+            "severity": "warning",
+            "message": "return-type mismatch on `convert': declared App::Common | App::Foo, inferred Integer | String",
+            "line": 22,
+            "column": 9
+          }
+        ],
+        "inputs": [
+          {
+            "path": "lib/app/types.rb",
+            "digest": "xxh3-64:4a601d1ddd44fc06"
+          }
+        ]
+      },
+      {
+        "argument": "./lib/app/types.rb",
+        "path": "lib/app/types.rb",
+        "status": "ok",
+        "reason": null,
+        "digest": "xxh3-64:4a601d1ddd44fc06",
+        "complete": true,
+        "omissions": [],
+        "sites": [
+          {
+            "key": "lib/app/types.rb:23-530:0",
+            "kind": "module",
+            "name": "App",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 3,
+              "start_column": 0,
+              "end_line": 31,
+              "end_column": 3,
+              "start_offset": 23,
+              "end_offset": 530
+            },
+            "contract_span": null,
+            "anchor": "3:8133",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/types.rb:62-77:0",
+            "kind": "class",
+            "name": "App::Foo",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 5,
+              "start_column": 2,
+              "end_line": 6,
+              "end_column": 5,
+              "start_offset": 62,
+              "end_offset": 77
+            },
+            "contract_span": null,
+            "anchor": "5:a08d",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/types.rb:129-147:0",
+            "kind": "class",
+            "name": "App::Common",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 9,
+              "start_column": 2,
+              "end_line": 10,
+              "end_column": 5,
+              "start_offset": 129,
+              "end_offset": 147
+            },
+            "contract_span": null,
+            "anchor": "9:744f",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/types.rb:264-287:0",
+            "kind": "class",
+            "name": "App::Point",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": "data",
+            "ordinal": 0,
+            "span": {
+              "start_line": 17,
+              "start_column": 2,
+              "end_line": 17,
+              "end_column": 25,
+              "start_offset": 264,
+              "end_offset": 287
+            },
+            "contract_span": null,
+            "anchor": "17:1fe8",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/types.rb:284-286:0",
+            "kind": "attribute",
+            "name": "x",
+            "owner": "App::Point",
+            "scope": "instance",
+            "attribute": "reader",
+            "members": [
+              "x"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 17,
+              "start_column": 22,
+              "end_line": 17,
+              "end_column": 24,
+              "start_offset": 284,
+              "end_offset": 286
+            },
+            "contract_span": null,
+            "anchor": "17:2fb5",
+            "visibility": "public",
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/types.rb:339-526:0",
+            "kind": "class",
+            "name": "App::Box",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 22,
+              "start_column": 2,
+              "end_line": 30,
+              "end_column": 5,
+              "start_offset": 339,
+              "end_offset": 526
+            },
+            "contract_span": {
+              "start_line": 21,
+              "start_column": 2,
+              "end_line": 21,
+              "end_column": 18,
+              "start_offset": 320,
+              "end_offset": 336
+            },
+            "anchor": "21:c7ae",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/types.rb:398-411:0",
+            "kind": "method",
+            "name": "get",
+            "owner": "App::Box",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "get"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 25,
+              "start_column": 4,
+              "end_line": 25,
+              "end_column": 17,
+              "start_offset": 398,
+              "end_offset": 411
+            },
+            "contract_span": {
+              "start_line": 24,
+              "start_column": 4,
+              "end_line": 24,
+              "end_column": 14,
+              "start_offset": 383,
+              "end_offset": 393
+            },
+            "anchor": "24:6243",
+            "visibility": "public",
+            "contract": "inline",
+            "params": [],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "nil",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/app/types.rb:502-520:0",
+            "kind": "method",
+            "name": "map",
+            "owner": "App::Box",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "map"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 29,
+              "start_column": 4,
+              "end_line": 29,
+              "end_column": 22,
+              "start_offset": 502,
+              "end_offset": 520
+            },
+            "contract_span": {
+              "start_line": 28,
+              "start_column": 4,
+              "end_line": 28,
+              "end_column": 57,
+              "start_offset": 444,
+              "end_offset": 497
+            },
+            "anchor": "28:5a66",
+            "visibility": "public",
+            "contract": "inline",
+            "params": [
+              {
+                "name": "seed",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "{}",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          }
+        ],
+        "diagnostics": [],
+        "inputs": [
+          {
+            "path": "lib/app/reopened.rb",
+            "digest": "xxh3-64:80a2d13f85e1d1d9"
+          },
+          {
+            "path": "lib/app/service.rb",
+            "digest": "xxh3-64:f6b37f05dbf6184c"
+          },
+          {
+            "path": "lib/shared/thing.rb",
+            "digest": "xxh3-64:8b6c7340db762f9e"
+          },
+          {
+            "path": "lib/unrelated/lonely.rb",
+            "digest": "xxh3-64:af66185b51a870c2"
+          }
+        ]
+      },
+      {
+        "argument": "./lib/far/far.rb",
+        "path": "lib/far/far.rb",
+        "status": "ok",
+        "reason": null,
+        "digest": "xxh3-64:9587ed0a590593fd",
+        "complete": true,
+        "omissions": [],
+        "sites": [
+          {
+            "key": "lib/far/far.rb:53-66:0",
+            "kind": "class",
+            "name": "Far",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 2,
+              "start_column": 0,
+              "end_line": 3,
+              "end_column": 3,
+              "start_offset": 53,
+              "end_offset": 66
+            },
+            "contract_span": null,
+            "anchor": "2:fba1",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          }
+        ],
+        "diagnostics": [],
+        "inputs": []
+      },
+      {
+        "argument": "./lib/left/twin.rb",
+        "path": "lib/left/twin.rb",
+        "status": "ok",
+        "reason": null,
+        "digest": "xxh3-64:0211c48bb595a770",
+        "complete": true,
+        "omissions": [],
+        "sites": [
+          {
+            "key": "lib/left/twin.rb:37-51:0",
+            "kind": "class",
+            "name": "Twin",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 2,
+              "start_column": 0,
+              "end_line": 3,
+              "end_column": 3,
+              "start_offset": 37,
+              "end_offset": 51
+            },
+            "contract_span": null,
+            "anchor": "2:3dc6",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          }
+        ],
+        "diagnostics": [],
+        "inputs": []
+      },
+      {
+        "argument": "./lib/right/twin.rb",
+        "path": "lib/right/twin.rb",
+        "status": "ok",
+        "reason": null,
+        "digest": "xxh3-64:2c790a79fae8bd80",
+        "complete": true,
+        "omissions": [],
+        "sites": [
+          {
+            "key": "lib/right/twin.rb:38-52:0",
+            "kind": "class",
+            "name": "Twin",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 2,
+              "start_column": 0,
+              "end_line": 3,
+              "end_column": 3,
+              "start_offset": 38,
+              "end_offset": 52
+            },
+            "contract_span": null,
+            "anchor": "2:3dc6",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          }
+        ],
+        "diagnostics": [],
+        "inputs": []
+      },
+      {
+        "argument": "./lib/shared/thing.rb",
+        "path": "lib/shared/thing.rb",
+        "status": "ok",
+        "reason": null,
+        "digest": "xxh3-64:8b6c7340db762f9e",
+        "complete": true,
+        "omissions": [],
+        "sites": [
+          {
+            "key": "lib/shared/thing.rb:23-237:0",
+            "kind": "module",
+            "name": "Shared",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 3,
+              "start_column": 0,
+              "end_line": 10,
+              "end_column": 3,
+              "start_offset": 23,
+              "end_offset": 237
+            },
+            "contract_span": null,
+            "anchor": "3:3070",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shared/thing.rb:87-233:0",
+            "kind": "class",
+            "name": "Shared::Thing",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 5,
+              "start_column": 2,
+              "end_line": 9,
+              "end_column": 5,
+              "start_offset": 87,
+              "end_offset": 233
+            },
+            "contract_span": null,
+            "anchor": "5:5b25",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shared/thing.rb:199-227:0",
+            "kind": "method",
+            "name": "link",
+            "owner": "Shared::Thing",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "link"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 8,
+              "start_column": 4,
+              "end_line": 8,
+              "end_column": 32,
+              "start_offset": 199,
+              "end_offset": 227
+            },
+            "contract_span": {
+              "start_line": 7,
+              "start_column": 4,
+              "end_line": 7,
+              "end_column": 28,
+              "start_offset": 170,
+              "end_offset": 194
+            },
+            "anchor": "7:ac11",
+            "visibility": "public",
+            "contract": "inline",
+            "params": [
+              {
+                "name": "far",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "App::Foo",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shared/thing.rb:239-320:0",
+            "kind": "module",
+            "name": "App",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 12,
+              "start_column": 0,
+              "end_line": 16,
+              "end_column": 3,
+              "start_offset": 239,
+              "end_offset": 320
+            },
+            "contract_span": null,
+            "anchor": "12:c2f5",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/shared/thing.rb:298-316:0",
+            "kind": "class",
+            "name": "App::Common",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 14,
+              "start_column": 2,
+              "end_line": 15,
+              "end_column": 5,
+              "start_offset": 298,
+              "end_offset": 316
+            },
+            "contract_span": null,
+            "anchor": "14:744f",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          }
+        ],
+        "diagnostics": [],
+        "inputs": []
+      },
+      {
+        "argument": "./lib/unrelated/lonely.rb",
+        "path": "lib/unrelated/lonely.rb",
+        "status": "ok",
+        "reason": null,
+        "digest": "xxh3-64:af66185b51a870c2",
+        "complete": true,
+        "omissions": [],
+        "sites": [
+          {
+            "key": "lib/unrelated/lonely.rb:53-69:0",
+            "kind": "class",
+            "name": "Lonely",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 2,
+              "start_column": 0,
+              "end_line": 3,
+              "end_column": 3,
+              "start_offset": 53,
+              "end_offset": 69
+            },
+            "contract_span": null,
+            "anchor": "2:9d22",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/unrelated/lonely.rb:71-162:0",
+            "kind": "module",
+            "name": "App",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 5,
+              "start_column": 0,
+              "end_line": 9,
+              "end_column": 3,
+              "start_offset": 71,
+              "end_offset": 162
+            },
+            "contract_span": null,
+            "anchor": "5:6ebf",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/unrelated/lonely.rb:143-158:0",
+            "kind": "class",
+            "name": "App::Foo",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 7,
+              "start_column": 2,
+              "end_line": 8,
+              "end_column": 5,
+              "start_offset": 143,
+              "end_offset": 158
+            },
+            "contract_span": null,
+            "anchor": "7:a08d",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          }
+        ],
+        "diagnostics": [],
+        "inputs": []
+      }
+    ],
+    "members": [
+      {
+        "owner": "App::Foo",
+        "scope": "instance",
+        "name": "itself_value",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/app/reopened.rb:148-171:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "() -> ::App::Foo",
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "::App::Foo",
+              "provenance": "inline",
+              "path": null,
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"App::Foo\",\"instance\",\"itself_value\"]"
+      },
+      {
+        "owner": "App::Service",
+        "scope": "instance",
+        "name": "call",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/app/service.rb:243-272:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "(::Array[::Hash[::Symbol, ::App::Foo]] items) { (::App::Foo) -> ::App::Common } -> (::App::Foo | \"ä\")?",
+            "params": [
+              {
+                "name": "items",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::Array[::Hash[::Symbol, ::App::Foo]]",
+                  "provenance": "inline",
+                  "path": null,
+                  "from_site": null
+                }
+              }
+            ],
+            "block": {
+              "required": true,
+              "type": {
+                "state": "typed",
+                "type": "(::App::Foo) -> ::App::Common",
+                "provenance": "inline",
+                "path": null,
+                "from_site": null
+              }
+            },
+            "return": {
+              "state": "typed",
+              "type": "(::App::Foo | \"ä\")?",
+              "provenance": "inline",
+              "path": null,
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"App::Service\",\"instance\",\"call\"]"
+      },
+      {
+        "owner": "App::Service",
+        "scope": "instance",
+        "name": "across",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/app/service.rb:418-457:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "(::Shared::Thing thing, ::Far far, ::Twin twin, ::_ToS text) -> ::String",
+            "params": [
+              {
+                "name": "thing",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::Shared::Thing",
+                  "provenance": "inline",
+                  "path": null,
+                  "from_site": null
+                }
+              },
+              {
+                "name": "far",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::Far",
+                  "provenance": "inline",
+                  "path": null,
+                  "from_site": null
+                }
+              },
+              {
+                "name": "twin",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::Twin",
+                  "provenance": "inline",
+                  "path": null,
+                  "from_site": null
+                }
+              },
+              {
+                "name": "text",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::_ToS",
+                  "provenance": "inline",
+                  "path": null,
+                  "from_site": null
+                }
+              }
+            ],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "::String",
+              "provenance": "inline",
+              "path": null,
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"App::Service\",\"instance\",\"across\"]"
+      },
+      {
+        "owner": "App::Service",
+        "scope": "instance",
+        "name": "elsewhere",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/app/service.rb:588-635:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "(::App::Hidden hidden, ::Lonely lonely) -> ::App::Point",
+            "params": [
+              {
+                "name": "hidden",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::App::Hidden",
+                  "provenance": "inline",
+                  "path": null,
+                  "from_site": null
+                }
+              },
+              {
+                "name": "lonely",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::Lonely",
+                  "provenance": "inline",
+                  "path": null,
+                  "from_site": null
+                }
+              }
+            ],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "::App::Point",
+              "provenance": "inline",
+              "path": null,
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"App::Service\",\"instance\",\"elsewhere\"]"
+      },
+      {
+        "owner": "App::Service",
+        "scope": "instance",
+        "name": "make",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/app/service.rb:664-682:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": "() -> App::Foo",
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "App::Foo",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": "lib/app/service.rb:664-682:0"
+            }
+          }
+        ],
+        "key": "[\"App::Service\",\"instance\",\"make\"]"
+      },
+      {
+        "owner": "App::Service",
+        "scope": "instance",
+        "name": "convert",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/app/service.rb:725-751:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "(::Integer value) -> ::App::Foo",
+            "params": [
+              {
+                "name": "value",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::Integer",
+                  "provenance": "sig",
+                  "path": "sig/service.rbs",
+                  "from_site": null
+                }
+              }
+            ],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "::App::Foo",
+              "provenance": "sig",
+              "path": "sig/service.rbs",
+              "from_site": null
+            }
+          },
+          {
+            "rbs": "(::String value) -> ::App::Common",
+            "params": [
+              {
+                "name": "value",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::String",
+                  "provenance": "sig",
+                  "path": "sig/service.rbs",
+                  "from_site": null
+                }
+              }
+            ],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "::App::Common",
+              "provenance": "sig",
+              "path": "sig/service.rbs",
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"App::Service\",\"instance\",\"convert\"]"
+      },
+      {
+        "owner": "App::Point",
+        "scope": "instance",
+        "name": "x",
+        "kind": "attribute",
+        "visibility": "public",
+        "sites": [
+          "lib/app/types.rb:284-286:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": null,
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "unavailable",
+              "reason": "not_computed"
+            }
+          }
+        ],
+        "key": "[\"App::Point\",\"instance\",\"x\"]"
+      },
+      {
+        "owner": "App::Box",
+        "scope": "instance",
+        "name": "get",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/app/types.rb:398-411:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "() -> T",
+            "params": [],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "T",
+              "provenance": "inline",
+              "path": null,
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"App::Box\",\"instance\",\"get\"]"
+      },
+      {
+        "owner": "App::Box",
+        "scope": "instance",
+        "name": "map",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/app/types.rb:502-520:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "[U] (U seed) { (T) -> U } -> ::Hash[::Symbol, ::App::Foo | U]",
+            "params": [
+              {
+                "name": "seed",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "U",
+                  "provenance": "inline",
+                  "path": null,
+                  "from_site": null
+                }
+              }
+            ],
+            "block": {
+              "required": true,
+              "type": {
+                "state": "typed",
+                "type": "(T) -> U",
+                "provenance": "inline",
+                "path": null,
+                "from_site": null
+              }
+            },
+            "return": {
+              "state": "typed",
+              "type": "::Hash[::Symbol, ::App::Foo | U]",
+              "provenance": "inline",
+              "path": null,
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"App::Box\",\"instance\",\"map\"]"
+      },
+      {
+        "owner": "Shared::Thing",
+        "scope": "instance",
+        "name": "link",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/shared/thing.rb:199-227:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "(::Far far) -> ::App::Foo",
+            "params": [
+              {
+                "name": "far",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::Far",
+                  "provenance": "inline",
+                  "path": null,
+                  "from_site": null
+                }
+              }
+            ],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "::App::Foo",
+              "provenance": "inline",
+              "path": null,
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"Shared::Thing\",\"instance\",\"link\"]"
+      }
+    ],
+    "adapter": {
+      "name": "zard-rigor",
+      "version": "0.0.2",
+      "grammar": "rigor:v1"
+    },
+    "project": ".",
+    "bindings": [
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-6d6f64756c6500417070000072656f70656e65642e6d640031",
+        "file": "lib/app/reopened.rb",
+        "site_key": "lib/app/reopened.rb:23-181:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+        "file": "lib/app/reopened.rb",
+        "site_key": "lib/app/reopened.rb:89-177:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a466f6f23697473656c665f76616c756500",
+        "file": "lib/app/reopened.rb",
+        "site_key": "lib/app/reopened.rb:148-171:0",
+        "member_keys": [
+          "[\"App::Foo\",\"instance\",\"itself_value\"]"
+        ],
+        "status": "matched",
+        "type_references": [
+          {
+            "name": "::App::Foo",
+            "start_offset": 6,
+            "end_offset": 16,
+            "candidates": [
+              {
+                "scope": "app",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "targets": [
+              {
+                "scope": "app",
+                "declaration_id": "app:zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "path": "app/reopened.md",
+                "anchor": "zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "status": "resolved",
+            "member_key": "[\"App::Foo\",\"instance\",\"itself_value\"]",
+            "overload": 0
+          }
+        ],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-6d6f64756c65004170700000736572766963652e6d640031",
+        "file": "lib/app/service.rb",
+        "site_key": "lib/app/service.rb:23-761:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-636c617373004170703a3a5365727669636500",
+        "file": "lib/app/service.rb",
+        "site_key": "lib/app/service.rb:96-757:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a536572766963652363616c6c00",
+        "file": "lib/app/service.rb",
+        "site_key": "lib/app/service.rb:243-272:0",
+        "member_keys": [
+          "[\"App::Service\",\"instance\",\"call\"]"
+        ],
+        "status": "matched",
+        "type_references": [
+          {
+            "name": "::Array",
+            "start_offset": 1,
+            "end_offset": 8,
+            "candidates": [],
+            "targets": [],
+            "status": "unresolved",
+            "reason": "missing",
+            "member_key": "[\"App::Service\",\"instance\",\"call\"]",
+            "overload": 0
+          },
+          {
+            "name": "::Hash",
+            "start_offset": 9,
+            "end_offset": 15,
+            "candidates": [],
+            "targets": [],
+            "status": "unresolved",
+            "reason": "missing",
+            "member_key": "[\"App::Service\",\"instance\",\"call\"]",
+            "overload": 0
+          },
+          {
+            "name": "::Symbol",
+            "start_offset": 16,
+            "end_offset": 24,
+            "candidates": [],
+            "targets": [],
+            "status": "unresolved",
+            "reason": "missing",
+            "member_key": "[\"App::Service\",\"instance\",\"call\"]",
+            "overload": 0
+          },
+          {
+            "name": "::App::Foo",
+            "start_offset": 26,
+            "end_offset": 36,
+            "candidates": [
+              {
+                "scope": "app",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "targets": [
+              {
+                "scope": "app",
+                "declaration_id": "app:zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "path": "app/reopened.md",
+                "anchor": "zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "status": "resolved",
+            "member_key": "[\"App::Service\",\"instance\",\"call\"]",
+            "overload": 0
+          },
+          {
+            "name": "::App::Foo",
+            "start_offset": 49,
+            "end_offset": 59,
+            "candidates": [
+              {
+                "scope": "app",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "targets": [
+              {
+                "scope": "app",
+                "declaration_id": "app:zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "path": "app/reopened.md",
+                "anchor": "zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "status": "resolved",
+            "member_key": "[\"App::Service\",\"instance\",\"call\"]",
+            "overload": 0
+          },
+          {
+            "name": "::App::Common",
+            "start_offset": 64,
+            "end_offset": 77,
+            "candidates": [
+              {
+                "scope": "app",
+                "span": {
+                  "path": "lib/app/types.rb",
+                  "start_line": 9,
+                  "end_line": 10
+                }
+              }
+            ],
+            "targets": [
+              {
+                "scope": "app",
+                "declaration_id": "app:zard-636c617373004170703a3a436f6d6d6f6e00",
+                "path": "app/types.md",
+                "anchor": "zard-636c617373004170703a3a436f6d6d6f6e00",
+                "span": {
+                  "path": "lib/app/types.rb",
+                  "start_line": 9,
+                  "end_line": 10
+                }
+              }
+            ],
+            "status": "resolved",
+            "member_key": "[\"App::Service\",\"instance\",\"call\"]",
+            "overload": 0
+          },
+          {
+            "name": "::App::Foo",
+            "start_offset": 84,
+            "end_offset": 94,
+            "candidates": [
+              {
+                "scope": "app",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "targets": [
+              {
+                "scope": "app",
+                "declaration_id": "app:zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "path": "app/reopened.md",
+                "anchor": "zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "status": "resolved",
+            "member_key": "[\"App::Service\",\"instance\",\"call\"]",
+            "overload": 0
+          }
+        ],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a53657276696365236163726f737300",
+        "file": "lib/app/service.rb",
+        "site_key": "lib/app/service.rb:418-457:0",
+        "member_keys": [
+          "[\"App::Service\",\"instance\",\"across\"]"
+        ],
+        "status": "matched",
+        "type_references": [
+          {
+            "name": "::Shared::Thing",
+            "start_offset": 1,
+            "end_offset": 16,
+            "candidates": [
+              {
+                "scope": "shared",
+                "span": {
+                  "path": "lib/shared/thing.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "targets": [
+              {
+                "scope": "shared",
+                "declaration_id": "shared:zard-636c617373005368617265643a3a5468696e6700",
+                "path": "shared/thing.md",
+                "anchor": "zard-636c617373005368617265643a3a5468696e6700",
+                "span": {
+                  "path": "lib/shared/thing.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "status": "resolved",
+            "member_key": "[\"App::Service\",\"instance\",\"across\"]",
+            "overload": 0
+          },
+          {
+            "name": "::Far",
+            "start_offset": 24,
+            "end_offset": 29,
+            "candidates": [],
+            "targets": [],
+            "status": "unresolved",
+            "reason": "missing",
+            "member_key": "[\"App::Service\",\"instance\",\"across\"]",
+            "overload": 0
+          },
+          {
+            "name": "::Twin",
+            "start_offset": 35,
+            "end_offset": 41,
+            "candidates": [
+              {
+                "scope": "left",
+                "span": {
+                  "path": "lib/left/twin.rb",
+                  "start_line": 2,
+                  "end_line": 3
+                }
+              },
+              {
+                "scope": "right",
+                "span": {
+                  "path": "lib/right/twin.rb",
+                  "start_line": 2,
+                  "end_line": 3
+                }
+              }
+            ],
+            "targets": [
+              {
+                "scope": "left",
+                "declaration_id": "left:zard-636c617373005477696e00",
+                "path": "left/twin.md",
+                "anchor": "zard-636c617373005477696e00",
+                "span": {
+                  "path": "lib/left/twin.rb",
+                  "start_line": 2,
+                  "end_line": 3
+                }
+              },
+              {
+                "scope": "right",
+                "declaration_id": "right:zard-636c617373005477696e00",
+                "path": "right/twin.md",
+                "anchor": "zard-636c617373005477696e00",
+                "span": {
+                  "path": "lib/right/twin.rb",
+                  "start_line": 2,
+                  "end_line": 3
+                }
+              }
+            ],
+            "status": "ambiguous",
+            "member_key": "[\"App::Service\",\"instance\",\"across\"]",
+            "overload": 0
+          },
+          {
+            "name": "::_ToS",
+            "start_offset": 48,
+            "end_offset": 54,
+            "candidates": [],
+            "targets": [],
+            "status": "unresolved",
+            "reason": "missing",
+            "member_key": "[\"App::Service\",\"instance\",\"across\"]",
+            "overload": 0
+          },
+          {
+            "name": "::String",
+            "start_offset": 64,
+            "end_offset": 72,
+            "candidates": [],
+            "targets": [],
+            "status": "unresolved",
+            "reason": "missing",
+            "member_key": "[\"App::Service\",\"instance\",\"across\"]",
+            "overload": 0
+          }
+        ],
+        "type_reference_diagnostics": [
+          "app:App::Service#across overload 0: ambiguous type reference ::Twin; candidates: left:lib/left/twin.rb:2, right:lib/right/twin.rb:2"
+        ]
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a5365727669636523656c7365776865726500",
+        "file": "lib/app/service.rb",
+        "site_key": "lib/app/service.rb:588-635:0",
+        "member_keys": [
+          "[\"App::Service\",\"instance\",\"elsewhere\"]"
+        ],
+        "status": "matched",
+        "type_references": [
+          {
+            "name": "::App::Hidden",
+            "start_offset": 1,
+            "end_offset": 14,
+            "candidates": [
+              {
+                "scope": "app",
+                "span": {
+                  "path": "lib/app/types.rb",
+                  "start_line": 13,
+                  "end_line": 14
+                }
+              }
+            ],
+            "targets": [],
+            "status": "unresolved",
+            "reason": "unpublished",
+            "member_key": "[\"App::Service\",\"instance\",\"elsewhere\"]",
+            "overload": 0
+          },
+          {
+            "name": "::Lonely",
+            "start_offset": 23,
+            "end_offset": 31,
+            "candidates": [],
+            "targets": [],
+            "status": "unresolved",
+            "reason": "missing",
+            "member_key": "[\"App::Service\",\"instance\",\"elsewhere\"]",
+            "overload": 0
+          },
+          {
+            "name": "::App::Point",
+            "start_offset": 43,
+            "end_offset": 55,
+            "candidates": [
+              {
+                "scope": "app",
+                "span": {
+                  "path": "lib/app/types.rb",
+                  "start_line": 17,
+                  "end_line": 17
+                }
+              }
+            ],
+            "targets": [
+              {
+                "scope": "app",
+                "declaration_id": "app:zard-636c617373004170703a3a506f696e7400",
+                "path": "app/types.md",
+                "anchor": "zard-636c617373004170703a3a506f696e7400",
+                "span": {
+                  "path": "lib/app/types.rb",
+                  "start_line": 17,
+                  "end_line": 17
+                }
+              }
+            ],
+            "status": "resolved",
+            "member_key": "[\"App::Service\",\"instance\",\"elsewhere\"]",
+            "overload": 0
+          }
+        ],
+        "type_reference_diagnostics": [
+          "app:App::Service#elsewhere overload 0: type reference ::App::Hidden left literal; its declaration at app:lib/app/types.rb:13 is excluded from publication"
+        ]
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a53657276696365236d616b6500",
+        "file": "lib/app/service.rb",
+        "site_key": "lib/app/service.rb:664-682:0",
+        "member_keys": [
+          "[\"App::Service\",\"instance\",\"make\"]"
+        ],
+        "status": "matched",
+        "type_references": [
+          {
+            "name": "App::Foo",
+            "start_offset": 6,
+            "end_offset": 14,
+            "candidates": [
+              {
+                "scope": "app",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "targets": [
+              {
+                "scope": "app",
+                "declaration_id": "app:zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "path": "app/reopened.md",
+                "anchor": "zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "status": "resolved",
+            "member_key": "[\"App::Service\",\"instance\",\"make\"]",
+            "overload": 0
+          }
+        ],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a5365727669636523636f6e7665727400",
+        "file": "lib/app/service.rb",
+        "site_key": "lib/app/service.rb:725-751:0",
+        "member_keys": [
+          "[\"App::Service\",\"instance\",\"convert\"]"
+        ],
+        "status": "matched",
+        "type_references": [
+          {
+            "name": "::Integer",
+            "start_offset": 1,
+            "end_offset": 10,
+            "candidates": [],
+            "targets": [],
+            "status": "unresolved",
+            "reason": "missing",
+            "member_key": "[\"App::Service\",\"instance\",\"convert\"]",
+            "overload": 0
+          },
+          {
+            "name": "::App::Foo",
+            "start_offset": 21,
+            "end_offset": 31,
+            "candidates": [
+              {
+                "scope": "app",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "targets": [
+              {
+                "scope": "app",
+                "declaration_id": "app:zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "path": "app/reopened.md",
+                "anchor": "zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "status": "resolved",
+            "member_key": "[\"App::Service\",\"instance\",\"convert\"]",
+            "overload": 0
+          },
+          {
+            "name": "::String",
+            "start_offset": 1,
+            "end_offset": 9,
+            "candidates": [],
+            "targets": [],
+            "status": "unresolved",
+            "reason": "missing",
+            "member_key": "[\"App::Service\",\"instance\",\"convert\"]",
+            "overload": 1
+          },
+          {
+            "name": "::App::Common",
+            "start_offset": 20,
+            "end_offset": 33,
+            "candidates": [
+              {
+                "scope": "app",
+                "span": {
+                  "path": "lib/app/types.rb",
+                  "start_line": 9,
+                  "end_line": 10
+                }
+              }
+            ],
+            "targets": [
+              {
+                "scope": "app",
+                "declaration_id": "app:zard-636c617373004170703a3a436f6d6d6f6e00",
+                "path": "app/types.md",
+                "anchor": "zard-636c617373004170703a3a436f6d6d6f6e00",
+                "span": {
+                  "path": "lib/app/types.rb",
+                  "start_line": 9,
+                  "end_line": 10
+                }
+              }
+            ],
+            "status": "resolved",
+            "member_key": "[\"App::Service\",\"instance\",\"convert\"]",
+            "overload": 1
+          }
+        ],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-6d6f64756c6500417070000074797065732e6d640031",
+        "file": "lib/app/types.rb",
+        "site_key": "lib/app/types.rb:23-530:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-636c617373004170703a3a466f6f000074797065732e6d640031",
+        "file": "lib/app/types.rb",
+        "site_key": "lib/app/types.rb:62-77:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-636c617373004170703a3a436f6d6d6f6e00",
+        "file": "lib/app/types.rb",
+        "site_key": "lib/app/types.rb:129-147:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-636c617373004170703a3a506f696e7400",
+        "file": "lib/app/types.rb",
+        "site_key": "lib/app/types.rb:264-287:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6174747269627574655f726561646572004170703a3a506f696e74237800",
+        "file": "lib/app/types.rb",
+        "site_key": "lib/app/types.rb:284-286:0",
+        "member_keys": [
+          "[\"App::Point\",\"instance\",\"x\"]"
+        ],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-636c617373004170703a3a426f7800",
+        "file": "lib/app/types.rb",
+        "site_key": "lib/app/types.rb:339-526:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a426f782367657400",
+        "file": "lib/app/types.rb",
+        "site_key": "lib/app/types.rb:398-411:0",
+        "member_keys": [
+          "[\"App::Box\",\"instance\",\"get\"]"
+        ],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64004170703a3a426f78236d617000",
+        "file": "lib/app/types.rb",
+        "site_key": "lib/app/types.rb:502-520:0",
+        "member_keys": [
+          "[\"App::Box\",\"instance\",\"map\"]"
+        ],
+        "status": "matched",
+        "type_references": [
+          {
+            "name": "::Hash",
+            "start_offset": 29,
+            "end_offset": 35,
+            "candidates": [],
+            "targets": [],
+            "status": "unresolved",
+            "reason": "missing",
+            "member_key": "[\"App::Box\",\"instance\",\"map\"]",
+            "overload": 0
+          },
+          {
+            "name": "::Symbol",
+            "start_offset": 36,
+            "end_offset": 44,
+            "candidates": [],
+            "targets": [],
+            "status": "unresolved",
+            "reason": "missing",
+            "member_key": "[\"App::Box\",\"instance\",\"map\"]",
+            "overload": 0
+          },
+          {
+            "name": "::App::Foo",
+            "start_offset": 46,
+            "end_offset": 56,
+            "candidates": [
+              {
+                "scope": "app",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "targets": [
+              {
+                "scope": "app",
+                "declaration_id": "app:zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "path": "app/reopened.md",
+                "anchor": "zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "status": "resolved",
+            "member_key": "[\"App::Box\",\"instance\",\"map\"]",
+            "overload": 0
+          }
+        ],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "far",
+        "declaration_id": "far:zard-636c6173730046617200",
+        "file": "lib/far/far.rb",
+        "site_key": "lib/far/far.rb:53-66:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "left",
+        "declaration_id": "left:zard-636c617373005477696e00",
+        "file": "lib/left/twin.rb",
+        "site_key": "lib/left/twin.rb:37-51:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "right",
+        "declaration_id": "right:zard-636c617373005477696e00",
+        "file": "lib/right/twin.rb",
+        "site_key": "lib/right/twin.rb:38-52:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "shared",
+        "declaration_id": "shared:zard-6d6f64756c650053686172656400",
+        "file": "lib/shared/thing.rb",
+        "site_key": "lib/shared/thing.rb:23-237:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "shared",
+        "declaration_id": "shared:zard-636c617373005368617265643a3a5468696e6700",
+        "file": "lib/shared/thing.rb",
+        "site_key": "lib/shared/thing.rb:87-233:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "shared",
+        "declaration_id": "shared:zard-696e7374616e63655f6d6574686f64005368617265643a3a5468696e67236c696e6b00",
+        "file": "lib/shared/thing.rb",
+        "site_key": "lib/shared/thing.rb:199-227:0",
+        "member_keys": [
+          "[\"Shared::Thing\",\"instance\",\"link\"]"
+        ],
+        "status": "matched",
+        "type_references": [
+          {
+            "name": "::Far",
+            "start_offset": 1,
+            "end_offset": 6,
+            "candidates": [
+              {
+                "scope": "far",
+                "span": {
+                  "path": "lib/far/far.rb",
+                  "start_line": 2,
+                  "end_line": 3
+                }
+              }
+            ],
+            "targets": [
+              {
+                "scope": "far",
+                "declaration_id": "far:zard-636c6173730046617200",
+                "path": "far/far.md",
+                "anchor": "zard-636c6173730046617200",
+                "span": {
+                  "path": "lib/far/far.rb",
+                  "start_line": 2,
+                  "end_line": 3
+                }
+              }
+            ],
+            "status": "resolved",
+            "member_key": "[\"Shared::Thing\",\"instance\",\"link\"]",
+            "overload": 0
+          },
+          {
+            "name": "::App::Foo",
+            "start_offset": 15,
+            "end_offset": 25,
+            "candidates": [
+              {
+                "scope": "app",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "targets": [
+              {
+                "scope": "app",
+                "declaration_id": "app:zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "path": "app/reopened.md",
+                "anchor": "zard-636c617373004170703a3a466f6f000072656f70656e65642e6d640031",
+                "span": {
+                  "path": "lib/app/reopened.rb",
+                  "start_line": 5,
+                  "end_line": 9
+                }
+              }
+            ],
+            "status": "resolved",
+            "member_key": "[\"Shared::Thing\",\"instance\",\"link\"]",
+            "overload": 0
+          }
+        ],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "shared",
+        "declaration_id": "shared:zard-6d6f64756c650041707000",
+        "file": "lib/shared/thing.rb",
+        "site_key": "lib/shared/thing.rb:239-320:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "shared",
+        "declaration_id": "shared:zard-636c617373004170703a3a436f6d6d6f6e00",
+        "file": "lib/shared/thing.rb",
+        "site_key": "lib/shared/thing.rb:298-316:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "unrelated",
+        "declaration_id": "unrelated:zard-636c617373004c6f6e656c7900",
+        "file": "lib/unrelated/lonely.rb",
+        "site_key": "lib/unrelated/lonely.rb:53-69:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "unrelated",
+        "declaration_id": "unrelated:zard-6d6f64756c650041707000",
+        "file": "lib/unrelated/lonely.rb",
+        "site_key": "lib/unrelated/lonely.rb:71-162:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      },
+      {
+        "scope": "unrelated",
+        "declaration_id": "unrelated:zard-636c617373004170703a3a466f6f00",
+        "file": "lib/unrelated/lonely.rb",
+        "site_key": "lib/unrelated/lonely.rb:143-158:0",
+        "member_keys": [],
+        "status": "matched",
+        "type_references": [],
+        "type_reference_diagnostics": []
+      }
+    ],
+    "warnings": [
+      "app:App::Service#across overload 0: ambiguous type reference ::Twin; candidates: left:lib/left/twin.rb:2, right:lib/right/twin.rb:2",
+      "app:App::Service#elsewhere overload 0: type reference ::App::Hidden left literal; its declaration at app:lib/app/types.rb:13 is excluded from publication"
+    ]
+  }
+}

@@ -24,7 +24,8 @@ module Zard
         @runner = runner
       end
 
-      def enrich(export, base:)
+      # `resolve_constant` is zard-doc's scope-aware constant lookup. Without it, signatures stay literal.
+      def enrich(export, base:, resolve_constant: nil)
         data = JSON.parse(JSON.generate(export))
         raise Error, "Expected zard-doc/v0 revision 1 or 2" unless data["schema"] == "zard-doc/v0" && [1, 2].include?(data["revision"])
 
@@ -51,7 +52,8 @@ module Zard
         paths.each do |file|
           raise Error, "Source changed during lens: #{relative(file)}" unless File.binread(file) == selected.fetch(file)
         end
-        data["lens"] = document.bind(data, base: base, project: Pathname.new(@root).relative_path_from(Pathname.new(base)).to_s)
+        data["lens"] = document.bind(data, base: base, project: Pathname.new(@root).relative_path_from(Pathname.new(base)).to_s,
+          resolve_constant: resolve_constant)
         data
       rescue JSON::ParserError => error
         raise Error, "rigor lens returned invalid or truncated JSON: #{error.message}"

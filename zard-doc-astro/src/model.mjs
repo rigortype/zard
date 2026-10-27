@@ -60,6 +60,7 @@ function declaration(value, revision) {
     displayName: text(row.display_name, 'display name'), page: outputPath(row.page), anchor,
     parameters: list(row.parameters, 'parameters').map((item) => text(item, 'parameter')),
     parameterDetails, visibility: row.visibility, publication,
+    containerBuilder: row.container_builder == null ? null : text(row.container_builder, 'container builder'),
     relationships: row.relationships == null ? null : list(row.relationships, 'relationships').map((relationship) => {
       object(relationship, 'relationship');
       if (!['superclass', 'include', 'prepend', 'extend', 'container_builder'].includes(relationship.kind)) fail('unknown relationship kind');

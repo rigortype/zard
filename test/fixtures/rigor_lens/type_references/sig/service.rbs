@@ -1,0 +1,6 @@
+module App
+  class Service
+    def convert: (Integer value) -> Foo
+               | (String value) -> Common
+  end
+end

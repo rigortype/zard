@@ -1,0 +1,28 @@
+docroot: docs/api
+scopes:
+  app:
+    destination: app
+    references: [shared, left, right]
+    sources:
+      - root: lib/app
+  shared:
+    destination: shared
+    references: [app, far]
+    sources:
+      - root: lib/shared
+  far:
+    destination: far
+    sources:
+      - root: lib/far
+  left:
+    destination: left
+    sources:
+      - root: lib/left
+  right:
+    destination: right
+    sources:
+      - root: lib/right
+  unrelated:
+    destination: unrelated
+    sources:
+      - root: lib/unrelated

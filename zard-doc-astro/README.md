@@ -63,11 +63,14 @@ Consumers style these hooks with their own stylesheet:
 - `.api-relationships`: written source references and reverse documentation links in a definition list.
 - `.api-hierarchy`: nested class relationship list, separate from module usage.
 
-An optional `lens` extension from `zard-rigor` supports Rigor 0.4.3's experimental
+An optional `lens` extension from `zard-rigor` supports Rigor 0.4.5's experimental
 `lens/v0` revision 1. Member signatures are shared across definitions; body
 returns belong to one definition. Dynamic and unavailable states retain their
 meaning. The renderer neither parses type text nor selects runtime winners.
-It rejects incompatible revisions and dangling bindings before publication.
+The shared compatibility manifest declares `rigor:v1` as the supported type
+grammar. Enriched exports must carry that exact value in `lens.adapter.grammar`;
+missing or unsupported grammar values, incompatible revisions and dangling
+bindings are rejected before publication. Plain exports need no lens metadata.
 
 Additive producer `relationships` enable a per-scope hierarchy page and forward/
 reverse links. Only validated targets in the current scope or its explicit direct

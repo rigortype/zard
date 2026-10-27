@@ -1,7 +1,7 @@
 # zard-rigor
 
 Optional, experimental adapter from the **released Rigor 0.4.5 CLI** to
-`zard-doc/v0` revision 1. It accepts only `lens/v0` revision 1; this is not
+`zard-doc/v0` revisions 1 and 2. It accepts only `lens/v0` revision 1; this is not
 the future stable lens protocol. Neither `zard` nor `zard-doc` loads Rigor.
 
 Version 0.0.2 is the first release of this optional gem. Add `gem "zard-rigor", "~> 0.0.2"` to your Gemfile alongside `zard-doc`.
@@ -61,7 +61,10 @@ Set `ZARD_RIGOR_COMMAND` to an executable for the opt-in released-CLI test.
 
 ## Updating supported releases
 
-`lib/zard/rigor/compatibility.json` is the authoritative producer/schema allowlist.
+`lib/zard/rigor/compatibility.json` is the authoritative producer/schema allowlist and declares the supported
+`rigor:v1` type grammar. The adapter copies this value to `lens.adapter.grammar`;
+the Astro consumer requires an exact match before rendering enriched exports.
+Missing or unsupported grammar values fail validation without parsing type text.
 `default_version` selects the released executable tested in CI. Versions are
 explicitly reviewed; sharing a schema revision does not automatically admit an
 untested producer. After verifying a new released executable with the shared

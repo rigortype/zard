@@ -39,6 +39,19 @@ test('shows member facts, site body returns and unavailable/dynamic states witho
   assert.ok(createReference(data).pages.every((page) => !page.body.includes('api-lens')));
 });
 
+test('requires the supported type grammar only when lens data is present', () => {
+  const data = fixture();
+  assert.equal(data.lens.adapter.grammar, 'rigor:v1');
+  assert.ok(createReference(data).pages.some((page) => page.body.includes('api-lens-signature')));
+  for (const adapter of [undefined, null, {}, { grammar: null }, { grammar: 'rigor:v2' }]) {
+    const incompatible = fixture();
+    incompatible.lens.adapter = adapter;
+    assert.throws(() => createReference(incompatible), /unsupported type grammar/);
+  }
+  delete data.lens;
+  assert.ok(createReference(data).pages.every((page) => !page.body.includes('api-lens')));
+});
+
 test('rejects incompatible lens data and dangling joins instead of publishing guessed types', () => {
   const mutations = [
     (data) => { data.lens.revision = 2; },

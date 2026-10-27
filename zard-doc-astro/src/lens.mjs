@@ -16,6 +16,7 @@ const slot = (value) => {
 export function parseLens(data, scopes) {
   if (data == null) return null;
   if (data.schema !== compatibility.schema || data.revision !== compatibility.revision || data.producer?.name !== compatibility.producer || !compatibility.versions.includes(data.producer?.version)) fail('unsupported producer/schema/revision');
+  if (data.adapter?.grammar !== compatibility.grammar) fail('unsupported type grammar; expected ' + compatibility.grammar);
   const declarations = new Map(scopes.flatMap((scope) => scope.declarations.map((row) => [row.id, scope.name])));
   const sites = new Map();
   for (const file of array(data.files)) {

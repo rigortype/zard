@@ -38,7 +38,9 @@ jobs:
           GEM_HOME="$RUNNER_TEMP/rigor" GEM_PATH="$RUNNER_TEMP/rigor" exec ruby "$RUNNER_TEMP/rigor/bin/rigor" "$@"
           SH
           chmod +x "$RUNNER_TEMP/rigor-cli"
-      - run: ZARD_RIGOR_COMMAND="$RUNNER_TEMP/rigor-cli" bundle exec ruby -Itest test/rigor_lens_test.rb
+      - run: |
+          ZARD_RIGOR_COMMAND="$RUNNER_TEMP/rigor-cli" bundle exec ruby -Itest test/rigor_lens_test.rb
+          ZARD_RIGOR_COMMAND="$RUNNER_TEMP/rigor-cli" bundle exec ruby -Itest test/rigor_lens_boundaries_test.rb
 
   astro:
     runs-on: ubuntu-latest

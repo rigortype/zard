@@ -80,3 +80,68 @@ test('explains target failures and missing capabilities without interpreting dia
   assert.match(body, /Capabilities not supplied by this producer: <code>body_return<\/code>/);
   assert.doesNotMatch(body, /Body return for this definition|<script>/);
 });
+
+const boundaries = () => JSON.parse(readFileSync(new URL('fixtures/lens-boundaries-export.json', import.meta.url), 'utf8'));
+function declarationBody(reference, row) {
+  const page = reference.pages.find((page) => page.body.includes(`id="${row.anchor}"`));
+  assert.ok(page, `missing rendered definition ${row.display_name}`);
+  const start = page.body.indexOf(`<h3 id="${row.anchor}"`);
+  const closing = row.kind.includes('method') ? '</details>' : '</section>';
+  const end = page.body.indexOf(closing, start);
+  assert.ok(end > start);
+  return page.body.slice(start, end);
+}
+
+test('released receiver and refinement omissions remain separate from same-named matched members', () => {
+  const data = boundaries();
+  const reference = createReference(data);
+  const rows = data.scopes[0].declarations;
+  const explicit = rows.find((row) => row.receiver === 'Target');
+  const explicitBody = declarationBody(reference, explicit);
+  assert.match(explicitBody, /construct not supported by this lens version \(method: unsupported_kind\)/);
+  assert.doesNotMatch(explicitBody, /Member signature|Body return for this definition/);
+  const selfMethods = rows.filter((row) => row.receiver === 'self');
+  assert.equal(selfMethods.length, 2);
+  for (const row of selfMethods) {
+    const body = declarationBody(reference, row);
+    assert.ok(body.includes(`Member signature <code>${row.namespace}.identity</code>`));
+    assert.doesNotMatch(body, /type information unavailable/);
+  }
+  const refined = rows.filter((row) => row.refinement);
+  assert.deepEqual(refined.map((row) => row.refinement), ['String', 'Integer']);
+  assert.equal(new Set([...selfMethods, explicit, ...refined].map((row) => row.anchor)).size, 5);
+  for (const row of refined) {
+    const body = declarationBody(reference, row);
+    assert.match(body, /No matching source site was reported/);
+    assert.doesNotMatch(body, /Member signature|Body return for this definition/);
+  }
+  for (const row of rows.filter((row) => row.kind === 'refinement')) {
+    assert.match(declarationBody(reference, row), /producer does not supply this declaration capability \(refinement\)/);
+  }
+});
+
+test('released overloads, generic block signature and extended annotation render verbatim with slot provenance', () => {
+  const data = boundaries();
+  const reference = createReference(data);
+  const rows = data.scopes[0].declarations;
+  const convert = declarationBody(reference, rows.find((row) => row.name === 'convert'));
+  assert.equal((convert.match(/class="api-lens-signature"/g) || []).length, 2);
+  assert.match(convert, /\(::String value\) -&gt; ::String/);
+  assert.match(convert, /\(::Integer value\) -&gt; ::Integer/);
+  const transform = declarationBody(reference, rows.find((row) => row.name === 'transform'));
+  assert.match(transform, /%a\{rigor:v1:return: non-empty-string\} \[T\] \(T value\) \{ \(T\) -&gt; ::String \} -&gt; ::String/);
+  assert.match(transform, /Block \(required\)<\/dt><dd><code>\(T\) -&gt; ::String<\/code> — sig · <code>sig\/boundaries.rbs<\/code>/);
+  assert.match(transform, /Parameter <code>value<\/code> \(required\)<\/dt><dd><code>T<\/code> — sig/);
+  assert.match(transform, /Returns<\/dt><dd><code>::String<\/code> — sig/);
+});
+
+test('reserved extrbs stays source text while rendered facts retain the released inferred dynamic origin', () => {
+  const data = boundaries();
+  const row = data.scopes[0].declarations.find((row) => row.name === 'reserved');
+  assert.equal(row.contracts[0].channel, 'extrbs');
+  assert.equal(row.contracts[0].raw, '# @extrbs (String value) -> Integer');
+  assert.equal(row.contracts[0].payload, '(String value) -> Integer');
+  const body = declarationBody(createReference(data), row);
+  assert.match(body, /untyped<\/code> \(dynamic; inferred return is untyped\) — inferred/);
+  assert.doesNotMatch(body, /(?:-&gt;|<code>)\s*(?:::)?Integer| — extrbs/);
+});

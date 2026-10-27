@@ -1,0 +1,7 @@
+class Signatures
+  def convert: (String value) -> String
+             | (Integer value) -> Integer
+
+  %a{rigor:v1:return: non-empty-string}
+  def transform: [T] (T value) { (T) -> String } -> String
+end

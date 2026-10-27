@@ -1,0 +1,1581 @@
+{
+  "schema": "zard-doc/v0",
+  "revision": 2,
+  "producer": {
+    "zard": "0.0.2",
+    "zard_doc": "0.0.2"
+  },
+  "layout": "namespace",
+  "scopes": [
+    {
+      "name": "app",
+      "destination": "app",
+      "references": [],
+      "files": [
+        {
+          "path": "lib/boundaries.rb",
+          "digest": "53af1ba83768621ae97ee4482dfdb3e65be09a194c2ba113fe8fb655c62d212f",
+          "diagnostics": []
+        }
+      ],
+      "declarations": [
+        {
+          "id": "app:zard-636c6173730054617267657400",
+          "kind": "class",
+          "name": "Target",
+          "namespace": null,
+          "display_name": "Target",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/Target.md",
+          "anchor": "zard-636c6173730054617267657400",
+          "references": [
+            "Target"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 3,
+            "end_line": 5,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 23,
+            "end_offset": 74
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-73696e676c65746f6e5f6d6574686f64005461726765742e6964656e746974790000626f756e6461726965732e6d640031",
+          "kind": "singleton_method",
+          "name": "identity",
+          "namespace": "Target",
+          "display_name": "Target.identity",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [
+            "value"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "value",
+              "source": "value",
+              "span": {
+                "path": "lib/boundaries.rb",
+                "start_line": 4,
+                "end_line": 4,
+                "start_column": 20,
+                "end_column": 25,
+                "start_offset": 56,
+                "end_offset": 61
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/Target.md",
+          "anchor": "zard-73696e676c65746f6e5f6d6574686f64005461726765742e6964656e746974790000626f756e6461726965732e6d640031",
+          "references": [
+            "Target.identity"
+          ],
+          "receiver": "self",
+          "receiver_span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 4,
+            "end_line": 4,
+            "start_column": 6,
+            "end_column": 10,
+            "start_offset": 42,
+            "end_offset": 46
+          },
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 4,
+            "end_line": 4,
+            "start_column": 2,
+            "end_column": 34,
+            "start_offset": 38,
+            "end_offset": 70
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-6d6f64756c6500426f756e6461727900",
+          "kind": "module",
+          "name": "Boundary",
+          "namespace": null,
+          "display_name": "Boundary",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/Boundary.md",
+          "anchor": "zard-6d6f64756c6500426f756e6461727900",
+          "references": [
+            "Boundary"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 7,
+            "end_line": 19,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 76,
+            "end_offset": 290
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-73696e676c65746f6e5f6d6574686f64005461726765742e6964656e746974790000626f756e6461726965732e6d640032",
+          "kind": "singleton_method",
+          "name": "identity",
+          "namespace": "Boundary",
+          "display_name": "Target.identity",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [
+            "value"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "value",
+              "source": "value",
+              "span": {
+                "path": "lib/boundaries.rb",
+                "start_line": 8,
+                "end_line": 8,
+                "start_column": 22,
+                "end_column": 27,
+                "start_offset": 114,
+                "end_offset": 119
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/Target.md",
+          "anchor": "zard-73696e676c65746f6e5f6d6574686f64005461726765742e6964656e746974790000626f756e6461726965732e6d640032",
+          "references": [
+            "Target.identity"
+          ],
+          "receiver": "Target",
+          "receiver_span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 8,
+            "end_line": 8,
+            "start_column": 6,
+            "end_column": 12,
+            "start_offset": 98,
+            "end_offset": 104
+          },
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 8,
+            "end_line": 8,
+            "start_column": 2,
+            "end_column": 41,
+            "start_offset": 94,
+            "end_offset": 133
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-73696e676c65746f6e5f6d6574686f6400426f756e646172792e6964656e7469747900",
+          "kind": "singleton_method",
+          "name": "identity",
+          "namespace": "Boundary",
+          "display_name": "Boundary.identity",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [
+            "value"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "value",
+              "source": "value",
+              "span": {
+                "path": "lib/boundaries.rb",
+                "start_line": 10,
+                "end_line": 10,
+                "start_column": 20,
+                "end_column": 25,
+                "start_offset": 155,
+                "end_offset": 160
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/Boundary.md",
+          "anchor": "zard-73696e676c65746f6e5f6d6574686f6400426f756e646172792e6964656e7469747900",
+          "references": [
+            "Boundary.identity"
+          ],
+          "receiver": "self",
+          "receiver_span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 10,
+            "end_line": 10,
+            "start_column": 6,
+            "end_column": 10,
+            "start_offset": 141,
+            "end_offset": 145
+          },
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 10,
+            "end_line": 10,
+            "start_column": 2,
+            "end_column": 34,
+            "start_offset": 137,
+            "end_offset": 169
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-726566696e656d656e7400426f756e6461727923537472696e6700",
+          "kind": "refinement",
+          "name": "String",
+          "namespace": "Boundary",
+          "display_name": "Boundary#String",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/Boundary.md",
+          "anchor": "zard-726566696e656d656e7400426f756e6461727923537472696e6700",
+          "references": [],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 12,
+            "end_line": 14,
+            "start_column": 2,
+            "end_column": 5,
+            "start_offset": 173,
+            "end_offset": 227
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f6400426f756e646172795b537472696e675d236964656e7469747900537472696e67",
+          "kind": "instance_method",
+          "name": "identity",
+          "namespace": "Boundary",
+          "display_name": "Boundary[String]#identity",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [
+            "value"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "value",
+              "source": "value",
+              "span": {
+                "path": "lib/boundaries.rb",
+                "start_line": 13,
+                "end_line": 13,
+                "start_column": 17,
+                "end_column": 22,
+                "start_offset": 207,
+                "end_offset": 212
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/Boundary.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f6400426f756e646172795b537472696e675d236964656e7469747900537472696e67",
+          "references": [],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": "String",
+          "refinement_span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 12,
+            "end_line": 12,
+            "start_column": 9,
+            "end_column": 15,
+            "start_offset": 180,
+            "end_offset": 186
+          },
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 13,
+            "end_line": 13,
+            "start_column": 4,
+            "end_column": 31,
+            "start_offset": 194,
+            "end_offset": 221
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-726566696e656d656e7400426f756e6461727923496e746567657200",
+          "kind": "refinement",
+          "name": "Integer",
+          "namespace": "Boundary",
+          "display_name": "Boundary#Integer",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/Boundary.md",
+          "anchor": "zard-726566696e656d656e7400426f756e6461727923496e746567657200",
+          "references": [],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 16,
+            "end_line": 18,
+            "start_column": 2,
+            "end_column": 5,
+            "start_offset": 231,
+            "end_offset": 286
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f6400426f756e646172795b496e74656765725d236964656e7469747900496e7465676572",
+          "kind": "instance_method",
+          "name": "identity",
+          "namespace": "Boundary",
+          "display_name": "Boundary[Integer]#identity",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [
+            "value"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "value",
+              "source": "value",
+              "span": {
+                "path": "lib/boundaries.rb",
+                "start_line": 17,
+                "end_line": 17,
+                "start_column": 17,
+                "end_column": 22,
+                "start_offset": 266,
+                "end_offset": 271
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/Boundary.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f6400426f756e646172795b496e74656765725d236964656e7469747900496e7465676572",
+          "references": [],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": "Integer",
+          "refinement_span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 16,
+            "end_line": 16,
+            "start_column": 9,
+            "end_column": 16,
+            "start_offset": 238,
+            "end_offset": 245
+          },
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 17,
+            "end_line": 17,
+            "start_column": 4,
+            "end_column": 31,
+            "start_offset": 253,
+            "end_offset": 280
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-636c617373005369676e61747572657300",
+          "kind": "class",
+          "name": "Signatures",
+          "namespace": null,
+          "display_name": "Signatures",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [],
+          "parameter_details": null,
+          "page": "app/Signatures.md",
+          "anchor": "zard-636c617373005369676e61747572657300",
+          "references": [
+            "Signatures"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 21,
+            "end_line": 28,
+            "start_column": 0,
+            "end_column": 3,
+            "start_offset": 292,
+            "end_offset": 462
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64005369676e61747572657323636f6e7665727400",
+          "kind": "instance_method",
+          "name": "convert",
+          "namespace": "Signatures",
+          "display_name": "Signatures#convert",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [
+            "value"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "value",
+              "source": "value",
+              "span": {
+                "path": "lib/boundaries.rb",
+                "start_line": 22,
+                "end_line": 22,
+                "start_column": 14,
+                "end_column": 19,
+                "start_offset": 323,
+                "end_offset": 328
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/Signatures.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64005369676e61747572657323636f6e7665727400",
+          "references": [
+            "Signatures#convert"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 22,
+            "end_line": 22,
+            "start_column": 2,
+            "end_column": 28,
+            "start_offset": 311,
+            "end_offset": 337
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64005369676e617475726573237472616e73666f726d00",
+          "kind": "instance_method",
+          "name": "transform",
+          "namespace": "Signatures",
+          "display_name": "Signatures#transform",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [
+            "value",
+            "&block"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "value",
+              "source": "value",
+              "span": {
+                "path": "lib/boundaries.rb",
+                "start_line": 24,
+                "end_line": 24,
+                "start_column": 16,
+                "end_column": 21,
+                "start_offset": 355,
+                "end_offset": 360
+              },
+              "default": null,
+              "default_span": null
+            },
+            {
+              "kind": "block",
+              "name": "block",
+              "source": "&block",
+              "span": {
+                "path": "lib/boundaries.rb",
+                "start_line": 24,
+                "end_line": 24,
+                "start_column": 23,
+                "end_column": 29,
+                "start_offset": 362,
+                "end_offset": 368
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/Signatures.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64005369676e617475726573237472616e73666f726d00",
+          "references": [
+            "Signatures#transform"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 24,
+            "end_line": 24,
+            "start_column": 2,
+            "end_column": 50,
+            "start_offset": 341,
+            "end_offset": 389
+          },
+          "comment_span": null,
+          "documentation": [],
+          "contracts": []
+        },
+        {
+          "id": "app:zard-696e7374616e63655f6d6574686f64005369676e61747572657323726573657276656400",
+          "kind": "instance_method",
+          "name": "reserved",
+          "namespace": "Signatures",
+          "display_name": "Signatures#reserved",
+          "visibility": "public",
+          "publication": "public",
+          "parameters": [
+            "value"
+          ],
+          "parameter_details": [
+            {
+              "kind": "required",
+              "name": "value",
+              "source": "value",
+              "span": {
+                "path": "lib/boundaries.rb",
+                "start_line": 27,
+                "end_line": 27,
+                "start_column": 15,
+                "end_column": 20,
+                "start_offset": 444,
+                "end_offset": 449
+              },
+              "default": null,
+              "default_span": null
+            }
+          ],
+          "page": "app/Signatures.md",
+          "anchor": "zard-696e7374616e63655f6d6574686f64005369676e61747572657323726573657276656400",
+          "references": [
+            "Signatures#reserved"
+          ],
+          "receiver": null,
+          "receiver_span": null,
+          "refinement": null,
+          "refinement_span": null,
+          "alias_target": null,
+          "superclass": null,
+          "superclass_span": null,
+          "container_builder": null,
+          "container_builder_span": null,
+          "mixins": [],
+          "relationships": [],
+          "span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 27,
+            "end_line": 27,
+            "start_column": 2,
+            "end_column": 29,
+            "start_offset": 431,
+            "end_offset": 458
+          },
+          "comment_span": {
+            "path": "lib/boundaries.rb",
+            "start_line": 26,
+            "end_line": 26,
+            "start_column": 2,
+            "end_column": 37,
+            "start_offset": 393,
+            "end_offset": 428
+          },
+          "documentation": [],
+          "contracts": [
+            {
+              "channel": "extrbs",
+              "payload": "(String value) -> Integer",
+              "note": null,
+              "raw": "# @extrbs (String value) -> Integer",
+              "span": {
+                "path": "lib/boundaries.rb",
+                "start_line": 26,
+                "end_line": 26,
+                "start_column": 2,
+                "end_column": 37,
+                "start_offset": 393,
+                "end_offset": 428
+              }
+            }
+          ]
+        }
+      ],
+      "pages": [
+        {
+          "path": "app/Boundary.md",
+          "declarations": [
+            "app:zard-6d6f64756c6500426f756e6461727900",
+            "app:zard-73696e676c65746f6e5f6d6574686f6400426f756e646172792e6964656e7469747900",
+            "app:zard-726566696e656d656e7400426f756e6461727923537472696e6700",
+            "app:zard-696e7374616e63655f6d6574686f6400426f756e646172795b537472696e675d236964656e7469747900537472696e67",
+            "app:zard-726566696e656d656e7400426f756e6461727923496e746567657200",
+            "app:zard-696e7374616e63655f6d6574686f6400426f756e646172795b496e74656765725d236964656e7469747900496e7465676572"
+          ]
+        },
+        {
+          "path": "app/Signatures.md",
+          "declarations": [
+            "app:zard-636c617373005369676e61747572657300",
+            "app:zard-696e7374616e63655f6d6574686f64005369676e61747572657323636f6e7665727400",
+            "app:zard-696e7374616e63655f6d6574686f64005369676e617475726573237472616e73666f726d00",
+            "app:zard-696e7374616e63655f6d6574686f64005369676e61747572657323726573657276656400"
+          ]
+        },
+        {
+          "path": "app/Target.md",
+          "declarations": [
+            "app:zard-636c6173730054617267657400",
+            "app:zard-73696e676c65746f6e5f6d6574686f64005461726765742e6964656e746974790000626f756e6461726965732e6d640031",
+            "app:zard-73696e676c65746f6e5f6d6574686f64005461726765742e6964656e746974790000626f756e6461726965732e6d640032"
+          ]
+        }
+      ]
+    }
+  ],
+  "links": {},
+  "warnings": [],
+  "lens": {
+    "schema": "lens/v0",
+    "revision": 1,
+    "producer": {
+      "name": "rigor",
+      "version": "0.4.5",
+      "engine_source": null
+    },
+    "context": {
+      "config": ".rigor.yml",
+      "target_ruby": "3.4",
+      "rbs_version": "4.2.0",
+      "signature_roots": [
+        "sig"
+      ],
+      "signature_digest": "xxh3-64:a0acae5c7e482f03",
+      "plugins": [
+        {
+          "id": "rbs-inline",
+          "version": "0.4.5"
+        }
+      ],
+      "lockfiles": [],
+      "digest": "xxh3-64:8295cc775198eea1"
+    },
+    "capabilities": [
+      "class",
+      "module",
+      "method",
+      "attribute",
+      "constant",
+      "module_function",
+      "builder",
+      "alias",
+      "body_return",
+      "diagnostics",
+      "inputs"
+    ],
+    "files": [
+      {
+        "argument": "./lib/boundaries.rb",
+        "path": "lib/boundaries.rb",
+        "status": "ok",
+        "reason": null,
+        "digest": "xxh3-64:85673a67f1ad3847",
+        "complete": false,
+        "omissions": [
+          {
+            "kind": "method",
+            "owner": null,
+            "scope": null,
+            "name": "identity",
+            "span": {
+              "start_line": 8,
+              "start_column": 2,
+              "end_line": 8,
+              "end_column": 41,
+              "start_offset": 94,
+              "end_offset": 133
+            },
+            "reason": "unsupported_kind"
+          },
+          {
+            "kind": "refine",
+            "owner": null,
+            "scope": null,
+            "name": null,
+            "span": {
+              "start_line": 12,
+              "start_column": 2,
+              "end_line": 14,
+              "end_column": 5,
+              "start_offset": 173,
+              "end_offset": 227
+            },
+            "reason": "unsupported_kind"
+          },
+          {
+            "kind": "refine",
+            "owner": null,
+            "scope": null,
+            "name": null,
+            "span": {
+              "start_line": 16,
+              "start_column": 2,
+              "end_line": 18,
+              "end_column": 5,
+              "start_offset": 231,
+              "end_offset": 286
+            },
+            "reason": "unsupported_kind"
+          }
+        ],
+        "sites": [
+          {
+            "key": "lib/boundaries.rb:23-74:0",
+            "kind": "class",
+            "name": "Target",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 3,
+              "start_column": 0,
+              "end_line": 5,
+              "end_column": 3,
+              "start_offset": 23,
+              "end_offset": 74
+            },
+            "contract_span": null,
+            "anchor": "3:cc83",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/boundaries.rb:38-70:0",
+            "kind": "method",
+            "name": "identity",
+            "owner": "Target",
+            "scope": "singleton",
+            "attribute": null,
+            "members": [
+              "identity"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 4,
+              "start_column": 2,
+              "end_line": 4,
+              "end_column": 34,
+              "start_offset": 38,
+              "end_offset": 70
+            },
+            "contract_span": null,
+            "anchor": "4:7084",
+            "visibility": "public",
+            "contract": null,
+            "params": [
+              {
+                "name": "value",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": null,
+            "body_return": {
+              "state": "dynamic",
+              "type": "untyped",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null,
+              "cause": "inferred_return_untyped"
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/boundaries.rb:76-290:0",
+            "kind": "module",
+            "name": "Boundary",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 7,
+              "start_column": 0,
+              "end_line": 19,
+              "end_column": 3,
+              "start_offset": 76,
+              "end_offset": 290
+            },
+            "contract_span": null,
+            "anchor": "7:c786",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/boundaries.rb:137-169:0",
+            "kind": "method",
+            "name": "identity",
+            "owner": "Boundary",
+            "scope": "singleton",
+            "attribute": null,
+            "members": [
+              "identity"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 10,
+              "start_column": 2,
+              "end_line": 10,
+              "end_column": 34,
+              "start_offset": 137,
+              "end_offset": 169
+            },
+            "contract_span": null,
+            "anchor": "10:7084",
+            "visibility": "public",
+            "contract": null,
+            "params": [
+              {
+                "name": "value",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": null,
+            "body_return": {
+              "state": "dynamic",
+              "type": "untyped",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null,
+              "cause": "inferred_return_untyped"
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/boundaries.rb:292-462:0",
+            "kind": "class",
+            "name": "Signatures",
+            "owner": null,
+            "scope": null,
+            "attribute": null,
+            "members": [],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 21,
+              "start_column": 0,
+              "end_line": 28,
+              "end_column": 3,
+              "start_offset": 292,
+              "end_offset": 462
+            },
+            "contract_span": null,
+            "anchor": "21:e5f7",
+            "visibility": null,
+            "contract": null,
+            "params": null,
+            "block": null,
+            "body_return": null,
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/boundaries.rb:311-337:0",
+            "kind": "method",
+            "name": "convert",
+            "owner": "Signatures",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "convert"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 22,
+              "start_column": 2,
+              "end_line": 22,
+              "end_column": 28,
+              "start_offset": 311,
+              "end_offset": 337
+            },
+            "contract_span": null,
+            "anchor": "22:55e2",
+            "visibility": "public",
+            "contract": null,
+            "params": [
+              {
+                "name": "value",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": null,
+            "body_return": {
+              "state": "typed",
+              "type": "Integer | String",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/boundaries.rb:341-389:0",
+            "kind": "method",
+            "name": "transform",
+            "owner": "Signatures",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "transform"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 24,
+              "start_column": 2,
+              "end_line": 24,
+              "end_column": 50,
+              "start_offset": 341,
+              "end_offset": 389
+            },
+            "contract_span": null,
+            "anchor": "24:fc59",
+            "visibility": "public",
+            "contract": null,
+            "params": [
+              {
+                "name": "value",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": {
+              "required": false,
+              "type": null
+            },
+            "body_return": {
+              "state": "dynamic",
+              "type": "untyped",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null,
+              "cause": "inferred_return_untyped"
+            },
+            "value": null,
+            "alias_of": null
+          },
+          {
+            "key": "lib/boundaries.rb:431-458:0",
+            "kind": "method",
+            "name": "reserved",
+            "owner": "Signatures",
+            "scope": "instance",
+            "attribute": null,
+            "members": [
+              "reserved"
+            ],
+            "module_function": false,
+            "builder": null,
+            "ordinal": 0,
+            "span": {
+              "start_line": 27,
+              "start_column": 2,
+              "end_line": 27,
+              "end_column": 29,
+              "start_offset": 431,
+              "end_offset": 458
+            },
+            "contract_span": {
+              "start_line": 26,
+              "start_column": 2,
+              "end_line": 26,
+              "end_column": 37,
+              "start_offset": 393,
+              "end_offset": 428
+            },
+            "anchor": "26:dec6",
+            "visibility": "public",
+            "contract": null,
+            "params": [
+              {
+                "name": "value",
+                "kind": "required",
+                "type": null
+              }
+            ],
+            "block": null,
+            "body_return": {
+              "state": "dynamic",
+              "type": "untyped",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": null,
+              "cause": "inferred_return_untyped"
+            },
+            "value": null,
+            "alias_of": null
+          }
+        ],
+        "diagnostics": [],
+        "inputs": []
+      }
+    ],
+    "members": [
+      {
+        "owner": "Target",
+        "scope": "singleton",
+        "name": "identity",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/boundaries.rb:38-70:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": "(untyped value) -> untyped",
+            "params": [
+              {
+                "name": "value",
+                "kind": "required",
+                "type": {
+                  "state": "dynamic",
+                  "type": "untyped",
+                  "provenance": "inferred",
+                  "path": null,
+                  "from_site": null,
+                  "cause": "inferred_return_untyped"
+                }
+              }
+            ],
+            "block": null,
+            "return": {
+              "state": "dynamic",
+              "type": "untyped",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": "lib/boundaries.rb:38-70:0",
+              "cause": "inferred_return_untyped"
+            }
+          }
+        ],
+        "key": "[\"Target\",\"singleton\",\"identity\"]"
+      },
+      {
+        "owner": "Boundary",
+        "scope": "singleton",
+        "name": "identity",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/boundaries.rb:137-169:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": "(untyped value) -> untyped",
+            "params": [
+              {
+                "name": "value",
+                "kind": "required",
+                "type": {
+                  "state": "dynamic",
+                  "type": "untyped",
+                  "provenance": "inferred",
+                  "path": null,
+                  "from_site": null,
+                  "cause": "inferred_return_untyped"
+                }
+              }
+            ],
+            "block": null,
+            "return": {
+              "state": "dynamic",
+              "type": "untyped",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": "lib/boundaries.rb:137-169:0",
+              "cause": "inferred_return_untyped"
+            }
+          }
+        ],
+        "key": "[\"Boundary\",\"singleton\",\"identity\"]"
+      },
+      {
+        "owner": "Signatures",
+        "scope": "instance",
+        "name": "convert",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/boundaries.rb:311-337:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "(::String value) -> ::String",
+            "params": [
+              {
+                "name": "value",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::String",
+                  "provenance": "sig",
+                  "path": "sig/boundaries.rbs",
+                  "from_site": null
+                }
+              }
+            ],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "::String",
+              "provenance": "sig",
+              "path": "sig/boundaries.rbs",
+              "from_site": null
+            }
+          },
+          {
+            "rbs": "(::Integer value) -> ::Integer",
+            "params": [
+              {
+                "name": "value",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "::Integer",
+                  "provenance": "sig",
+                  "path": "sig/boundaries.rbs",
+                  "from_site": null
+                }
+              }
+            ],
+            "block": null,
+            "return": {
+              "state": "typed",
+              "type": "::Integer",
+              "provenance": "sig",
+              "path": "sig/boundaries.rbs",
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"Signatures\",\"instance\",\"convert\"]"
+      },
+      {
+        "owner": "Signatures",
+        "scope": "instance",
+        "name": "transform",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/boundaries.rb:341-389:0"
+        ],
+        "also_defined_at": [],
+        "basis": "contract",
+        "overloads": [
+          {
+            "rbs": "%a{rigor:v1:return: non-empty-string} [T] (T value) { (T) -> ::String } -> ::String",
+            "params": [
+              {
+                "name": "value",
+                "kind": "required",
+                "type": {
+                  "state": "typed",
+                  "type": "T",
+                  "provenance": "sig",
+                  "path": "sig/boundaries.rbs",
+                  "from_site": null
+                }
+              }
+            ],
+            "block": {
+              "required": true,
+              "type": {
+                "state": "typed",
+                "type": "(T) -> ::String",
+                "provenance": "sig",
+                "path": "sig/boundaries.rbs",
+                "from_site": null
+              }
+            },
+            "return": {
+              "state": "typed",
+              "type": "::String",
+              "provenance": "sig",
+              "path": "sig/boundaries.rbs",
+              "from_site": null
+            }
+          }
+        ],
+        "key": "[\"Signatures\",\"instance\",\"transform\"]"
+      },
+      {
+        "owner": "Signatures",
+        "scope": "instance",
+        "name": "reserved",
+        "kind": "method",
+        "visibility": "public",
+        "sites": [
+          "lib/boundaries.rb:431-458:0"
+        ],
+        "also_defined_at": [],
+        "basis": "single_site",
+        "overloads": [
+          {
+            "rbs": "(untyped value) -> untyped",
+            "params": [
+              {
+                "name": "value",
+                "kind": "required",
+                "type": {
+                  "state": "dynamic",
+                  "type": "untyped",
+                  "provenance": "inferred",
+                  "path": null,
+                  "from_site": null,
+                  "cause": "inferred_return_untyped"
+                }
+              }
+            ],
+            "block": null,
+            "return": {
+              "state": "dynamic",
+              "type": "untyped",
+              "provenance": "inferred",
+              "path": null,
+              "from_site": "lib/boundaries.rb:431-458:0",
+              "cause": "inferred_return_untyped"
+            }
+          }
+        ],
+        "key": "[\"Signatures\",\"instance\",\"reserved\"]"
+      }
+    ],
+    "adapter": {
+      "name": "zard-rigor",
+      "version": "0.0.2",
+      "grammar": "rigor:v1"
+    },
+    "project": ".",
+    "bindings": [
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-636c6173730054617267657400",
+        "file": "lib/boundaries.rb",
+        "site_key": "lib/boundaries.rb:23-74:0",
+        "member_keys": [],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-73696e676c65746f6e5f6d6574686f64005461726765742e6964656e746974790000626f756e6461726965732e6d640031",
+        "file": "lib/boundaries.rb",
+        "site_key": "lib/boundaries.rb:38-70:0",
+        "member_keys": [
+          "[\"Target\",\"singleton\",\"identity\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-6d6f64756c6500426f756e6461727900",
+        "file": "lib/boundaries.rb",
+        "site_key": "lib/boundaries.rb:76-290:0",
+        "member_keys": [],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-73696e676c65746f6e5f6d6574686f64005461726765742e6964656e746974790000626f756e6461726965732e6d640032",
+        "file": "lib/boundaries.rb",
+        "site_key": null,
+        "member_keys": [],
+        "status": "unavailable",
+        "reason": "unsupported_declaration",
+        "omission": {
+          "kind": "method",
+          "reason": "unsupported_kind"
+        }
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-73696e676c65746f6e5f6d6574686f6400426f756e646172792e6964656e7469747900",
+        "file": "lib/boundaries.rb",
+        "site_key": "lib/boundaries.rb:137-169:0",
+        "member_keys": [
+          "[\"Boundary\",\"singleton\",\"identity\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-726566696e656d656e7400426f756e6461727923537472696e6700",
+        "file": "lib/boundaries.rb",
+        "site_key": null,
+        "member_keys": [],
+        "status": "unavailable",
+        "reason": "unsupported_capability",
+        "capability": "refinement"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f6400426f756e646172795b537472696e675d236964656e7469747900537472696e67",
+        "file": "lib/boundaries.rb",
+        "site_key": null,
+        "member_keys": [],
+        "status": "unavailable",
+        "reason": "unmatched_declaration"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-726566696e656d656e7400426f756e6461727923496e746567657200",
+        "file": "lib/boundaries.rb",
+        "site_key": null,
+        "member_keys": [],
+        "status": "unavailable",
+        "reason": "unsupported_capability",
+        "capability": "refinement"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f6400426f756e646172795b496e74656765725d236964656e7469747900496e7465676572",
+        "file": "lib/boundaries.rb",
+        "site_key": null,
+        "member_keys": [],
+        "status": "unavailable",
+        "reason": "unmatched_declaration"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-636c617373005369676e61747572657300",
+        "file": "lib/boundaries.rb",
+        "site_key": "lib/boundaries.rb:292-462:0",
+        "member_keys": [],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64005369676e61747572657323636f6e7665727400",
+        "file": "lib/boundaries.rb",
+        "site_key": "lib/boundaries.rb:311-337:0",
+        "member_keys": [
+          "[\"Signatures\",\"instance\",\"convert\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64005369676e617475726573237472616e73666f726d00",
+        "file": "lib/boundaries.rb",
+        "site_key": "lib/boundaries.rb:341-389:0",
+        "member_keys": [
+          "[\"Signatures\",\"instance\",\"transform\"]"
+        ],
+        "status": "matched"
+      },
+      {
+        "scope": "app",
+        "declaration_id": "app:zard-696e7374616e63655f6d6574686f64005369676e61747572657323726573657276656400",
+        "file": "lib/boundaries.rb",
+        "site_key": "lib/boundaries.rb:431-458:0",
+        "member_keys": [
+          "[\"Signatures\",\"instance\",\"reserved\"]"
+        ],
+        "status": "matched"
+      }
+    ],
+    "warnings": [
+      "app:Target.identity: lens unsupported_declaration",
+      "app:Boundary#String: lens unsupported_capability",
+      "app:Boundary[String]#identity: lens unmatched_declaration",
+      "app:Boundary#Integer: lens unsupported_capability",
+      "app:Boundary[Integer]#identity: lens unmatched_declaration"
+    ]
+  }
+}

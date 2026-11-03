@@ -2,6 +2,8 @@
 
 Status: proposal for Zard #5. The command, schemas, and semantic proof capability below are unimplemented. This document does not change the accepted ADRs or authorize a release.
 
+Upstream agreement is requested in [Rigor #2737](https://github.com/rigortype/rigor/issues/2737). Runtime implementation of Zard #5 waits for an agreed producer contract and a tested release carrying that capability.
+
 ZARD permits an optional type claim in API documentation without making it a contract. This proposal lets Rigor check whether the authoritative method contract supports that claim, while preserving the separation required by [ADR 0001](../adr/0001-contract-and-documentation-channels.md) and [ADR 0003](../adr/0003-package-boundaries-and-rigor-lens.md).
 
 ## Existing boundary and missing capability

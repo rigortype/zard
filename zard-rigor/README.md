@@ -106,6 +106,10 @@ scope, member and overload, and each candidate as `scope:path:line`; they are
 also appended to `lens.warnings`. Consumers that ignore these fields keep
 rendering signatures literally.
 
+## Documentation claim validation proposal
+
+Documentation claim checking is not implemented. The [proposed public producer interface](../docs/design/documentation-claim-validation.md) specifies semantic verdicts, source integrity, and a release gate for Zard #5. Current lens type strings are presentation data and cannot establish whether a documentation claim agrees with a contract.
+
 ## Updating supported releases
 
 `lib/zard/rigor/compatibility.json` is the authoritative producer/schema allowlist and declares the supported

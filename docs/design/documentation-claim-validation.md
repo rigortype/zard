@@ -2,7 +2,7 @@
 
 Status: proposal for Zard #5. The command, schemas, and semantic proof capability below are unimplemented. This document does not change the accepted ADRs or authorize a release.
 
-Upstream agreement is requested in [Rigor #2737](https://github.com/rigortype/rigor/issues/2737). Runtime implementation of Zard #5 waits for an agreed producer contract and a tested release carrying that capability.
+This revision incorporates the [Rigor-side feedback on #2737](https://github.com/rigortype/rigor/issues/2737#issuecomment-6614160242). That feedback explicitly awaits owner ratification through a Rigor ADR; neither it nor this document establishes an accepted API. Runtime implementation of Zard #5 waits for an agreed producer contract and a tested release carrying that capability.
 
 ZARD permits an optional type claim in API documentation without making it a contract. This proposal lets Rigor check whether the authoritative method contract supports that claim, while preserving the separation required by [ADR 0001](../adr/0001-contract-and-documentation-channels.md) and [ADR 0003](../adr/0003-package-boundaries-and-rigor-lens.md).
 
@@ -30,33 +30,56 @@ The initial check concerns the documented API promise against an authored contra
 | `@param name [C]` | `C <: F` | Every input advertised as accepted is accepted by the contract. |
 | `@return [C]` | `F <: C` | Every result the contract permits satisfies the documented promise. |
 
-A narrower advertised parameter domain or a broader documented return domain is compatible under this rule. This proposal does not check whether documentation exhaustively describes the whole contract. Conversely, an overlapping type can violate inclusion without being disjoint. Rigor may report a mismatch only when it proves the required inclusion false; a failed proof attempt is `unknown`.
+A narrower advertised parameter domain or a broader documented return domain is compatible under this rule. It does not check whether documentation exhaustively describes the contract. A conflict says that the contract does not support the documented promise, not that a runtime execution violated it. Claims cannot override the contract, and a narrower inferred body return cannot replace the authored return as the comparison basis.
 
-For example, an isolated fixture can declare the RBS alias `type text = String` and compare a return claim `text` with an authoritative return `::String`. Once Rigor resolves both to the same type, different spelling must still yield `compatible`. Conversely, consider a return contract `Project::A | Project::B` and a claim `Project::B | Project::C`: the shared `Project::B` arm establishes overlap only. If the producer cannot establish whether `Project::A` is covered by the claim, nor prove a counterexample, the result must be `unknown`. These are proposed test inputs, not inferred types of repository code.
+The proposed first proof policy follows Rigor's feedback. Decompose the subset side (`C` for a parameter, `F` for a return) into union arms:
 
-A mismatch states that the contract does not support the documented promise. It does not claim a particular runtime execution violated it. A narrower inferred body return cannot override a broader authoritative return contract to make that contract comparison pass. Neither string inequality nor a missing diagnostic is evidence of either outcome.
+1. If every arm is proved included in the other side, return `compatible`.
+2. Otherwise, if at least one inhabited arm is proved disjoint from the entire other side, return `conflict`.
+3. Otherwise return `unknown`. A failed inclusion proof, partial overlap, or string inequality is not a conflict proof.
 
-The first producer implementation may prove only a conservative subset of these relations. It must expose its supported subject/grammar capabilities and return `unknown` elsewhere. It must not copy the existing signature-collision diagnostic's disjointness test and describe all other pairs as compatible.
+Inclusion may use authored ancestry of project classes. Conflict proofs are restricted to Rigor's trusted fragment of absolute core/stdlib classes and their literals, using the producer's ancestry checks and exclusions. Modules, project classes and gem classes cannot establish disjointness. Relative names resolve in the declaration's lexical nesting before this restriction is applied; a resolved project class can contribute to an inclusion proof, never a conflict proof. The adapter does not implement these rules or import the internal comparator. Rigor's gradual call-acceptance relation is not a substitute: its treatment of Dynamic does not satisfy this check's proof requirements.
+
+Either side containing Dynamic anywhere, including nested `Array[untyped]`, or `void`, `self`, `instance`, `class`, type variables or interfaces yields `unknown` in the first slice. An arm that only overlaps provides neither inclusion nor disjointness evidence; another inhabited, trusted disjoint arm can still prove conflict unless an excluded type makes the comparison unknown.
+
+These illustrative fixture inputs show the distinction; they are not observed types of repository code:
+
+| Authored slot and claim | Expected result under the proposed proof policy |
+| --- | --- |
+| Parameter `::String`, claim `"hello"` | `compatible` when literal inclusion is proved. |
+| Return `::String`, claim `Object` resolving to `::Object` | `compatible` when declared ancestry proves inclusion, despite different spelling. |
+| Return `::String`, claim `"hello"` | `unknown`: overlap alone does not establish a trusted disjoint arm; the first slice makes no cardinality argument. |
+| Return `::String \| ::Integer`, claim `::String` | `conflict` when the inhabited `::Integer` arm is proved disjoint from the claim. |
+| Return project class `B`, claim project class `A`, authored `class B < A` | `compatible` if the authored relation is resolved and proved. Missing ancestry does not prove conflict. |
+| Return `Array[untyped]`, claim `Array[String]` | `unknown`, including when an ordinary gradual call check would accept it. |
 
 ## Initial subject coverage
 
-Start with `@param` and `@return` on an unambiguous method declaration with one authored overload. Match a parameter by its Ruby name and parameter kind; unnamed RBS positions require a verified correspondence with the source definition. Limit the first parameter implementation to required positional and required keyword parameters. An undeclared or unresolvable parameter subject is an explicit `unknown` result with a reason, never a fallback to the first parameter.
+Start with `@param` and `@return` on an unambiguous method declaration with exactly one authored overload **after Rigor's own `sig/` and inline merge**: the contract call sites see. The first basis is `sig` or `inline` only. Library/gem contracts, plugin-supplied members and inferred facts yield `unknown`, even if their displayed types look usable.
 
-Return `unknown` for multiple overloads, argument/return correlations, generic binders the producer cannot instantiate soundly, forwarded or destructured parameters, optional/rest parameters, attributes, constants, yields, options, raises, unsupported declarations, ambiguous sites, and contested members. Each claim still gets a result. Later coverage requires a documented producer policy and conformance fixtures; overloads must never be paired by array order or collapsed into independently unioned slots that lose correlations.
+Match required positional and required keyword parameters by Ruby name and kind. Unnamed RBS positions need a verified correspondence with the source definition. An undeclared or unresolvable parameter subject yields `unknown`, never a fallback to the first parameter.
 
-Dynamic or unavailable evidence cannot prove compatibility or incompatibility. Inferred facts are not accepted as the comparison basis in the first version. In particular, observed examples and inferred underapproximations cannot prove a universal input or return promise. A future inferred-fact capability must define whether evidence is a sound upper bound, lower bound, or exact result and which proofs it permits; a display slot alone is insufficient.
+Multiple overloads, argument/return correlations, unsupported generics, forwarded/destructured/optional/rest parameters, attributes, constants, yields, options, raises, unsupported declarations, ambiguous sites and contested members remain explicit `unknown` cases. Later coverage needs a producer policy and conformance fixtures; never pair overloads by array order or union their slots independently and lose correlations.
 
-## Proposed batch CLI
+Dynamic and unavailable type evidence cannot establish either verdict. Inferred underapproximations cannot prove a universal promise; a future inferred-fact capability must define its approximation and proof guarantees. Failure to analyze a target is a separate availability state, not semantic `unknown` (below).
 
-Use one new external operation rather than reinterpreting existing lens output:
+## Proposed lens integration
+
+Use one existing lens session with an optional claims request:
 
 ```text
-rigor claims check --request claim-request.json --format json [--config FILE] [--workers N]
+rigor lens FILE... --claims REQUEST.json --format json [--config FILE] [--workers N]
 ```
 
-This spelling is proposed, not an available command. The current directory is the explicit project root. The request file is UTF-8 JSON. Rigor analyzes the requested files together in the same configured environment it uses for `check`; it must not import the claims into that environment. Diagnostics and facts computed with a claim present must equal those computed without it, apart from the new claim results.
+`--claims` and the schemas below are proposed and unimplemented. The adapter already holds the parsed ZARD export and source snapshots before invoking lens, so it can extract the request before this one batch call. No prior lens invocation, handshake or separate analysis process is needed. Rigor checks claims using that session's authoritative merged contracts and returns the same session's site keys.
 
-Successful processing writes one response object to stdout, in request order; progress goes to stderr. Exit `0` means the response is complete and valid, including when it contains incompatibility or unknown results. Exit `64` means the request cannot be trusted or supported as a protocol request; exit `70` means the process failed. Neither failure emits a successful response. The consumer decides whether proven claim mismatches fail its documentation check.
+Claims must never enter the signature environment or narrow inference. Ordinary diagnostics, contracts and inferred facts must be identical with claims added, changed or removed; only the new claim results differ.
+
+The current directory remains the explicit lens project root. Reuse lens context, file statuses/digests, inputs, completeness and omissions, and its existing exit rules: `0` when at least one target is `ok`, `1` when none is, `64` for a usage error, and no document on a whole-run crash (existing fatal-error handling uses `70`). Per-target failures stay in-band. Claim verdicts do not change the lens exit status. Unsupported request schema or grammar revision is a usage error with no document, as proposed upstream. This design adds no new exit codes; detailed integrity-error reporting still needs producer agreement.
+
+### Consumer positions
+
+Canonical claim payloads use **RBS type-expression syntax**, not implicit YARD translation. ZARD supplies the payload as written; Rigor owns its grammar and any extended support. A first release that returns mostly `unknown` is useful because it distinguishes proven results from unchecked claims. Validated exhaustive per-claim results let the adapter calculate counts locally; the response does not need duplicate totals.
 
 ### Request, revision 1
 
@@ -65,7 +88,7 @@ Successful processing writes one response object to stdout, in request order; pr
   "schema": "rigor-claims-request/v0",
   "revision": 1,
   "grammar": "rigor:v1",
-  "files": [{"path": "lib/widget.rb", "digest": "sha256:<64 lowercase hex>"}],
+  "files": [{"path": "lib/widget.rb", "digest": "xxh3-64:<16 lowercase hex>"}],
   "claims": [{
     "id": "app:widget-result:tag-0",
     "file": "lib/widget.rb",
@@ -82,26 +105,33 @@ Successful processing writes one response object to stdout, in request order; pr
 }
 ```
 
-The sample uses illustrative offsets, digest, and type text; it is not a runnable fixture or a statement about repository code. Spans count bytes in the exact file, are zero-based and end-exclusive, and contain no derived line/column identity. `id` is a caller-supplied opaque identifier unique within the request; it is not a stable Rigor symbol id. The adapter can retain its own scope and declaration/tag identifiers in that string or an external map. Duplicate Ruby names in independent documentation scopes must not merge claims.
+The sample grammar label `rigor:v1` is illustrative, not an accepted request identifier or a promise of extended support. The exact grammar identifier and capability spelling await the producer ADR; the first semantic subset is plain RBS type expressions. The sample uses illustrative offsets, digest, and type text; it is not a runnable fixture or a statement about repository code. Spans count bytes in the exact file, are zero-based and end-exclusive, and contain no derived line/column identity. `id` is a caller-supplied opaque identifier unique within the request; it is not a stable Rigor symbol id. The adapter can retain its own scope and declaration/tag identifiers in that string or an external map. Duplicate Ruby names in independent documentation scopes must not merge claims.
 
-The file digest covers the entire source, including prose. Rigor requires project-relative canonical paths, rejects duplicate file entries, duplicate claim ids, out-of-range spans, mismatched declaration identity and stale digests, and never attaches a claim to a neighboring declaration. A declaration that exists but is outside the producer's supported coverage yields `unknown`; a request whose supplied span does not identify the declared source object is an integrity error.
+The request uses the lens source-digest convention and covers the entire source, including prose. Existing ZARD SHA-256 export checks still guard the adapter's source snapshot. Rigor requires project-relative canonical paths, rejects duplicate file entries, duplicate claim ids, out-of-range spans, mismatched declaration identity and stale digests, and never attaches a claim to a neighboring declaration. For an `ok` target, a declaration outside the supported subject coverage yields `unknown`; a request whose supplied locator contradicts the declaration identity is an integrity error. An unanalysable target uses the separate target-availability result described below.
 
 The adapter is responsible for extracting `tag.claim`, its tag span, and the tag's attachment to the declaration from the ZARD parser's exact source snapshot. Rigor validates the requested declaration identity, the tag span's file bounds, and parameter binding; it does not independently certify the ZARD parser's tag attachment or extraction. The adapter retains that association and checks it again when attaching the result. The request carries claim text as input, not an executable expression or an inline signature. Claims without a type payload are omitted.
 
-### Response, revision 1
+### Site association without preflight
+
+The request's source locator (file digest, declaration span, kind, owner, scope and name) is available from the parsed export. Rigor resolves it against sites generated in the same lens session and returns an authoritative `site_key`. The adapter verifies that key against the returned file/site and its own ZARD binding. No name-only or neighboring-site fallback is allowed.
+
+The exact locator-to-site wire shape remains open for owner agreement. Requiring a prior lens `site_key` in the first request would introduce the preflight call this integration is intended to avoid; it is not a requirement of this proposal. Unsupported declarations may have an omission rather than a site, so their unknown result may have a null site key with an explicit reason.
+
+### Proposed claims response section, revision 1
+
+The following object is the new `claims` section inside the lens document, not a second top-level response. The parent lens document supplies producer identity, `context`, `files`, their digests/statuses/sites/inputs, and `members`. Its capabilities advertise claims plus supported grammar and subjects; exact capability spellings need producer agreement. The claims section and request each have a separate schema/revision independent of `lens/v0`.
 
 ```json
 {
   "schema": "rigor-claims/v0",
   "revision": 1,
-  "producer": {"name": "rigor", "version": "<released version>", "engine_source": null},
   "grammar": "rigor:v1",
   "request_digest": "sha256:<digest of the exact request bytes>",
-  "capabilities": ["authored-single-overload-param", "authored-single-overload-return"],
-  "context": {"digest": "<opaque analysis identity>"},
-  "files": [{"path": "lib/widget.rb", "digest": "sha256:<64 lowercase hex>"}],
   "results": [{
     "id": "app:widget-result:tag-0",
+    "file": "lib/widget.rb",
+    "site_key": "lib/widget.rb:80-110:0",
+    "availability": "available",
     "relation": "documentation_coverage",
     "direction": "contract_subtype_of_claim",
     "verdict": "unknown",
@@ -113,19 +143,20 @@ The adapter is responsible for extracting `tag.claim`, its tag span, and the tag
 }
 ```
 
-The producer computes `request_digest` over the exact UTF-8 request file bytes. The adapter verifies it before accepting any verdict, so an id reused with different claim text cannot accept a response for the old request. The response must also echo exactly the requested ids, order, grammar, and file digests, with one result per claim. Its context must identify configuration, target Ruby, loaded RBS and plugins, signature roots/digests, lockfiles, and analysis engine, with the same completeness caveats as lens context. Include digested project source inputs consulted by the proof. The context digest is opaque and must not be treated as a complete cache key by the adapter.
+Rigor computes `request_digest` over the exact UTF-8 request bytes. The adapter verifies it before accepting results, preventing an id reused with changed claim text from accepting an old response. Validate exactly one result for every requested id, in request order, the negotiated grammar, file references and source snapshots. Reuse the same lens context and input integrity machinery; do not copy those fields into a competing claims context. A context digest or unchanged `inputs` list is not a complete cache key.
 
-Each result names the `documentation_coverage` relation. Its `direction` is `claim_subtype_of_contract` for a supported parameter or `contract_subtype_of_claim` for a supported return; direction is `null` when no supported relation applies. `basis` is null when no authoritative slot was resolved. Otherwise it identifies the member tuple, exact definition site, overload index, slot (`return` or parameter name/kind/index), provenance, and contract source path/span where available. Evidence entries identify the producer's proof kind and source facts; human-readable type text and messages are explanatory only. No internal analyzer objects or serialized implementation classes cross the boundary.
+Each available result names `documentation_coverage`, with direction `claim_subtype_of_contract` for parameters or `contract_subtype_of_claim` for returns; direction is null when no supported relation applies. `basis` is null when no authoritative slot was resolved. Otherwise it identifies the same-session member/site, authoritative single overload, slot, and `sig`/`inline` provenance. Evidence carries producer proof rules and source references, not serialized analyzer objects. Display text is explanatory only.
 
-For example, a producer proving that an authored `Integer` result is outside a `String` claim could return these fields on the result (illustrative source offsets):
+For example, fields on an available conflict result could be:
 
 ```json
 {
+  "availability": "available",
+  "site_key": "lib/widget.rb:80-110:0",
   "verdict": "conflict",
-  "reason": "proven_non_inclusion",
+  "reason": "proven_disjoint_arm",
   "basis": {
     "member": {"owner": "Widget", "scope": "instance", "name": "result"},
-    "definition": {"file": "lib/widget.rb", "span": {"start_offset": 80, "end_offset": 110}},
     "overload": 0,
     "slot": {"kind": "return", "parameter": null},
     "provenance": {
@@ -134,36 +165,42 @@ For example, a producer proving that an authored `Integer` result is outside a `
     }
   },
   "evidence": [{
-    "kind": "non_inclusion", "rule": "disjoint_types",
-    "contract_display": "::Integer", "claim_display": "::String"
+    "kind": "non_inclusion", "rule": "inhabited_trusted_disjoint_arm",
+    "subset_arm_display": "::Integer", "other_side_display": "::String"
   }]
 }
 ```
 
-For a parameter slot, `parameter` is `{name, kind, index}` and `kind` uses the producer's documented Ruby parameter vocabulary; for a return it is null. The overload index addresses the authoritative single overload and does not authorize selecting one branch of an overloaded contract. Contract source files are among the response's digested inputs. The adapter validates these references but trusts only the allowlisted producer to perform the proof; it must not recheck it using `contract_display` or `claim_display`. Computed paths must not disclose absolute local filesystem paths. Evidence outside the project needs a documented package/source identity; the first implementation may return `unknown` until that identity is supported.
+For a parameter, `slot.parameter` is `{name, kind, index}` using the producer's Ruby parameter vocabulary. The overload index cannot authorize selecting one of several overloads. Source references must be covered by the lens session's source/signature integrity records. Computed paths remain project-relative; there is no need to introduce external library proof provenance in the first authored-only basis. The adapter validates references, not the semantic proof.
 
-| Verdict | Required producer evidence | Consumer behavior |
+| Available verdict | Required producer evidence | Consumer behavior |
 | --- | --- | --- |
-| `compatible` | A proof that the required inclusion holds on a supported authoritative basis. | Show checked status; do not alter the contract. |
-| `conflict` | A proof that the required inclusion is false, with a structured reason such as `proven_counterexample` or `proven_disjoint`. | Emit a claim mismatch at the tag span with the evidence reference. |
-| `unknown` | No supported proof, dynamic/unavailable basis, unsupported grammar feature/subject, or unresolved association within valid source. | Show unchecked status and reason; do not emit a type mismatch. |
-| `invalid_claim` | The selected supported grammar rejects the payload's syntax or semantic well-formedness. | Emit an invalid-claim diagnostic, distinct from mismatch. |
+| `compatible` | Every subset-side arm is proved included, without a first-slice exclusion. | Show decided status; keep the authoritative contract. |
+| `conflict` | An inhabited subset-side arm is proved disjoint in the trusted fragment, without a first-slice exclusion. | Emit a mismatch at the original tag span with its evidence. |
+| `unknown` | Neither supported proof, or excluded grammar, subject, provenance or type evidence. | Show unchecked status/reason, not mismatch. |
+| `invalid_claim` | Supported grammar conclusively rejects the payload's syntax or semantic well-formedness. | Emit invalid-claim diagnostics separately from mismatch. |
 
-Suggested unknown reasons include `no_authored_contract`, `dynamic_evidence`, `unavailable_evidence`, `contested_member`, `ambiguous_subject`, `unsupported_subject`, `unsupported_overloads`, `unsupported_correlation`, `unsupported_grammar_feature`, and `unsupported_relation`. A claim referring to an unresolved type whose meaning the environment cannot establish is `unknown`, unless the supported grammar conclusively establishes that it is invalid.
+Suggested unknown reasons include `no_authored_contract`, `unsupported_provenance`, `dynamic_evidence`, `unavailable_evidence`, `contested_member`, `ambiguous_subject`, `unsupported_subject`, `unsupported_overloads`, `unsupported_correlation`, `unsupported_grammar_feature` and `unsupported_relation`. An unresolved type is unknown unless the supported grammar conclusively establishes invalidity.
 
-Unsupported protocol/schema or grammar revisions, malformed JSON, stale source, and invalid identity fields are whole-request integrity errors. They must not be disguised as per-claim `invalid_claim` results. A valid extended payload outside the implementation's advertised semantic subset is `unknown`, not invalid syntax.
+### Target availability and integrity errors
+
+A valid claims request may target a file that lens reports as `parse_error`, `failed`, `outside_project` or another unsuccessful status. Preserve that in-band target failure. Proposed per-claim fields are `availability: "target_unavailable"`, `verdict: null`, `site_key: null`, `basis: null`, empty evidence, and the file reference/reason; the authoritative failure remains on the lens file row. This availability shape is pending upstream agreement. It must not be interpreted as semantic unknown or a type mismatch, and it must not introduce a new exit status. The claims section should still account for each requested claim when lens can emit a valid document.
+
+Malformed requests, unsupported request/schema/grammar revisions, stale digests, duplicate ids, invalid spans and contradictory source identities are protocol/integrity errors, not `invalid_claim`. Exact failure reporting for integrity errors beyond the proposed usage-error case needs producer ratification. A process crash or invalid/truncated document provides no accepted claim results. Do not accept partial claim results from an otherwise untrusted response.
+
+After validating exhaustiveness and uniqueness, the adapter can count `compatible` and `conflict` as decided, `unknown` as unchecked, `invalid_claim` separately, and unavailable targets separately. An optional decided ratio uses all requested claims as its denominator and states that definition; zero claims displays “no claims,” not 100% checked. Missing capabilities or protocol failures are unavailable validation, never a zero-result success. No response totals are needed.
 
 ## Grammar and drift
 
-Rigor owns parsing and normalization of plain RBS and extended types, name resolution in the declaration's lexical context, aliases, inheritance, variance, refinements, and proof policy. It must compare semantic types before any lens erasure. The proposed grammar revision is a negotiated protocol field; the adapter's existing `rigor:v1` string alone is not proof that all extended forms can be checked.
+Rigor owns RBS parsing, lexical name resolution, normalization, aliases, ancestry and proof policy. ZARD does not silently translate YARD spellings such as `Array<String>`, `Boolean` or `#to_s`; a name that also parses as RBS is resolved as that RBS name, not reinterpreted as a YARD shorthand. The precise request grammar identifier/revision and advertised subset await the producer ADR. Existing `rigor:v1` metadata does not imply full extended checking.
 
-For a plain-RBS-only initial producer, report valid extended claims as unsupported and advertise that limitation. An authored `@extrbs` contract cannot silently fall back to its erased plain-RBS type: return `unknown` until the producer can resolve the authoritative extended contract. Do not make `@extrbs` support appear by changing Zard's compatibility manifest.
+The first slice accepts plain RBS type expressions. A recognized valid Rigor-extended/refinement payload is `unknown` with `unsupported_grammar_feature`; an authored `@extrbs` contract is unknown until the producer supports it. Neither may silently fall back to erasure. A failed plain-RBS parse alone cannot establish that an unfamiliar extended payload is invalid. Rigor must distinguish conclusively invalid supported syntax from unsupported or unrecognized grammar conservatively; the adapter must not make that classification.
 
-Rigor checks requested source digests before analysis and verifies the analysis read those bytes. Source or consulted signature/input drift during the operation invalidates the response. The adapter also rereads the requested files after the subprocess returns, validates the response's ids, basis references and spans, and rejects drift atomically. A response cannot be reused merely because tag or declaration bytes remain unchanged; the surrounding project environment may have changed.
+Use the lens session's drift checks for requested sources, consulted sources, signatures and context. Rigor verifies that analysis used the request's source snapshots; source or consulted input drift invalidates the affected evidence under the agreed integrity policy. The adapter rereads requested files after the subprocess and validates ids, request digest, same-session site keys, basis references and spans before accepting claim results. Stable tag bytes alone do not justify reuse after the project environment changes.
 
 ## Compatibility and release gate
 
-The new request/response schemas are independent of `lens/v0`. A breaking change increments their revision. A producer release advertises supported grammar revisions, subject coverage and proof capabilities; absent capability means unavailable, not successful validation. Zard must accept only explicitly tested released producer/schema/grammar combinations and preserve an explicit unavailable result when claim validation is not installed. Raw source-checkout engines need a separate development-only route, never an implicit release allowlist entry.
+The new request schema and lens `claims` section schema have independent revisions alongside `lens/v0`. They reuse the enclosing lens document rather than requiring another producer run. A breaking change increments their revision. A producer release advertises supported grammar revisions, subject coverage and proof capabilities; absent capability means unavailable, not successful validation. Zard must accept only explicitly tested released producer/schema/grammar combinations and preserve an explicit unavailable result when claim validation is not installed. Raw source-checkout engines need a separate development-only route, never an implicit release allowlist entry.
 
 Before enabling mismatch diagnostics, release Rigor's implementation with real CLI conformance artifacts, then add the corresponding Zard adapter compatibility entry and transport integration tests. A shared schema revision is insufficient to admit a new producer version. Existing parsing and documentation generation must continue to work without Rigor.
 
@@ -173,29 +210,40 @@ Each producer fixture must execute the proposed CLI against a real isolated proj
 
 | Scenario | Required observable |
 | --- | --- |
-| Equal semantic type with different alias/absolute spelling | `compatible` if resolved and proven; never mismatch from spelling. |
+| Equal or included types with different resolved spelling | `compatible` when proved; never mismatch from spelling. |
 | Narrower advertised parameter; broader documented return | Correct directional inclusion produces `compatible`. |
-| Broader advertised parameter; narrower documented return | `conflict` only with proof of failed inclusion; otherwise `unknown`. |
-| Proven disjoint claim/contract | `conflict`, exact tag location, authoritative basis and proof reason. |
-| Same erasure with incompatible extended refinements | Full semantic result when supported; otherwise `unknown`. |
-| Dynamic, unavailable, contested, or inference-only evidence | `unknown`; no compatibility or mismatch claim. |
+| `String` return documented as `"hello"` | `unknown`: overlap is insufficient and cardinality proofs are outside the first slice. |
+| Subset-side union with one inhabited trusted disjoint arm | `conflict` even if another arm is included; all arms included yields `compatible`. |
+| Authored project ancestry vs absent project ancestry | Inclusion may prove `compatible`; absence never supplies a conflict proof. |
+| Trusted core/stdlib disjoint arm | `conflict`, exact tag location, authoritative merged `sig`/`inline` basis and proof reason. |
+| Extended/refinement payload or authored `@extrbs` basis | `unknown` in the first slice; no erasure fallback. |
+| Nested Dynamic, void, self/instance/class, type variables, interfaces | `unknown`, even if ordinary gradual acceptance would succeed. |
+| Library/plugin/inference basis, unavailable type evidence or contested member | `unknown`; no compatibility or mismatch claim. |
 | Overloads/correlations or unsupported tag/parameter forms | One explicit `unknown` result per claim; no first-overload fallback. |
 | Malformed supported payload vs valid unsupported extension | `invalid_claim` vs `unknown`, respectively. |
 | Missing named parameter or ambiguous valid definition | `unknown` with subject/association reason. |
-| Altered source, signature, or consulted input during analysis | Integrity failure; no accepted successful response. |
-| Duplicate ids, out-of-range spans, forged declaration identity | Exit 64; no successful response. |
+| Altered source, request, signature, or consulted input | Integrity rejection; no accepted stale claim verdict. |
+| One successful and one failed lens target; all targets failed | Available results and distinct target-unavailable rows; preserve lens exit 0/1 respectively. |
+| Unsupported request/schema/grammar revision | Existing usage error 64, no document. |
+| Duplicate ids, out-of-range spans, forged declaration identity | Protocol/integrity rejection under the ratified lens policy, not semantic invalidity. |
 | Same Ruby name in different documentation scopes | Results remain associated with their individual ids and sources. |
 | Claim inserted/changed/removed | Underlying contracts, inference and ordinary diagnostics stay unchanged. |
-| Multiple claims, unsupported version, missing producer | One ordered batch; strict protocol rejection or explicit unavailable capability, never silent success. |
+| Multiple claims, initial request without a site key | One lens process, one ordered result per id, same-session site keys; no preflight. |
+| Counts with decided/unknown/invalid/unavailable results and zero claims | Derived from validated exhaustive rows; zero claims never reports 100% checked. |
+| Unsupported producer version or missing claims capability | Explicit unavailable validation or compatibility rejection, never silent success. |
 
 Zard's tests cover extraction, batching, integrity validation, exact tag association, diagnostics and optional operation. Semantic relation tests belong to Rigor. A mock response alone does not satisfy the end-to-end gate.
 
-## Implementation order and handoff
+## Open decisions and handoff
+
+Owner ratification is still required for the lens amendment, request and claims-section schemas/revisions, exact grammar/capability identifiers, and the conservative proof policy. The locator-to-site wire detail must permit constructing the first request without a prior site key. The availability/null-verdict shape for failed targets, and detailed integrity-error reporting within existing lens exits, also remain open. These are consumer positions for upstream review, not newly accepted requirements.
+
+The implementation handoff remains gated on that agreement:
 
 1. Review this proposal jointly with the Rigor owner, especially directional inclusion, proof meanings, unknown reasons, grammar revisioning, and authoritative contract coverage. Record an accepted producer contract before implementation.
-2. Implement the request parser, source identity checks, non-authoritative claim channel, and conservative semantic proof operation in Rigor. Keep unsupported cases explicit; add the acceptance fixtures and claim non-interference checks.
+2. Implement the optional lens request, same-session site association, non-authoritative claim channel, and conservative semantic proof operation in Rigor. Keep unsupported cases explicit; add the acceptance fixtures and claim non-interference checks.
 3. Publish a Rigor release carrying the operation, schema documentation and evidence. Verify its actual CLI output against the agreed contract; no new Zard mismatch behavior ships before this dependency.
-4. Add a thin batch client to `zard-rigor`, extracting existing tags/provenance and consuming producer verdicts. Add transport and source-binding tests plus real released-CLI fixtures. Do not duplicate semantic proofs in the adapter.
+4. Extend the existing `zard-rigor` batch lens call with extracted tags/provenance, then consume the claims section and derive coverage counts. Add transport and source-binding tests plus real released-CLI fixtures. Do not duplicate semantic proofs in the adapter.
 5. Integrate the results with the documentation check surface, with separate mismatch, invalid and unchecked states, and demonstrate operation both with and without the optional producer. Update user documentation and compatibility declarations after the integration passes.
 
 This proposal is complete when its boundary and acceptance criteria are reviewable. It does not claim #5's runtime validation behavior is implemented.

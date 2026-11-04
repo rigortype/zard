@@ -108,7 +108,11 @@ rendering signatures literally.
 
 ## Documentation claim validation proposal
 
-Documentation claim checking is not implemented. The [proposed public producer interface](../docs/design/documentation-claim-validation.md) specifies semantic verdicts, source integrity, and a release gate for Zard #5. Current lens type strings are presentation data and cannot establish whether a documentation claim agrees with a contract.
+Documentation claim checking is not implemented. The [revised proposal](../docs/design/documentation-claim-validation.md) follows [Rigor-side feedback](https://github.com/rigortype/rigor/issues/2737#issuecomment-6614160242) and still awaits owner ratification. It would send claims with the existing batch lens call (`rigor lens FILE... --claims REQUEST --format json`) and consume a separately versioned claims section in that same document. The parsed export is available before the call, so the adapter needs no preflight lens request; exact source locators would resolve to site keys in the returned session. The locator wire format and failed-target availability shape remain open upstream.
+
+The consumer position is RBS type-expression syntax, without implicit YARD translation. Rigor would own parsing and proofs; the first proposed basis is one merged authored `sig`/`inline` overload with plain RBS types. Parameter claims require claim inclusion in the contract, while return claims require contract inclusion in the claim. Proven inclusion is compatible; conflict requires an inhabited union arm proved disjoint in Rigor's trusted core/stdlib fragment. Unsupported proofs, nested Dynamic, extended payloads and library/plugin/inferred bases remain unknown. Claims must not affect inference or contracts.
+
+Mostly unknown results are useful when shown explicitly. The adapter can derive decided, unknown, invalid and target-unavailable counts from exhaustive validated results, without duplicated response totals; zero claims is not 100% checked. Request/source integrity and existing lens exit behavior are preserved. No mismatch diagnostics ship until an agreed producer contract and tested release supply the capability. Current lens type strings cannot establish semantic claim compatibility.
 
 ## Updating supported releases
 

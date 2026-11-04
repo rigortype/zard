@@ -106,6 +106,16 @@ scope, member and overload, and each candidate as `scope:path:line`; they are
 also appended to `lens.warnings`. Consumers that ignore these fields keep
 rendering signatures literally.
 
+## Documentation claim validation
+
+The producer contract is accepted in [Rigor PR #2779](https://github.com/rigortype/rigor/pull/2779), but claim checking is not implemented or released. The [consumer integration handoff](../docs/design/documentation-claim-validation.md) follows the [ratified specification](https://github.com/rigortype/rigor/blob/fc8a97f10cb4c39abecbf344a19f26396d8a4835/docs/internal-spec/lens-claims.md). Zard #5 remains gated on a released, verified producer advertising `claims`; this adapter's current Rigor 0.4.5 allowlist is unchanged.
+
+The accepted interface extends one lens call with `--claims REQUEST --format json`, without a preflight. Requests use `lens-claims-request/v0`; the lens `claims` section uses `lens-claims/v0`. Their revision 1 is versioned jointly, with grammar `rbs` and XXH3 request/source digests. The request puts type text in each row's top-level `claim`; results bind to same-session sites and return `compatible`, `conflict`, `unknown`, `invalid_claim` or `unavailable`. A failed target is unavailable, while an in-file span with no declaration is unknown rather than a request integrity error.
+
+Rigor owns type parsing and proof. The first basis is one merged authored `sig`/`inline` overload for returns and required positional/keyword parameters. Parameter claims require claim inclusion in the contract; return claims require contract inclusion in the claim. Conflict needs a trusted disjoint-arm proof. Relative claim names can prove conflict only in top-level declarations; elsewhere use absolute spelling, and never present relative-name compatible as a proof against the running program. RBS and project Ruby lookup must agree; visible shadows are unknown. Extended/refined, dynamic and unsupported evidence stays unknown under the specified reason ordering. Claims never affect analysis, contracts or caches.
+
+The adapter will derive decided, unknown, invalid and unavailable counts from exhaustive validated results. Zero claims does not mean 100% checked. Existing lens context and exit behavior are retained, with request integrity faults returning exit 64 and no document. Current lens type strings alone cannot establish semantic claim compatibility.
+
 ## Updating supported releases
 
 `lib/zard/rigor/compatibility.json` is the authoritative producer/schema allowlist and declares the supported
